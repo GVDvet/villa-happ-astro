@@ -1,0 +1,60 @@
+---
+// Editorial newsletter CTA
+---
+<section class="vh-newsletter-cta">
+  <div class="vh-newsletter-cta-inner">
+    <p class="vh-newsletter-cta-eyebrow vh-reveal">Word lid</p>
+    <h2 class="vh-newsletter-cta-title vh-reveal">
+      Mis geen enkele <span class="vh-italic-accent">drop</span>
+    </h2>
+    <p class="vh-newsletter-cta-desc vh-reveal">
+      Schrijf je in en wees als eerste op de hoogte van nieuwe releases,
+      exclusieve drops en het verhaal achter elk stuk.
+    </p>
+
+    <form class="vh-newsletter-cta-form vh-reveal" id="vh-newsletter-hero" novalidate>
+      <label for="vh-nl-hero-email" class="vh-sr-only">E-mailadres</label>
+      <input type="email" id="vh-nl-hero-email" name="email" placeholder="jouw@e-mailadres.nl" required autocomplete="email" />
+      <button type="submit">Inschrijven</button>
+    </form>
+    <p class="vh-newsletter-cta-msg vh-reveal" data-msg role="status" aria-live="polite"></p>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('vh-newsletter-hero') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[type="email"]') as HTMLInputElement;
+      const msg = form.parentElement!.querySelector('[data-msg]') as HTMLElement;
+      const email = input.value.trim();
+      if (!email || email.indexOf('@') === -1) {
+        msg.className = 'vh-newsletter-cta-msg is-error';
+        msg.textContent = 'Vul een geldig e-mailadres in.';
+        return;
+      }
+      msg.className = 'vh-newsletter-cta-msg';
+      msg.textContent = 'Bezig...';
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'home-hero' }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          msg.className = 'vh-newsletter-cta-msg is-success';
+          msg.textContent = data.message || 'Bedankt voor je inschrijving!';
+          input.value = '';
+        } else {
+          msg.className = 'vh-newsletter-cta-msg is-error';
+          msg.textContent = data.message || 'Er ging iets mis.';
+        }
+      } catch {
+        msg.className = 'vh-newsletter-cta-msg is-error';
+        msg.textContent = 'Verbinding mislukt. Probeer opnieuw.';
+      }
+    });
+  }
+</script>

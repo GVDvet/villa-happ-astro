@@ -1,73 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
-import Scene1Hero from '../components/home/Scene1Hero.astro';
-import Scene2Origin from '../components/home/Scene2Origin.astro';
-import Scene3Family from '../components/home/Scene3Family.astro';
-import Scene4Marketleader from '../components/home/Scene4Marketleader.astro';
-import Scene5Brand from '../components/home/Scene5Brand.astro';
-import Scene6Europe from '../components/home/Scene6Europe.astro';
-import Scene7Silence from '../components/home/Scene7Silence.astro';
-import Scene8Comeback from '../components/home/Scene8Comeback.astro';
-import Scene9Relaunch from '../components/home/Scene9Relaunch.astro';
-
-import Marquee from '../components/home/Marquee.astro';
-import StatsCounter from '../components/home/StatsCounter.astro';
-import ShopPreview from '../components/home/ShopPreview.astro';
-import FeaturedDrop from '../components/home/FeaturedDrop.astro';
+import Hero from '../components/home/Hero.astro';
+import Statement from '../components/home/Statement.astro';
+import DropSpotlight from '../components/home/DropSpotlight.astro';
+import Heritage from '../components/home/Heritage.astro';
+import ShopGrid from '../components/home/ShopGrid.astro';
+import Brands from '../components/home/Brands.astro';
+import Lookbook from '../components/home/Lookbook.astro';
+import NewsletterCTA from '../components/home/NewsletterCTA.astro';
 
 import '../styles/home.css';
 ---
 
 <Base bodyClass="vh-home" title="Villa Happ — Heritage lifestyle, gemaakt voor nu">
-
-  <!-- Scene navigator (vertical dots, fixed right) -->
-  <nav class="vh-scene-nav" id="vh-scene-nav" aria-label="Scene navigatie"></nav>
-
-  <!-- Progress bar (bottom) -->
-  <div class="vh-progress" aria-hidden="true"><div class="vh-progress-fill"></div></div>
-
-  <!-- Camera-flight wrapper -->
-  <div class="vh-homepage" id="vh-homepage">
-    <div class="vh-canvas">
-      <div class="vh-world-bg" aria-hidden="true"></div>
-
-      <Scene1Hero />
-      <Scene2Origin />
-      <Scene3Family />
-      <Scene4Marketleader />
-      <Scene5Brand />
-      <Scene6Europe />
-      <Scene7Silence />
-      <Scene8Comeback />
-      <Scene9Relaunch />
-    </div>
-  </div>
-
-  <!-- Outro interludes (normaal scrollbaar na de camera-flight) -->
-  <section class="vh-home-outro">
-    <Marquee />
-    <StatsCounter />
-    <ShopPreview />
-    <FeaturedDrop />
-  </section>
-
-  <!-- Noscript SEO fallback -->
-  <noscript>
-    <div style="padding: 60px 24px;">
-      <h1>Villa Happ. Nederlands lifestylelabel sinds 1960</h1>
-      <p>Van familieverhaal naar mode-erfgoed. Een lifestylelabel met historie, karakter en toekomst.</p>
-      <p><a href="/shop">Bekijk de collectie</a> · <a href="/drops">Limited edition drops</a></p>
-    </div>
-  </noscript>
+  <Hero />
+  <Statement />
+  <DropSpotlight />
+  <ShopGrid />
+  <Heritage />
+  <Brands />
+  <Lookbook />
+  <NewsletterCTA />
 </Base>
 
 <script>
-  // Set body data-page voor grain overlay
   document.body.setAttribute('data-page', 'home');
 </script>
 
-<!-- Motion engine: client-side, bundled door Vite -->
 <script>
-  import '../lib/homepage-motion';
+  import '../lib/reveal';
   import '../lib/cart';
 </script>

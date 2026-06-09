@@ -1,0 +1,57 @@
+---
+// Condensed heritage timeline — 3 momenten, geen camera-flight
+const steps = [
+  {
+    year: '1960',
+    title: 'Het begon in Tilburg',
+    text: 'Wat startte als Babyparadijs groeide uit tot de basis van een familiegeschiedenis die de Nederlandse kindermode blijvend zou beïnvloeden.',
+    img: '/img/heritage/origin-babyparadijs.png',
+  },
+  {
+    year: '1999',
+    title: 'Een eigen gezicht',
+    text: 'Met een eigen winkelconcept en herkenbare stijl werd Villa Happ meer dan een producent. Het werd een merkbeleving, geliefd door een hele generatie.',
+    img: null,
+  },
+  {
+    year: '2024',
+    title: 'Terug waar het hoort',
+    text: 'Met de derde generatie keert Villa Happ terug. Niet als herhaling van vroeger, maar als nieuwe vertaling van een rijk verleden.',
+    img: '/img/products/hoodie-logo-detail.png',
+  },
+];
+---
+<section class="vh-heritage">
+  <div class="vh-heritage-inner">
+    <div class="vh-heritage-header">
+      <div class="vh-reveal">
+        <p class="vh-heritage-eyebrow">Het verhaal</p>
+        <h2 class="vh-heritage-title">65 jaar,<br />drie generaties</h2>
+      </div>
+      <p class="vh-heritage-intro vh-reveal">
+        Van familiebedrijf naar marktleider, en nu terug als premium lifestylelabel.
+        Een verhaal van lef, vakmanschap en een merk dat nooit echt verdween.
+      </p>
+    </div>
+
+    <div class="vh-heritage-timeline">
+      {steps.map((step, i) => (
+        <article class="vh-heritage-step vh-reveal" style={`transition-delay: ${i * 0.12}s;`}>
+          <div class={`vh-heritage-step-img${step.img ? '' : ' vh-heritage-step-img--placeholder'}`}>
+            {step.img
+              ? <img src={step.img} alt={step.title} width="600" height="750" loading="lazy" />
+              : <span>{step.year.slice(2)}</span>
+            }
+          </div>
+          <p class="vh-heritage-year">{step.year}</p>
+          <h3 class="vh-heritage-step-title">{step.title}</h3>
+          <p class="vh-heritage-step-text">{step.text}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="vh-heritage-cta vh-reveal">
+      <a href="/story" class="vh-btn vh-btn--ghost"><span>Lees het volledige verhaal</span></a>
+    </div>
+  </div>
+</section>
