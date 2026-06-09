@@ -1,0 +1,247 @@
+---
+import { getActiveDrop } from '../../lib/commerce';
+const drop = await getActiveDrop();
+// Fallback content als geen drop in DB
+const fallback = {
+  title: 'Sweater Stories',
+  description: 'Eerste limited edition van de derde generatie. Een collectie hoodies in heritage colorways, oplage 500 stuks per kleur. Elk stuk genummerd en gecertificeerd.',
+  image_url: '/img/products/hoodie-grey-lifestyle.png',
+  total_pieces: 500,
+  status: 'coming-soon',
+  launch_date: Date.now() + 1000 * 60 * 60 * 24 * 14, // 14 dagen
+  slug: 'sweater-stories',
+};
+const d = drop || fallback;
+const launchTs = d.launch_date ? Math.floor(new Date(d.launch_date as any).getTime() / 1000) : 0;
+const isLive = d.status === 'live';
+const isComing = d.status === 'coming-soon' && launchTs * 1000 > Date.now();
+const eyebrow = isLive ? 'Live nu' : (isComing ? 'Coming soon' : 'Featured drop');
+---
+
+<section class="vh-featured-drop" aria-label="Featured drop">
+
+  {d.image_url && (
+    <div class="vh-featured-drop-bg" style={`background-image: url('${d.image_url}');`} aria-hidden="true"></div>
+  )}
+
+  <div class="vh-featured-drop-inner vh-container">
+
+    <div class="vh-featured-drop-text">
+      <p class="vh-featured-drop-eyebrow">{eyebrow}</p>
+      <h2 class="vh-featured-drop-title" data-vh-italic="drop,limited">{d.title}</h2>
+      <p class="vh-featured-drop-desc">{d.description}</p>
+
+      <div class="vh-featured-drop-meta">
+        {d.total_pieces && (
+          <div class="vh-meta-item">
+            <span class="vh-meta-label">Oplage</span>
+            <span class="vh-meta-value">{d.total_pieces} stuks</span>
+          </div>
+        )}
+        {launchTs > 0 && (
+          <div class="vh-meta-item">
+            <span class="vh-meta-label">{isLive ? 'Gelanceerd' : 'Lanceert'}</span>
+            <span class="vh-meta-value">{new Date(launchTs * 1000).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}</span>
+          </div>
+        )}
+      </div>
+
+      {isComing && launchTs * 1000 > Date.now() && (
+        <div class="vh-featured-drop-countdown" data-vh-featured-countdown={launchTs}>
+          <div class="vh-cd-cell"><div class="vh-cd-num" data-vh-cd-days>00</div><div class="vh-cd-label">dagen</div></div>
+          <div class="vh-cd-cell"><div class="vh-cd-num" data-vh-cd-hours>00</div><div class="vh-cd-label">uur</div></div>
+          <div class="vh-cd-cell"><div class="vh-cd-num" data-vh-cd-minutes>00</div><div class="vh-cd-label">min</div></div>
+          <div class="vh-cd-cell"><div class="vh-cd-num" data-vh-cd-seconds>00</div><div class="vh-cd-label">sec</div></div>
+        </div>
+      )}
+
+      <a href={`/drops/${d.slug}`} class="vh-btn vh-btn--accent" data-vh-magnetic="0.18">
+        <span>{isLive ? 'Shop deze drop' : 'Bekijk drop'}</span>
+        <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+
+    {d.image_url && (
+      <div class="vh-featured-drop-visual">
+        <img src={d.image_url} alt={d.title} loading="lazy" />
+      </div>
+    )}
+
+  </div>
+</section>
+
+<style>
+  .vh-featured-drop {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--vh-ink);
+    color: var(--vh-paper);
+    z-index: 5;
+  }
+
+  .vh-featured-drop-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+
+  .vh-featured-drop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(30, 30, 27, 0.95), rgba(30, 30, 27, 0.6) 60%, rgba(30, 30, 27, 0.4));
+    z-index: 1;
+  }
+
+  .vh-featured-drop-inner {
+    position: relative;
+    z-index: 2;
+    padding: clamp(60px, 10vw, 100px) var(--vh-gutter);
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .vh-featured-drop-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: var(--vh-tracking-widest);
+    text-transform: uppercase;
+    color: var(--vh-accent);
+    margin: 0 0 24px;
+  }
+
+  .vh-featured-drop-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--vh-accent);
+  }
+
+  .vh-featured-drop-title {
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: var(--vh-tracking-tight);
+    margin: 0 0 24px;
+  }
+
+  .vh-featured-drop-desc {
+    font-size: clamp(15px, 1.2vw, 17px);
+    line-height: 1.6;
+    color: rgba(247, 243, 236, 0.75);
+    margin: 0 0 32px;
+    max-width: 480px;
+  }
+
+  .vh-featured-drop-meta {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .vh-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .vh-meta-label {
+    font-size: 10px;
+    letter-spacing: var(--vh-tracking-widest);
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.5);
+  }
+  .vh-meta-value { font-size: 16px; font-weight: 500; }
+
+  .vh-featured-drop-countdown {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .vh-cd-cell {
+    min-width: 60px;
+    padding: 12px 14px;
+    background: rgba(247, 243, 236, 0.06);
+    border: 1px solid rgba(247, 243, 236, 0.15);
+    border-radius: var(--vh-radius-md);
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .vh-cd-num {
+    font-size: 26px;
+    font-weight: 300;
+    font-family: var(--vh-font-serif);
+    line-height: 1;
+  }
+
+  .vh-cd-label {
+    font-size: 9px;
+    letter-spacing: var(--vh-tracking-widest);
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.55);
+    margin-top: 4px;
+  }
+
+  .vh-featured-drop-visual {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: var(--vh-radius-lg);
+    overflow: hidden;
+  }
+
+  .vh-featured-drop-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 900px) {
+    .vh-featured-drop-inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .vh-featured-drop-visual { max-width: 380px; margin: 0 auto; }
+    .vh-featured-drop::after {
+      background: linear-gradient(180deg, rgba(30, 30, 27, 0.95), rgba(30, 30, 27, 0.7));
+    }
+  }
+</style>
+
+<script>
+  // Countdown ticker
+  document.querySelectorAll<HTMLElement>('[data-vh-featured-countdown]').forEach(el => {
+    const target = parseInt(el.dataset.vhFeaturedCountdown || '0', 10) * 1000;
+    if (!target || target <= Date.now()) { el.style.display = 'none'; return; }
+
+    const dEl = el.querySelector('[data-vh-cd-days]') as HTMLElement;
+    const hEl = el.querySelector('[data-vh-cd-hours]') as HTMLElement;
+    const mEl = el.querySelector('[data-vh-cd-minutes]') as HTMLElement;
+    const sEl = el.querySelector('[data-vh-cd-seconds]') as HTMLElement;
+
+    function tick() {
+      const diff = target - Date.now();
+      if (diff <= 0) { clearInterval(timer); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      if (dEl) dEl.textContent = String(days).padStart(2, '0');
+      if (hEl) hEl.textContent = String(hours).padStart(2, '0');
+      if (mEl) mEl.textContent = String(mins).padStart(2, '0');
+      if (sEl) sEl.textContent = String(secs).padStart(2, '0');
+    }
+    tick();
+    const timer = setInterval(tick, 1000);
+  });
+</script>

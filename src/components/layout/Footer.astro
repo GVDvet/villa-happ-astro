@@ -1,0 +1,306 @@
+---
+const navCols = [
+  {
+    title: 'Shop',
+    links: [
+      { label: 'Hele collectie', href: '/shop' },
+      { label: 'Limited drops', href: '/drops' },
+      { label: 'H_APProved brands', href: '/brands' },
+      { label: 'Wishlist', href: '/wishlist' },
+    ],
+  },
+  {
+    title: 'Verhaal',
+    links: [
+      { label: 'Heritage', href: '/story' },
+      { label: 'Journal', href: '/journal' },
+      { label: 'Pers', href: '/pers' },
+    ],
+  },
+  {
+    title: 'Service',
+    links: [
+      { label: 'Contact', href: '/contact' },
+      { label: 'Verzending', href: '/verzending' },
+      { label: 'Retourneren', href: '/retourneren' },
+      { label: 'FAQ', href: '/faq' },
+    ],
+  },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="vh-footer">
+  <div class="vh-footer-inner vh-container">
+
+    <div class="vh-footer-top">
+      <!-- Brand + Newsletter -->
+      <div class="vh-footer-brand-col">
+        <img src="/img/brand/villa-happ-logo.png" alt="Villa Happ" width="48" height="48" class="vh-footer-logo" />
+        <p class="vh-footer-tagline">
+          Een lifestylelabel met historie,<br />
+          karakter en toekomst.
+        </p>
+
+        <form class="vh-newsletter" id="vh-newsletter">
+          <h3 class="vh-footer-heading">Blijf in the know</h3>
+          <p class="vh-newsletter-tagline">
+            Als eerste op de hoogte van nieuwe drops en exclusieve releases.
+          </p>
+          <div class="vh-newsletter-row">
+            <label for="vh-newsletter-email" class="vh-sr-only">E-mailadres</label>
+            <input
+              type="email"
+              id="vh-newsletter-email"
+              name="email"
+              placeholder="jouw@e-mailadres.nl"
+              required
+              autocomplete="email"
+            />
+            <button type="submit">
+              Inschrijven
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <p class="vh-newsletter-msg" data-msg role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- Nav columns -->
+      <div class="vh-footer-cols">
+        {navCols.map(col => (
+          <div class="vh-footer-col">
+            <h4 class="vh-footer-heading">{col.title}</h4>
+            <ul role="list">
+              {col.links.map(link => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="vh-footer-bottom">
+      <p class="vh-footer-copy">© {year} Villa Happ. Alle rechten voorbehouden.</p>
+      <ul class="vh-footer-legal" role="list">
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/algemene-voorwaarden">Voorwaarden</a></li>
+        <li><a href="/cookies">Cookies</a></li>
+      </ul>
+    </div>
+
+  </div>
+</footer>
+
+<style>
+  .vh-footer {
+    background: var(--vh-ink);
+    color: var(--vh-paper);
+    padding: clamp(60px, 8vw, 100px) 0 32px;
+  }
+
+  .vh-footer-top {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.2fr) 2fr;
+    gap: clamp(40px, 6vw, 96px);
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(247, 243, 236, 0.08);
+  }
+
+  .vh-footer-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 16px;
+  }
+
+  .vh-footer-tagline {
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(247, 243, 236, 0.5);
+    margin: 0 0 32px;
+  }
+
+  .vh-footer-heading {
+    font-size: 11px;
+    letter-spacing: var(--vh-tracking-widest);
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.55);
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  .vh-footer-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .vh-footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vh-footer-col li { padding: 4px 0; }
+
+  .vh-footer-col a {
+    font-size: 14px;
+    color: var(--vh-paper);
+    transition: color var(--vh-dur-fast) ease;
+  }
+
+  .vh-footer-col a:hover { color: var(--vh-accent); }
+
+  /* Newsletter */
+  .vh-newsletter-tagline {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(247, 243, 236, 0.55);
+    margin: 0 0 14px;
+  }
+
+  .vh-newsletter-row {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid rgba(247, 243, 236, 0.18);
+    border-radius: var(--vh-radius-pill);
+    overflow: hidden;
+    background: rgba(247, 243, 236, 0.04);
+    transition: border-color var(--vh-dur-fast) ease;
+    max-width: 360px;
+  }
+
+  .vh-newsletter-row:focus-within {
+    border-color: var(--vh-accent);
+  }
+
+  .vh-newsletter-row input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--vh-paper);
+    outline: none;
+    min-width: 0;
+  }
+
+  .vh-newsletter-row input::placeholder {
+    color: rgba(247, 243, 236, 0.4);
+  }
+
+  .vh-newsletter-row button {
+    background: var(--vh-accent);
+    color: var(--vh-white);
+    border: 0;
+    padding: 0 22px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: var(--vh-tracking-wide);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background var(--vh-dur-fast) ease;
+    font-family: inherit;
+  }
+
+  .vh-newsletter-row button:hover { background: var(--vh-accent-soft); }
+
+  .vh-newsletter-msg {
+    font-size: 12px;
+    color: rgba(247, 243, 236, 0.6);
+    margin: 10px 4px 0;
+    min-height: 16px;
+  }
+
+  .vh-newsletter-msg.is-success { color: #76c576; }
+  .vh-newsletter-msg.is-error { color: #ff8b80; }
+
+  /* Bottom */
+  .vh-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .vh-footer-copy {
+    font-size: 12px;
+    color: rgba(247, 243, 236, 0.4);
+    margin: 0;
+  }
+
+  .vh-footer-legal {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .vh-footer-legal a {
+    font-size: 12px;
+    color: rgba(247, 243, 236, 0.5);
+    transition: color var(--vh-dur-fast) ease;
+  }
+
+  .vh-footer-legal a:hover { color: var(--vh-paper); }
+
+  @media (max-width: 900px) {
+    .vh-footer-top {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .vh-footer-cols {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .vh-footer-cols { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('vh-newsletter') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
+      const msgEl = form.querySelector('[data-msg]') as HTMLElement;
+      const email = emailInput.value.trim();
+
+      msgEl.className = 'vh-newsletter-msg';
+      msgEl.textContent = 'Bezig...';
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          msgEl.className = 'vh-newsletter-msg is-success';
+          msgEl.textContent = data.message || 'Bedankt voor je inschrijving.';
+          emailInput.value = '';
+        } else {
+          msgEl.className = 'vh-newsletter-msg is-error';
+          msgEl.textContent = data.message || 'Er ging iets mis. Probeer opnieuw.';
+        }
+      } catch {
+        msgEl.className = 'vh-newsletter-msg is-error';
+        msgEl.textContent = 'Verbinding mislukt. Probeer opnieuw.';
+      }
+    });
+  }
+</script>

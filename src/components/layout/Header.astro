@@ -1,0 +1,311 @@
+---
+const navLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Brands', href: '/brands' },
+  { label: 'Drops', href: '/drops' },
+  { label: 'Story', href: '/story' },
+  { label: 'Journal', href: '/journal' },
+];
+---
+
+<header class="vh-header" id="vh-header">
+  <a href="/" class="vh-header-logo" aria-label="Villa Happ home">
+    <img src="/img/brand/villa-happ-logo.png" alt="Villa Happ" width="36" height="36" />
+  </a>
+
+  <nav class="vh-header-nav" aria-label="Hoofdnavigatie">
+    <ul class="vh-header-nav-list" role="list">
+      {navLinks.map((link, idx) => (
+        <>
+          <li><a href={link.href} class="vh-header-nav-link">{link.label}</a></li>
+          {idx < navLinks.length - 1 && <span class="vh-header-nav-sep" aria-hidden="true">·</span>}
+        </>
+      ))}
+    </ul>
+  </nav>
+
+  <div class="vh-header-actions">
+    <button type="button" class="vh-header-icon" aria-label="Zoeken">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    </button>
+
+    <a href="/wishlist" class="vh-header-icon" aria-label="Wishlist">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    </a>
+
+    <a href="/cart" class="vh-header-icon vh-header-cart" aria-label="Winkelmandje">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+      <span class="vh-header-cart-count" data-cart-count>0</span>
+    </a>
+
+    <button type="button" class="vh-header-hamburger" id="vh-hamburger" aria-label="Menu openen" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div class="vh-mobile-menu" id="vh-mobile-menu" aria-hidden="true">
+  <ul class="vh-mobile-menu-list" role="list">
+    {navLinks.map((link, idx) => (
+      <li style={`--idx: ${idx + 1};`}>
+        <span class="vh-mobile-menu-num">0{idx + 1}</span>
+        <a href={link.href} class="vh-mobile-menu-link">{link.label}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .vh-header {
+    position: fixed;
+    top: 12px;
+    left: 0;
+    right: 0;
+    z-index: var(--vh-z-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px clamp(20px, 4vw, 56px);
+    transition: top var(--vh-dur-base) var(--vh-ease-out),
+                background var(--vh-dur-base) ease,
+                backdrop-filter var(--vh-dur-base) ease,
+                color var(--vh-dur-base) ease;
+    color: var(--vh-paper);
+    mix-blend-mode: difference;
+  }
+
+  .vh-header.is-scrolled {
+    top: 0;
+    mix-blend-mode: normal;
+    background: rgba(247, 243, 236, 0.85);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    color: var(--vh-ink);
+    border-bottom: 1px solid var(--vh-ink-hairline);
+  }
+
+  .vh-header-logo {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .vh-header-logo img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  .vh-header-nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .vh-header-nav-list {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .vh-header-nav-link {
+    font-size: 12px;
+    letter-spacing: var(--vh-tracking-wider);
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 6px 4px;
+    transition: opacity var(--vh-dur-fast) ease;
+  }
+
+  .vh-header-nav-link:hover {
+    opacity: 0.6;
+  }
+
+  .vh-header-nav-sep {
+    opacity: 0.4;
+    font-size: 11px;
+  }
+
+  .vh-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .vh-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--vh-radius-pill);
+    transition: background var(--vh-dur-fast) ease;
+    position: relative;
+  }
+
+  .vh-header-icon:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .vh-header.is-scrolled .vh-header-icon:hover {
+    background: var(--vh-ink-hairline);
+  }
+
+  .vh-header-cart-count {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--vh-accent);
+    color: var(--vh-white);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: var(--vh-radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vh-header-cart-count[data-cart-count="0"] {
+    display: none;
+  }
+
+  .vh-header-hamburger {
+    display: none;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 900px) {
+    .vh-header-nav { display: none; }
+    .vh-header-hamburger { display: inline-flex; }
+  }
+
+  .vh-mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--vh-z-nav) + 1);
+    background: var(--vh-ink);
+    color: var(--vh-paper);
+    padding: 100px clamp(20px, 6vw, 56px) 40px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--vh-dur-base) ease, visibility var(--vh-dur-base) ease;
+    overflow-y: auto;
+  }
+
+  .vh-mobile-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .vh-mobile-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vh-mobile-menu-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(247, 243, 236, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s var(--vh-ease-out), transform 0.4s var(--vh-ease-out);
+    transition-delay: calc(var(--idx) * 0.05s);
+  }
+
+  .vh-mobile-menu.is-open .vh-mobile-menu-list li {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .vh-mobile-menu-num {
+    font-family: var(--vh-font-mono);
+    font-size: 12px;
+    opacity: 0.5;
+  }
+
+  .vh-mobile-menu-link {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 400;
+    letter-spacing: var(--vh-tracking-tight);
+  }
+</style>
+
+<script>
+  // Scroll detection — header turns light/scrolled state
+  const header = document.getElementById('vh-header');
+  let lastY = 0;
+  let ticking = false;
+
+  function updateHeader() {
+    const y = window.scrollY;
+    if (header) {
+      header.classList.toggle('is-scrolled', y > 40);
+    }
+    lastY = y;
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeader);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateHeader();
+
+  // Mobile menu toggle
+  const hamburger = document.getElementById('vh-hamburger');
+  const mobileMenu = document.getElementById('vh-mobile-menu');
+  let lastFocus: HTMLElement | null = null;
+
+  if (hamburger && mobileMenu) {
+    function openMenu() {
+      lastFocus = document.activeElement as HTMLElement;
+      mobileMenu!.classList.add('is-open');
+      mobileMenu!.setAttribute('aria-hidden', 'false');
+      hamburger!.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu() {
+      mobileMenu!.classList.remove('is-open');
+      mobileMenu!.setAttribute('aria-hidden', 'true');
+      hamburger!.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      if (lastFocus) lastFocus.focus();
+    }
+
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.contains('is-open') ? closeMenu() : openMenu();
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) closeMenu();
+    });
+  }
+</script>

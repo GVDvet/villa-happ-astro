@@ -1,0 +1,75 @@
+---
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/buttons.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  bodyClass?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+}
+
+const {
+  title = 'Villa Happ — Heritage lifestyle, gemaakt voor nu',
+  description = 'Nederlands lifestylelabel sinds 1960. Van familieverhaal naar mode-erfgoed. Limited edition drops en gecureerde merken uit Tilburg.',
+  ogImage = '/img/brand/villa-happ-logo.png',
+  bodyClass = '',
+  showHeader = true,
+  showFooter = true,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+---
+
+<!doctype html>
+<html lang="nl" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/img/brand/villa-happ-logo.png" />
+  <script is:inline>document.documentElement.classList.remove('no-js');</script>
+
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL.toString()} />
+
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL.toString()} />
+  <meta property="og:site_name" content="Villa Happ" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <meta name="theme-color" content="#F7F3EC" />
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Villa Happ',
+    url: canonicalURL.origin,
+    logo: `${canonicalURL.origin}/img/brand/villa-happ-logo.png`,
+    description: 'Nederlands lifestylelabel sinds 1960.',
+    foundingDate: '1960',
+    foundingLocation: { '@type': 'Place', name: 'Tilburg, Nederland' },
+  })}></script>
+</head>
+
+<body class={`vh-body ${bodyClass}`}>
+  <a class="vh-skip-link" href="#main-content">Ga naar inhoud</a>
+
+  {showHeader && <Header />}
+
+  <main id="main-content">
+    <slot />
+  </main>
+
+  {showFooter && <Footer />}
+</body>
+</html>

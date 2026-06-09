@@ -1,0 +1,125 @@
+/* ============================================================
+   Villa Happ — Base / reset / typography baseline
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	padding: 0;
+	background: var(--vh-paper);
+	color: var(--vh-ink);
+	font-family: var(--vh-font-sans);
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+html { scroll-behavior: smooth; }
+
+a {
+	color: inherit;
+	text-decoration: none;
+	transition: color var(--vh-dur-fast) ease;
+}
+
+img, svg, video { display: block; max-width: 100%; height: auto; }
+
+button {
+	font-family: inherit;
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+	color: inherit;
+}
+
+input, textarea, select {
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+}
+
+::selection { background: var(--vh-accent); color: var(--vh-white); }
+
+/* Editorial italic accent — wrap key words in <em class="vh-italic"> */
+.vh-italic {
+	font-family: var(--vh-font-serif);
+	font-style: italic;
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	color: var(--vh-accent);
+}
+
+.vh-headline .vh-italic {
+	color: inherit;
+}
+
+.vh-scene[data-text="#F7F3EC"] .vh-italic {
+	color: var(--vh-accent);
+}
+
+/* Typography baseline */
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	font-weight: 400;
+	letter-spacing: var(--vh-tracking-tight);
+	line-height: var(--vh-leading-tight);
+}
+
+p { margin: 0; }
+
+/* Utility: visually hidden but accessible */
+.vh-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Skip link */
+.vh-skip-link {
+	position: absolute;
+	top: -100%;
+	left: 0;
+	background: var(--vh-ink);
+	color: var(--vh-paper);
+	padding: 12px 20px;
+	z-index: var(--vh-z-toast);
+	font-size: 13px;
+	letter-spacing: 0.04em;
+	border-radius: 0 0 var(--vh-radius-md) 0;
+}
+.vh-skip-link:focus { top: 0; }
+
+/* Reduced motion baseline */
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Container */
+.vh-container {
+	max-width: var(--vh-max-width);
+	margin: 0 auto;
+	padding: 0 var(--vh-gutter);
+}
+
+.vh-container-narrow {
+	max-width: var(--vh-content-width);
+	margin: 0 auto;
+	padding: 0 var(--vh-gutter);
+}

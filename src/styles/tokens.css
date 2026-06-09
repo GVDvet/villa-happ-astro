@@ -1,0 +1,124 @@
+/* ============================================================
+   Villa Happ — Design tokens
+   Foundation: kleur, typografie, spacing, motion, shadow, radius
+   ============================================================ */
+
+:root {
+	/* ---------- Brand kleuren ---------- */
+	--vh-ink: #1E1E1B;
+	--vh-ink-soft: rgba(30, 30, 27, 0.7);
+	--vh-ink-muted: rgba(30, 30, 27, 0.5);
+	--vh-ink-faint: rgba(30, 30, 27, 0.18);
+	--vh-ink-hairline: rgba(30, 30, 27, 0.08);
+
+	--vh-paper: #F7F3EC;
+	--vh-paper-soft: #ECE6DA;
+	--vh-paper-deep: #D8CFBE;
+
+	--vh-white: #FFFFFF;
+	--vh-white-soft: #FAFAF8;
+
+	/* Primaire accent — Villa Happ oranje */
+	--vh-accent: #FE6B01;
+	--vh-accent-soft: #ff8533;
+	--vh-accent-deep: #d55a01;
+
+	/* Secundaire editorial gold */
+	--vh-gold: #c9b97a;
+	--vh-gold-soft: #d6c891;
+
+	/* Olijf */
+	--vh-olive: #6B7A4E;
+	--vh-olive-deep: #4F5B38;
+
+	/* Functioneel */
+	--vh-success: #4a7d4a;
+	--vh-warning: #c9892c;
+	--vh-danger: #c0392b;
+
+	--vh-overlay: rgba(30, 30, 27, 0.5);
+	--vh-overlay-soft: rgba(30, 30, 27, 0.2);
+	--vh-overlay-deep: rgba(30, 30, 27, 0.85);
+
+	/* ---------- Typografie ---------- */
+	--vh-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--vh-font-serif: 'Plantin', 'Cormorant Garamond', Georgia, serif;
+	--vh-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+	--vh-text-2xs: clamp(10px, 0.7vw, 11px);
+	--vh-text-xs: clamp(11px, 0.8vw, 12px);
+	--vh-text-sm: clamp(12px, 0.9vw, 13px);
+	--vh-text-base: clamp(14px, 1vw, 15px);
+	--vh-text-lg: clamp(15px, 1.15vw, 17px);
+	--vh-text-xl: clamp(18px, 1.4vw, 22px);
+	--vh-text-2xl: clamp(22px, 2vw, 28px);
+	--vh-text-3xl: clamp(28px, 3vw, 40px);
+	--vh-text-4xl: clamp(36px, 4.5vw, 56px);
+	--vh-text-5xl: clamp(48px, 6vw, 80px);
+	--vh-text-6xl: clamp(60px, 8vw, 120px);
+	--vh-text-7xl: clamp(72px, 10vw, 160px);
+
+	--vh-leading-none: 1;
+	--vh-leading-tight: 1.15;
+	--vh-leading-snug: 1.3;
+	--vh-leading-normal: 1.5;
+	--vh-leading-relaxed: 1.65;
+
+	--vh-tracking-tighter: -0.04em;
+	--vh-tracking-tight: -0.02em;
+	--vh-tracking-normal: 0;
+	--vh-tracking-wide: 0.04em;
+	--vh-tracking-wider: 0.12em;
+	--vh-tracking-widest: 0.22em;
+
+	/* ---------- Spacing ---------- */
+	--vh-space-1: 4px;
+	--vh-space-2: 8px;
+	--vh-space-3: 12px;
+	--vh-space-4: 16px;
+	--vh-space-5: 20px;
+	--vh-space-6: 24px;
+	--vh-space-8: 32px;
+	--vh-space-10: 40px;
+	--vh-space-12: 48px;
+	--vh-space-16: 64px;
+	--vh-space-20: 80px;
+	--vh-space-24: 96px;
+	--vh-space-32: 128px;
+
+	/* ---------- Radius ---------- */
+	--vh-radius-sm: 4px;
+	--vh-radius-md: 8px;
+	--vh-radius-lg: 16px;
+	--vh-radius-xl: 24px;
+	--vh-radius-pill: 999px;
+
+	/* ---------- Shadow / elevation ---------- */
+	--vh-shadow-sm: 0 1px 2px rgba(30, 30, 27, 0.06);
+	--vh-shadow-md: 0 4px 12px rgba(30, 30, 27, 0.08);
+	--vh-shadow-lg: 0 12px 32px rgba(30, 30, 27, 0.12);
+	--vh-shadow-xl: 0 24px 60px rgba(30, 30, 27, 0.18);
+
+	/* ---------- Motion ---------- */
+	--vh-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+	--vh-ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+	--vh-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	--vh-dur-fast: 0.2s;
+	--vh-dur-base: 0.3s;
+	--vh-dur-slow: 0.6s;
+	--vh-dur-flight: 1.8s;
+
+	/* ---------- Layout ---------- */
+	--vh-max-width: 1440px;
+	--vh-content-width: 800px;
+	--vh-gutter: clamp(20px, 4vw, 56px);
+
+	/* ---------- Z-index layers ---------- */
+	--vh-z-base: 1;
+	--vh-z-nav: 100;
+	--vh-z-overlay: 500;
+	--vh-z-drawer: 1000;
+	--vh-z-modal: 2000;
+	--vh-z-toast: 3000;
+}
