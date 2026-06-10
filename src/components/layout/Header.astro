@@ -44,7 +44,7 @@ const navLinks = [
       </svg>
     </a>
 
-    <a href="/cart" class="vh-header-icon vh-header-cart" aria-label="Winkelmandje">
+    <a href="/cart" class="vh-header-icon vh-header-cart" aria-label="Winkelmandje" data-no-wipe>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
         <line x1="3" y1="6" x2="21" y2="6" />
@@ -355,6 +355,16 @@ const navLinks = [
       if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) closeMenu();
     });
   }
+
+  // Cart-icoon: open de drawer in plaats van navigeren
+  document.querySelectorAll('.vh-header-cart').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      const me = e as MouseEvent;
+      if (me.metaKey || me.ctrlKey || me.shiftKey) return;
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent('vh:open-cart'));
+    });
+  });
 
   // Nav hover-reveal preview (desktop)
   const preview = document.getElementById('vh-nav-preview');

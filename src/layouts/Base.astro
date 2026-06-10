@@ -1,6 +1,7 @@
 ---
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
+import CartDrawer from '../components/commerce/CartDrawer.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/buttons.css';
@@ -84,6 +85,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
   {showFooter && <Footer />}
 
+  <CartDrawer />
+
   <style>
     .vh-wipe {
       position: fixed;
@@ -156,6 +159,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         if (reduce) return;
         var a = e.target.closest && e.target.closest('a');
         if (!a) return;
+        if (a.hasAttribute('data-no-wipe')) return;
         var href = a.getAttribute('href');
         if (!href || href.charAt(0) === '#' || a.target === '_blank') return;
         if (href.indexOf('http') === 0 && href.indexOf(window.location.origin) !== 0) return;

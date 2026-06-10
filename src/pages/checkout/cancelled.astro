@@ -1,0 +1,25 @@
+---
+export const prerender = true;
+
+import Base from '../../layouts/Base.astro';
+import '../../styles/shop.css';
+---
+<Base title="Betaling geannuleerd · Villa Happ">
+  <section class="vh-page">
+    <div class="vh-result">
+      <h1>Betaling <span class="vh-italic-accent">afgebroken</span></h1>
+      <p>
+        Geen zorgen: er is niets afgeschreven en je mandje is bewaard.
+        Probeer het opnieuw wanneer je er klaar voor bent.
+      </p>
+      <div class="vh-result-actions">
+        <a href="/checkout" class="vh-btn vh-btn--accent"><span>Opnieuw afrekenen</span></a>
+        <a href="/cart" class="vh-btn vh-btn--ghost"><span>Naar je mandje</span></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import '../../lib/cart';
+</script>

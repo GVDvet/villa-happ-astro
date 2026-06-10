@@ -1,0 +1,206 @@
+---
+export const prerender = true;
+
+import Base from '../../layouts/Base.astro';
+import '../../styles/shop.css';
+---
+<Base title="Afrekenen · Villa Happ" showFooter={false}>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Afrekenen · Veilig via Mollie</p>
+        <h1 class="vh-page-title">Bijna <span class="vh-italic-accent">van jou</span></h1>
+      </header>
+
+      <div class="vh-commerce-grid" id="vh-co-grid" hidden>
+
+        <form class="vh-form" id="vh-co-form" novalidate>
+          <div class="vh-form-section">
+            <h2><i>01</i> Contact</h2>
+            <div class="vh-field">
+              <label for="co-email">E-mailadres</label>
+              <input id="co-email" name="email" type="email" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="vh-form-section">
+            <h2><i>02</i> Bezorgadres</h2>
+            <div class="vh-form-row">
+              <div class="vh-field">
+                <label for="co-first">Voornaam</label>
+                <input id="co-first" name="first_name" autocomplete="given-name" required />
+              </div>
+              <div class="vh-field">
+                <label for="co-last">Achternaam</label>
+                <input id="co-last" name="last_name" autocomplete="family-name" required />
+              </div>
+            </div>
+            <div class="vh-form-row" style="grid-template-columns: 2fr 1fr;">
+              <div class="vh-field">
+                <label for="co-street">Straat</label>
+                <input id="co-street" name="street" autocomplete="address-line1" required />
+              </div>
+              <div class="vh-field">
+                <label for="co-number">Huisnummer</label>
+                <input id="co-number" name="house_number" required />
+              </div>
+            </div>
+            <div class="vh-form-row">
+              <div class="vh-field">
+                <label for="co-postal">Postcode</label>
+                <input id="co-postal" name="postal_code" autocomplete="postal-code" required />
+              </div>
+              <div class="vh-field">
+                <label for="co-city">Plaats</label>
+                <input id="co-city" name="city" autocomplete="address-level2" required />
+              </div>
+            </div>
+            <div class="vh-field">
+              <label for="co-country">Land</label>
+              <select id="co-country" name="country">
+                <option value="NL" selected>Nederland</option>
+                <option value="BE">België</option>
+                <option value="DE">Duitsland</option>
+              </select>
+            </div>
+          </div>
+        </form>
+
+        <aside class="vh-summary">
+          <h2>Jouw bestelling</h2>
+          <div class="vh-lines" id="vh-co-lines" style="border-top: 0;"></div>
+          <div class="vh-summary-row"><span>Subtotaal</span><span id="vh-co-subtotal"></span></div>
+          <div class="vh-summary-row"><span>Verzending</span><span id="vh-co-shipping"></span></div>
+          <div class="vh-summary-row total"><span>Totaal</span><b id="vh-co-total"></b></div>
+
+          <div class="vh-demo-note" id="vh-co-demo" hidden>
+            <b>Demo-modus.</b> Dit zijn voorbeeldproducten. Koppel Supabase en
+            Mollie (echte API-keys in Vercel) om betalingen te activeren.
+          </div>
+          <div class="vh-error-note" id="vh-co-error" role="alert"></div>
+
+          <button type="submit" form="vh-co-form" class="vh-btn vh-btn--accent" id="vh-co-pay">
+            <span id="vh-co-pay-label">Betaal veilig</span>
+            <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="vh-pay-note">🔒 iDEAL · Bancontact · creditcard — via Mollie</p>
+        </aside>
+      </div>
+
+      <div class="vh-empty" id="vh-co-empty" hidden>
+        <p>Er ligt nog niets in je mandje.</p>
+        <a href="/shop" class="vh-btn vh-btn--primary"><span>Ontdek de collectie</span></a>
+      </div>
+
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { getCart, cartSubtotal, shippingCostCents, cartHasDemo } from '../../lib/cart';
+
+  const grid = document.getElementById('vh-co-grid')!;
+  const empty = document.getElementById('vh-co-empty')!;
+  const form = document.getElementById('vh-co-form') as HTMLFormElement;
+  const payBtn = document.getElementById('vh-co-pay') as HTMLButtonElement;
+  const payLabel = document.getElementById('vh-co-pay-label')!;
+  const demoNote = document.getElementById('vh-co-demo')!;
+  const errNote = document.getElementById('vh-co-error')!;
+  const countrySel = document.getElementById('co-country') as HTMLSelectElement;
+  const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+
+  function renderSummary() {
+    const items = getCart();
+    grid.hidden = items.length === 0;
+    empty.hidden = items.length > 0;
+    if (!items.length) return;
+
+    document.getElementById('vh-co-lines')!.innerHTML = items.map((i) => `
+      <div class="vh-line" style="grid-template-columns: 58px 1fr auto; padding: 14px 0;">
+        <img src="${i.image_url || ''}" alt="" style="width: 58px; height: 72px;" />
+        <div>
+          <p class="vh-line-name" style="font-size: 13px;">${i.name} × ${i.quantity}</p>
+          <p class="vh-line-variant">${i.variant_label || ''}</p>
+        </div>
+        <p class="vh-line-price" style="font-size: 14px;">${eur(i.unit_price_cents * i.quantity)}</p>
+      </div>`).join('');
+
+    const subtotal = cartSubtotal();
+    const shipping = shippingCostCents(countrySel.value, subtotal);
+    document.getElementById('vh-co-subtotal')!.textContent = eur(subtotal);
+    document.getElementById('vh-co-shipping')!.textContent = shipping === 0 ? 'Gratis' : eur(shipping);
+    document.getElementById('vh-co-total')!.textContent = eur(subtotal + shipping);
+    payLabel.textContent = `Betaal ${eur(subtotal + shipping)}`;
+
+    if (cartHasDemo()) {
+      demoNote.hidden = false;
+      payBtn.disabled = true;
+      payLabel.textContent = 'Demo-modus';
+    }
+  }
+
+  countrySel.addEventListener('change', renderSummary);
+  renderSummary();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errNote.classList.remove('is-visible');
+
+    // Validatie
+    let valid = true;
+    form.querySelectorAll<HTMLInputElement>('input[required]').forEach((input) => {
+      const bad = !input.value.trim() || (input.type === 'email' && !input.value.includes('@'));
+      input.classList.toggle('is-invalid', bad);
+      if (bad) valid = false;
+    });
+    if (!valid) {
+      errNote.textContent = 'Vul de gemarkeerde velden in.';
+      errNote.classList.add('is-visible');
+      return;
+    }
+    if (cartHasDemo()) return;
+
+    const fd = new FormData(form);
+    const payload = {
+      items: getCart().map((i) => ({ variant_id: i.variant_id, quantity: i.quantity })),
+      customer: {
+        email: String(fd.get('email')),
+        first_name: String(fd.get('first_name')),
+        last_name: String(fd.get('last_name')),
+      },
+      shipping: {
+        street: String(fd.get('street')),
+        house_number: String(fd.get('house_number')),
+        postal_code: String(fd.get('postal_code')),
+        city: String(fd.get('city')),
+        country: String(fd.get('country')),
+      },
+    };
+
+    payBtn.disabled = true;
+    payLabel.textContent = 'Een moment…';
+
+    try {
+      const res = await fetch('/api/checkout/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.checkout_url) {
+        window.location.href = data.checkout_url; // → Mollie betaalpagina
+      } else {
+        errNote.textContent = data.error || 'Afrekenen lukte niet. Probeer het opnieuw.';
+        errNote.classList.add('is-visible');
+        payBtn.disabled = false;
+        renderSummary();
+      }
+    } catch {
+      errNote.textContent = 'Verbinding mislukt. Controleer je internet en probeer opnieuw.';
+      errNote.classList.add('is-visible');
+      payBtn.disabled = false;
+      renderSummary();
+    }
+  });
+</script>

@@ -92,6 +92,32 @@ export function onCartChange(listener: Listener) {
   return () => listeners.delete(listener);
 }
 
+/* ---------- Verzendkosten (zelfde regels als de checkout-API) ---------- */
+export function shippingCostCents(country: string, subtotalCents: number): number {
+  if (subtotalCents >= 7500) return 0;
+  if (country === 'BE') return 695;
+  if (country === 'DE') return 895;
+  return 495; // NL
+}
+
+export const FREE_SHIPPING_CENTS = 7500;
+
+/* ---------- Demo-modus detectie ---------- */
+export function isDemoItem(item: CartItem): boolean {
+  return item.variant_id.startsWith('demo-');
+}
+
+export function cartHasDemo(): boolean {
+  return getCart().some(isDemoItem);
+}
+
+/* ---------- Cart drawer openen vanaf elke pagina ---------- */
+export function openCart() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('vh:open-cart'));
+  }
+}
+
 // Init badge bij page load
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {

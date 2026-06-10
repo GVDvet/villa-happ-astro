@@ -1,0 +1,225 @@
+---
+export const prerender = true;
+
+import Base from '../../layouts/Base.astro';
+import { getCatalog, type CatalogProduct } from '../../lib/catalog';
+import { formatPrice } from '../../lib/commerce';
+import '../../styles/shop.css';
+
+export async function getStaticPaths() {
+  const catalog = await getCatalog();
+  return catalog.map((product) => ({
+    params: { slug: product.slug },
+    props: { product, catalog },
+  }));
+}
+
+interface Props { product: CatalogProduct; catalog: CatalogProduct[]; }
+const { product, catalog } = Astro.props;
+
+const related = catalog.filter((p) => p.slug !== product.slug).slice(0, 3);
+const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+const soldOut = totalStock === 0;
+
+// Data voor het client-script (maatselectie + add-to-cart)
+const pdpData = {
+  slug: product.slug,
+  name: product.name,
+  color: product.color,
+  price_cents: product.price_cents,
+  image: product.images[0],
+  variants: product.variants,
+};
+---
+<Base title={`${product.name} ${product.color} · Villa Happ`} description={product.short_desc} ogImage={product.images[0]}>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+
+      <a href="/shop" class="vh-pdp-back">← Terug naar de collectie</a>
+
+      <div class="vh-pdp">
+
+        <!-- Gallery -->
+        <div class="vh-pdp-gallery">
+          <div class="vh-pdp-main">
+            <span class="vh-pdp-frame-tag">Archief · {product.variants[0]?.sku?.split('-').slice(0, 2).join('-') || 'VH'}</span>
+            <img src={product.images[0]} alt={`${product.name} ${product.color}`} id="vh-pdp-mainimg" width="900" height="1125" fetchpriority="high" />
+          </div>
+          {product.images.length > 1 && (
+            <div class="vh-pdp-thumbs" id="vh-pdp-thumbs">
+              {product.images.map((img, i) => (
+                <button type="button" class={`vh-pdp-thumb${i === 0 ? ' is-active' : ''}`} data-img={img} aria-label={`Foto ${i + 1}`}>
+                  <img src={img} alt="" width="72" height="90" loading="lazy" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Info -->
+        <div class="vh-pdp-info">
+          <p class="vh-pdp-kicker vh-mono">Heritage collectie · Genummerde oplage</p>
+          <h1 class="vh-pdp-title">{product.name}</h1>
+          <p class="vh-pdp-color">{product.color}</p>
+          <p class="vh-pdp-price">
+            {product.compare_at_cents && <del>{formatPrice(product.compare_at_cents)}</del>}
+            {formatPrice(product.price_cents)}
+          </p>
+          <p class="vh-pdp-short">{product.short_desc}</p>
+
+          <div class="vh-pdp-sizes-head">
+            <span>Maat</span>
+            <span>Valt ruim · twijfel? kies kleiner</span>
+          </div>
+          <div class="vh-pdp-sizes" id="vh-pdp-sizes">
+            {product.variants.map((v) => (
+              <button
+                type="button"
+                class={`vh-size${v.stock === 0 ? ' is-out' : ''}`}
+                data-variant={v.id}
+                data-size={v.size}
+                data-stock={v.stock}
+                disabled={v.stock === 0}
+              >{v.size}</button>
+            ))}
+          </div>
+          <p class="vh-pdp-stockmsg" id="vh-pdp-stockmsg"></p>
+
+          <div class="vh-pdp-atc">
+            <button type="button" class="vh-btn vh-btn--accent" id="vh-pdp-add" disabled={soldOut}>
+              <span id="vh-pdp-add-label">{soldOut ? 'Uitverkocht' : 'Kies je maat'}</span>
+            </button>
+          </div>
+
+          <div class="vh-pdp-trust">
+            <span><i>✦</i> Gratis verzending in NL vanaf € 75</span>
+            <span><i>✦</i> 30 dagen bedenktijd, retour gratis</span>
+            <span><i>✦</i> Genummerd · geleverd met certificaat van echtheid</span>
+          </div>
+
+          <details class="vh-acc" open>
+            <summary>Het verhaal</summary>
+            <div class="vh-acc-body">{product.description}</div>
+          </details>
+          <details class="vh-acc">
+            <summary>Details &amp; materiaal</summary>
+            <div class="vh-acc-body">
+              <ul>{product.details.map((d) => <li>{d}</li>)}</ul>
+            </div>
+          </details>
+          <details class="vh-acc">
+            <summary>Verzending &amp; retour</summary>
+            <div class="vh-acc-body">
+              Voor 16:00 besteld, binnen 2 werkdagen in huis. Verzending via PostNL.
+              Niet goed? Retourneren kan kosteloos binnen 30 dagen.
+            </div>
+          </details>
+        </div>
+      </div>
+
+      {related.length > 0 && (
+        <div class="vh-pdp-related">
+          <h2>Ook uit het <span class="vh-italic-accent">archief</span></h2>
+          <div class="vh-listing">
+            {related.map((p, i) => (
+              <a href={`/shop/${p.slug}`} class="vh-card">
+                <div class="vh-card-media">
+                  <span class="vh-card-num">0{i + 1}</span>
+                  {p.badge && <span class="vh-card-badge">{p.badge}</span>}
+                  <img src={p.images[0]} alt={p.name} class="vh-card-img main" width="600" height="750" loading="lazy" />
+                  {p.images[1] && <img src={p.images[1]} alt="" class="vh-card-img alt" width="600" height="750" loading="lazy" aria-hidden="true" />}
+                </div>
+                <div class="vh-card-info">
+                  <p class="vh-card-name">{p.name}</p>
+                  <p class="vh-card-price">{formatPrice(p.price_cents)}</p>
+                </div>
+                <p class="vh-card-meta">{p.meta}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+    </div>
+  </section>
+
+  <!-- Sticky mobile add-to-cart -->
+  <div class="vh-pdp-sticky" id="vh-pdp-sticky">
+    <b>{formatPrice(product.price_cents)}</b>
+    <button type="button" class="vh-btn vh-btn--accent" id="vh-pdp-add-sticky" disabled={soldOut}>
+      <span>{soldOut ? 'Uitverkocht' : 'In winkelmandje'}</span>
+    </button>
+  </div>
+
+  <script type="application/json" id="vh-pdp-data" set:html={JSON.stringify(pdpData)}></script>
+</Base>
+
+<script>
+  import { addToCart, openCart } from '../../lib/cart';
+
+  const data = JSON.parse(document.getElementById('vh-pdp-data')!.textContent!);
+
+  /* Gallery thumbs */
+  const mainImg = document.getElementById('vh-pdp-mainimg') as HTMLImageElement;
+  document.querySelectorAll<HTMLButtonElement>('.vh-pdp-thumb').forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+      document.querySelectorAll('.vh-pdp-thumb').forEach((t) => t.classList.remove('is-active'));
+      thumb.classList.add('is-active');
+      mainImg.style.opacity = '0';
+      setTimeout(() => {
+        mainImg.src = thumb.dataset.img!;
+        mainImg.style.opacity = '1';
+      }, 180);
+    });
+  });
+
+  /* Maatselectie */
+  let selected: { id: string; size: string; stock: number } | null = null;
+  const addBtn = document.getElementById('vh-pdp-add') as HTMLButtonElement;
+  const addLabel = document.getElementById('vh-pdp-add-label')!;
+  const stickyBtn = document.getElementById('vh-pdp-add-sticky') as HTMLButtonElement | null;
+  const stockMsg = document.getElementById('vh-pdp-stockmsg')!;
+
+  document.querySelectorAll<HTMLButtonElement>('.vh-size:not(.is-out)').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.vh-size').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      selected = { id: btn.dataset.variant!, size: btn.dataset.size!, stock: parseInt(btn.dataset.stock!, 10) };
+      addBtn.disabled = false;
+      addLabel.textContent = 'In winkelmandje';
+      stockMsg.textContent = selected.stock <= 3 ? `Nog ${selected.stock} op voorraad` : '';
+    });
+  });
+
+  function add() {
+    if (!selected) {
+      stockMsg.textContent = 'Kies eerst een maat';
+      document.getElementById('vh-pdp-sizes')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    addToCart({
+      variant_id: selected.id,
+      product_id: data.slug,
+      quantity: 1,
+      name: `${data.name}`,
+      variant_label: `${data.color} / ${selected.size}`,
+      unit_price_cents: data.price_cents,
+      image_url: data.image,
+      slug: data.slug,
+    });
+    window.dispatchEvent(new CustomEvent('vh:toast', { detail: 'Toegevoegd aan je mandje ✦' }));
+    openCart();
+  }
+
+  addBtn.addEventListener('click', add);
+  stickyBtn?.addEventListener('click', add);
+
+  /* Sticky bar: toon wanneer hoofdknop uit beeld is */
+  const sticky = document.getElementById('vh-pdp-sticky');
+  if (sticky && 'IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => sticky.classList.toggle('is-visible', !e.isIntersecting));
+    }, { threshold: 0 });
+    obs.observe(addBtn);
+  }
+</script>

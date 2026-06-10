@@ -2,9 +2,91 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
-import Placeholder from '../components/Placeholder.astro';
+import '../styles/shop.css';
 ---
 <Base title="Winkelmandje · Villa Happ">
-  <Placeholder eyebrow="Winkelmandje" title="Je mandje" text="Je winkelmandje en checkout komen binnenkort. We bouwen aan een soepele afrekenervaring met iDEAL en meer." />
+  <section class="vh-page">
+    <div class="vh-page-inner">
+
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Winkelmandje</p>
+        <h1 class="vh-page-title">Jouw <span class="vh-italic-accent">selectie</span></h1>
+      </header>
+
+      <div class="vh-commerce-grid" id="vh-cart-grid" hidden>
+        <div class="vh-lines" id="vh-cart-lines"></div>
+
+        <aside class="vh-summary">
+          <h2>Overzicht</h2>
+          <div class="vh-summary-row"><span>Subtotaal</span><span id="vh-cart-subtotal"></span></div>
+          <div class="vh-summary-row"><span>Verzending (NL)</span><span id="vh-cart-shipping"></span></div>
+          <div class="vh-summary-row total"><span>Totaal</span><b id="vh-cart-total"></b></div>
+          <a href="/checkout" class="vh-btn vh-btn--accent"><span>Afrekenen</span>
+            <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <p class="vh-summary-note">Veilig betalen via Mollie · iDEAL, Bancontact, creditcard</p>
+        </aside>
+      </div>
+
+      <div class="vh-empty" id="vh-cart-empty" hidden>
+        <p>Je mandje is nog leeg.</p>
+        <a href="/shop" class="vh-btn vh-btn--primary"><span>Ontdek de collectie</span></a>
+      </div>
+
+    </div>
+  </section>
 </Base>
-<script>import '../lib/cart';</script>
+
+<script>
+  import { getCart, updateQuantity, removeFromCart, cartSubtotal, shippingCostCents, onCartChange } from '../lib/cart';
+
+  const grid = document.getElementById('vh-cart-grid')!;
+  const empty = document.getElementById('vh-cart-empty')!;
+  const lines = document.getElementById('vh-cart-lines')!;
+  const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+
+  function render() {
+    const items = getCart();
+    grid.hidden = items.length === 0;
+    empty.hidden = items.length > 0;
+    if (!items.length) return;
+
+    lines.innerHTML = items.map((i) => `
+      <div class="vh-line" data-vid="${i.variant_id}">
+        <a href="/shop/${i.slug}"><img src="${i.image_url || ''}" alt="" /></a>
+        <div>
+          <p class="vh-line-name">${i.name}</p>
+          <p class="vh-line-variant">${i.variant_label || ''}</p>
+          <span class="vh-drawer-qty">
+            <button type="button" data-dec aria-label="Minder">−</button>
+            <b>${i.quantity}</b>
+            <button type="button" data-inc aria-label="Meer">+</button>
+          </span>
+          <br />
+          <button type="button" class="vh-line-remove" data-remove>Verwijder</button>
+        </div>
+        <p class="vh-line-price">${eur(i.unit_price_cents * i.quantity)}</p>
+      </div>`).join('');
+
+    const subtotal = cartSubtotal();
+    const shipping = shippingCostCents('NL', subtotal);
+    document.getElementById('vh-cart-subtotal')!.textContent = eur(subtotal);
+    document.getElementById('vh-cart-shipping')!.textContent = shipping === 0 ? 'Gratis' : eur(shipping);
+    document.getElementById('vh-cart-total')!.textContent = eur(subtotal + shipping);
+  }
+
+  lines.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const row = target.closest('[data-vid]') as HTMLElement | null;
+    if (!row) return;
+    const vid = row.dataset.vid!;
+    const item = getCart().find((i) => i.variant_id === vid);
+    if (!item) return;
+    if (target.closest('[data-inc]')) updateQuantity(vid, item.quantity + 1);
+    else if (target.closest('[data-dec]')) updateQuantity(vid, item.quantity - 1);
+    else if (target.closest('[data-remove]')) removeFromCart(vid);
+  });
+
+  onCartChange(render);
+  render();
+</script>

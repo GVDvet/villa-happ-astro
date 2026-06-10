@@ -40,7 +40,7 @@ const products = dbProducts.length > 0
             {p.badge && <span class="vh-shop-card-badge">{p.badge}</span>}
             <img src={p.image_url} alt={p.name} class="vh-shop-card-img is-primary" width="600" height="750" loading="lazy" />
             <img src={p.hover_url} alt="" class="vh-shop-card-img is-hover" width="600" height="750" loading="lazy" aria-hidden="true" />
-            <button class="vh-shop-card-quick" type="button" data-quick-add={p.slug}>Snel toevoegen</button>
+            <button class="vh-shop-card-quick" type="button">Bekijk &amp; kies je maat</button>
           </div>
           <div class="vh-shop-card-info">
             <p class="vh-shop-card-name">{p.name}</p>
