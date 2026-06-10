@@ -42,21 +42,33 @@ function initLenis() {
 /* ---------- Loader ---------- */
 function initLoader() {
   const loader = document.getElementById('vh-loader');
-  if (!loader) return;
+  const hero = document.getElementById('vh-hero');
+  if (!loader) { hero?.classList.add('is-ready'); return; }
   const bar = loader.querySelector('.vh-loader-bar span') as HTMLElement | null;
+
+  function dismiss() {
+    if (loader!.classList.contains('is-done')) return;
+    if (bar) bar.style.width = '100%';
+    loader!.classList.add('is-done');
+    hero?.classList.add('is-ready');
+    setTimeout(() => loader!.remove(), 600);
+  }
+
+  // Snel: vul progressbar in ~350ms, dismiss zodra pagina geladen is
   let p = 0;
   const iv = setInterval(() => {
-    p = Math.min(100, p + Math.random() * 30);
+    p = Math.min(95, p + 22);
     if (bar) bar.style.width = p + '%';
-    if (p >= 100) {
-      clearInterval(iv);
-      setTimeout(() => {
-        loader.classList.add('is-done');
-        document.getElementById('vh-hero')?.classList.add('is-ready');
-        setTimeout(() => loader.remove(), 800);
-      }, 250);
-    }
-  }, 130);
+  }, 60);
+
+  const finish = () => { clearInterval(iv); dismiss(); };
+  if (document.readyState === 'complete') {
+    setTimeout(finish, 250);
+  } else {
+    window.addEventListener('load', () => setTimeout(finish, 150));
+    // Failsafe: nooit langer dan 1.2s blijven hangen
+    setTimeout(finish, 1200);
+  }
 }
 
 /* ---------- Hero parallax ---------- */

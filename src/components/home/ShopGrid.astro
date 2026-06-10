@@ -2,15 +2,15 @@
 import { getFeaturedProducts, formatPrice } from '../../lib/commerce';
 const dbProducts = await getFeaturedProducts(6);
 const fallback = [
-  { slug: 'heritage-hoodie-grey', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-grey-front.png', hover_url: '/img/products/hoodie-grey-back.png', badge: 'Nieuw', meta: 'Heather Grey' },
-  { slug: 'heritage-hoodie-blue', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-blue-front.png', hover_url: '/img/products/hoodie-blue-lifestyle.png', badge: null, meta: 'Tilburg Blue' },
-  { slug: 'heritage-hoodie-unisex', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-grey-lifestyle.png', hover_url: '/img/products/hoodie-grey-new2.png', badge: 'Bestseller', meta: 'Oversized fit' },
+  { slug: 'heritage-hoodie-grey', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-grey-front.webp', hover_url: '/img/products/hoodie-grey-back.webp', badge: 'Nieuw', meta: 'Heather Grey' },
+  { slug: 'heritage-hoodie-blue', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-blue-front.webp', hover_url: '/img/products/hoodie-blue-lifestyle.webp', badge: null, meta: 'Tilburg Blue' },
+  { slug: 'heritage-hoodie-unisex', name: 'Heritage Hoodie', price_cents: 12900, image_url: '/img/products/hoodie-grey-lifestyle.webp', hover_url: '/img/products/hoodie-grey-new2.webp', badge: 'Bestseller', meta: 'Oversized fit' },
 ];
 const products = dbProducts.length > 0
   ? dbProducts.map((p) => ({
       slug: p.slug, name: p.name, price_cents: p.price_cents,
-      image_url: p.image_url || '/img/products/hoodie-grey-front.png',
-      hover_url: (p.gallery && p.gallery[0]) || p.image_url || '/img/products/hoodie-grey-back.png',
+      image_url: p.image_url || '/img/products/hoodie-grey-front.webp',
+      hover_url: (p.gallery && p.gallery[0]) || p.image_url || '/img/products/hoodie-grey-back.webp',
       badge: p.compare_at_cents ? 'Sale' : (p.featured ? 'Featured' : null),
       meta: p.category || '',
     }))
