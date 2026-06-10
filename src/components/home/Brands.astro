@@ -1,12 +1,26 @@
 ---
+// H_APProved — twee tegengesteld scrollende marquee-regels
 const brands = ['Patta', 'Daily Paper', 'Olaf', 'Filling Pieces', 'Arte', 'New Amsterdam'];
+const rowA = [...brands, ...brands];
+const rowB = [...[...brands].reverse(), ...[...brands].reverse()];
 ---
 <section class="vh-brands">
-  <div class="vh-brands-inner">
+  <div class="vh-brands-head">
     <p class="vh-brands-label vh-mono">08 / H_APProved</p>
     <h2 class="vh-brands-title vh-reveal">Merken die wij dragen, <span class="vh-italic-accent">gecureerd</span> voor jou.</h2>
-    <div class="vh-brands-grid vh-reveal">
-      {brands.map((b) => <a href="/brands" class="vh-brand-cell">{b}</a>)}
+  </div>
+
+  <div class="vh-brands-marquee" aria-hidden="true">
+    <div class="vh-brands-row vh-brands-row--left">
+      {rowA.map((b) => <span class="vh-brands-name">{b}<i>✦</i></span>)}
+    </div>
+    <div class="vh-brands-row vh-brands-row--right">
+      {rowB.map((b) => <span class="vh-brands-name vh-brands-name--outline">{b}<i>✦</i></span>)}
     </div>
   </div>
+
+  <p class="vh-brands-cta"><a href="/brands" class="vh-shop-link">Ontdek alle merken
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg></a></p>
 </section>

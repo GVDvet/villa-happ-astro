@@ -34,9 +34,9 @@ const year = new Date().getFullYear();
 <footer class="vh-footer">
   <div class="vh-footer-inner vh-container">
 
-    <div class="vh-footer-mega" aria-hidden="true">
-      {[...'VILLA HAPP'].map((ch) =>
-        ch === ' ' ? <span class="vh-mega-sp"></span> : <span class="vh-mega-ch">{ch}</span>
+    <div class="vh-footer-mega" id="vh-footer-mega" aria-hidden="true">
+      {[...'VILLA HAPP'].map((ch, i) =>
+        ch === ' ' ? <span class="vh-mega-sp"></span> : <span class="vh-mega-ch" style={`--d: ${i * 55}ms;`}>{ch}</span>
       )}
     </div>
 
@@ -110,7 +110,7 @@ const year = new Date().getFullYear();
     overflow: hidden;
   }
 
-  /* Mega wordmark — outline letters, vullen oranje per letter bij hover */
+  /* Mega wordmark — letters stijgen op bij binnenkomst, vullen oranje bij hover */
   .vh-footer-mega {
     display: flex;
     justify-content: center;
@@ -118,6 +118,7 @@ const year = new Date().getFullYear();
     user-select: none;
     margin: 0 0 clamp(48px, 7vw, 90px);
     white-space: nowrap;
+    overflow: hidden;
   }
 
   .vh-mega-ch {
@@ -128,17 +129,30 @@ const year = new Date().getFullYear();
     letter-spacing: -0.03em;
     color: transparent;
     -webkit-text-stroke: 1px rgba(244, 238, 227, 0.32);
-    transition: color 0.35s ease, -webkit-text-stroke-color 0.35s ease, transform 0.4s var(--vh-ease-out);
+    transform: translateY(112%);
+    transition: color 0.35s ease, -webkit-text-stroke-color 0.35s ease, transform 0.9s var(--vh-ease-out) var(--d, 0s);
     cursor: default;
   }
 
-  .vh-mega-ch:hover {
+  .vh-footer-mega.is-in .vh-mega-ch {
+    transform: translateY(0);
+  }
+
+  .vh-footer-mega.is-settled .vh-mega-ch {
+    transition: color 0.35s ease, -webkit-text-stroke-color 0.35s ease, transform 0.4s var(--vh-ease-out) 0s;
+  }
+
+  .vh-footer-mega.is-settled .vh-mega-ch:hover {
     color: var(--vh-accent);
     -webkit-text-stroke-color: var(--vh-accent);
     transform: translateY(-5%) rotate(-2deg);
   }
 
   .vh-mega-sp { width: 0.32em; }
+
+  /* Zonder JS of met reduced motion: letters direct zichtbaar */
+  :global(.no-js) .vh-mega-ch,
+  :global(.vh-reduced) .vh-mega-ch { transform: translateY(0); }
 
   .vh-footer-top {
     display: grid;
@@ -308,6 +322,21 @@ const year = new Date().getFullYear();
 </style>
 
 <script>
+  // Mega wordmark: letters stijgen op zodra de footer in beeld komt
+  const mega = document.getElementById('vh-footer-mega');
+  if (mega && 'IntersectionObserver' in window) {
+    const megaObs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          mega.classList.add('is-in');
+          setTimeout(() => mega.classList.add('is-settled'), 1500);
+          megaObs.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    megaObs.observe(mega);
+  }
+
   const form = document.getElementById('vh-newsletter') as HTMLFormElement | null;
   if (form) {
     form.addEventListener('submit', async (e) => {

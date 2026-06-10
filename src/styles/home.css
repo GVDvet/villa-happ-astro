@@ -951,36 +951,246 @@
 }
 
 /* ============================================================
-   BRANDS — H_APProved
+   BRANDS — H_APProved (twee tegengesteld scrollende regels)
    ============================================================ */
-.vh-brands { padding: clamp(80px, 12vh, 140px) var(--vh-gutter); background: var(--vh-espresso); color: var(--vh-paper); }
-.vh-brands-inner { max-width: var(--vh-max-width); margin: 0 auto; text-align: center; }
-.vh-brands-label { color: rgba(244,238,227,0.5); margin-bottom: 20px; }
+.vh-brands {
+	padding: clamp(80px, 12vh, 140px) 0;
+	background: var(--vh-espresso);
+	color: var(--vh-paper);
+	overflow: hidden;
+}
+.vh-brands-head {
+	text-align: center;
+	padding: 0 var(--vh-gutter);
+	margin-bottom: clamp(40px, 6vw, 72px);
+}
+.vh-brands-label { color: rgba(244,238,227,0.5); margin: 0 0 20px; }
 .vh-brands-title {
 	font-family: var(--vh-font-serif);
 	font-size: clamp(32px, 4.5vw, 60px); line-height: 1.05; font-weight: 400;
-	letter-spacing: -0.025em; max-width: 18ch; margin: 0 auto 60px;
+	letter-spacing: -0.025em; max-width: 18ch; margin: 0 auto;
 }
-.vh-brands-grid {
-	display: grid; grid-template-columns: repeat(6, 1fr);
-	gap: 1px; background: rgba(244,238,227,0.1);
-	border: 1px solid rgba(244,238,227,0.1);
+.vh-brands-row {
+	display: flex;
+	align-items: baseline;
+	width: max-content;
+	white-space: nowrap;
 }
-.vh-brand-cell {
-	background: var(--vh-espresso); aspect-ratio: 3/2;
-	display: flex; align-items: center; justify-content: center;
-	font-family: var(--vh-font-serif); font-style: italic;
-	font-size: clamp(16px, 1.8vw, 24px); color: rgba(244,238,227,0.5);
-	transition: color var(--vh-dur-base) ease, background var(--vh-dur-base) ease;
+.vh-brands-row--left { animation: vh-marquee 38s linear infinite; }
+.vh-brands-row--right { animation: vh-marquee 44s linear infinite reverse; margin-top: 6px; }
+.vh-brands-marquee:hover .vh-brands-row { animation-play-state: paused; }
+.vh-brands-name {
+	font-family: var(--vh-font-serif);
+	font-style: italic;
+	font-weight: 400;
+	font-size: clamp(40px, 6.5vw, 96px);
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+	color: rgba(244,238,227,0.4);
+	transition: color 0.35s ease;
+	padding: 0 0.22em;
+	cursor: default;
 }
-.vh-brand-cell:hover { color: var(--vh-paper); background: rgba(244,238,227,0.04); }
-@media (max-width: 900px) { .vh-brands-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 480px) { .vh-brands-grid { grid-template-columns: repeat(2, 1fr); } }
+.vh-brands-name:hover { color: var(--vh-paper); }
+.vh-brands-name i {
+	font-style: normal;
+	font-size: 0.32em;
+	color: var(--vh-accent);
+	vertical-align: middle;
+	margin-left: 0.45em;
+}
+.vh-brands-name--outline {
+	color: transparent;
+	-webkit-text-stroke: 1px rgba(244,238,227,0.3);
+}
+.vh-brands-name--outline:hover {
+	color: var(--vh-accent);
+	-webkit-text-stroke-color: var(--vh-accent);
+}
+.vh-brands-cta { text-align: center; margin: clamp(40px, 6vw, 64px) 0 0; }
+.vh-brands-cta .vh-shop-link { color: var(--vh-paper); border-bottom-color: rgba(244,238,227,0.3); }
+.vh-brands-cta .vh-shop-link:hover { color: var(--vh-accent); border-bottom-color: var(--vh-paper); }
+@media (prefers-reduced-motion: reduce) { .vh-brands-row { animation: none; } }
 
 /* ============================================================
    NEWSLETTER CTA
    ============================================================ */
 .vh-newsletter-cta { padding: clamp(100px, 16vh, 200px) var(--vh-gutter); background: var(--vh-paper); text-align: center; }
+
+/* ============================================================
+   FINALE — Frame 002: leeg polaroid, jouw naam in het archief
+   ============================================================ */
+.vh-finale {
+	position: relative;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: clamp(100px, 14vh, 160px) var(--vh-gutter);
+	background: var(--vh-espresso);
+	color: var(--vh-paper);
+	overflow: hidden;
+}
+.vh-finale-vf {
+	position: absolute;
+	inset: 24px;
+	pointer-events: none;
+	color: rgba(244, 238, 227, 0.7);
+}
+.vh-finale-inner {
+	position: relative;
+	z-index: 2;
+	text-align: center;
+	max-width: 860px;
+}
+.vh-finale-label { color: var(--vh-accent); margin: 0 0 24px; }
+.vh-finale-title {
+	font-family: var(--vh-font-serif);
+	font-size: clamp(34px, 5vw, 72px);
+	line-height: 1.02;
+	font-weight: 400;
+	letter-spacing: -0.03em;
+	margin: 0 0 clamp(36px, 5vw, 56px);
+}
+.vh-finale-em { color: var(--vh-accent); }
+
+/* Het lege polaroid */
+.vh-finale-polaroid {
+	position: relative;
+	width: min(400px, 86vw);
+	margin: 0 auto;
+	background: #FBF8F1;
+	border-radius: 14px;
+	padding: 14px 14px 0;
+	box-shadow: var(--vh-shadow-xl);
+	transform: rotate(3deg);
+	transition: transform 0.5s var(--vh-ease-out);
+}
+.vh-finale-polaroid:hover { transform: rotate(1.5deg) translateY(-4px); }
+
+.vh-finale-shot {
+	position: relative;
+	aspect-ratio: 4/5;
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--vh-paper-soft);
+	border: 1px dashed var(--vh-ink-faint);
+}
+.vh-finale-img {
+	position: absolute;
+	inset: 0;
+	width: 100%; height: 100%;
+	object-fit: cover;
+	opacity: 0;
+}
+.vh-finale-placeholder {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: var(--vh-font-serif);
+	font-style: italic;
+	font-size: clamp(40px, 6vw, 64px);
+	color: var(--vh-ink-faint);
+	transition: opacity 0.6s ease;
+}
+
+/* Flits bij submit */
+.vh-finale-flash {
+	position: absolute;
+	inset: 0;
+	background: #fff;
+	border-radius: 14px;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 5;
+}
+.vh-finale-polaroid.is-flashing .vh-finale-flash {
+	animation: vh-flash 0.38s ease-out;
+}
+@keyframes vh-flash {
+	0% { opacity: 0; }
+	18% { opacity: 1; }
+	100% { opacity: 0; }
+}
+.vh-finale-polaroid.is-flashing { animation: vh-snap 0.38s ease-out; }
+@keyframes vh-snap {
+	30% { transform: rotate(3deg) scale(0.985); }
+	60% { transform: rotate(2.4deg) scale(1.008); }
+}
+
+/* Polaroid 'ontwikkelt' zich — zoals echt fotopapier */
+.vh-finale-polaroid.is-developed .vh-finale-img {
+	opacity: 1;
+	filter: contrast(0.55) brightness(1.7) saturate(0) blur(7px);
+	animation: vh-develop 2.6s ease-out 0.1s forwards;
+}
+@keyframes vh-develop {
+	to { filter: contrast(1) brightness(1) saturate(1) blur(0); }
+}
+.vh-finale-polaroid.is-developed .vh-finale-placeholder { opacity: 0; }
+.vh-finale-polaroid.is-developed .vh-finale-shot { border-color: transparent; }
+
+/* Schrijfregel op het polaroid */
+.vh-finale-form {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 14px 8px 4px;
+}
+.vh-finale-form input {
+	flex: 1;
+	min-width: 0;
+	border: 0;
+	border-bottom: 1px solid var(--vh-ink-faint);
+	background: transparent;
+	padding: 6px 2px;
+	font-family: var(--vh-font-serif);
+	font-style: italic;
+	font-size: 16px;
+	color: var(--vh-ink);
+	outline: none;
+	transition: border-color var(--vh-dur-fast) ease;
+}
+.vh-finale-form input:focus { border-bottom-color: var(--vh-accent); }
+.vh-finale-form input::placeholder { color: var(--vh-ink-muted); }
+.vh-finale-form button {
+	border: 0;
+	background: var(--vh-ink);
+	color: var(--vh-paper);
+	width: 38px; height: 38px;
+	border-radius: 50%;
+	font-size: 16px;
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: background var(--vh-dur-fast) ease, transform var(--vh-dur-fast) var(--vh-ease-out);
+}
+.vh-finale-form button:hover { background: var(--vh-accent); transform: translateX(2px); }
+.vh-finale-cap {
+	margin: 0;
+	padding: 6px 8px 14px;
+	color: var(--vh-ink-muted);
+	font-size: 10px;
+}
+.vh-finale-msg {
+	min-height: 16px;
+	margin: 18px 0 0;
+	font-size: 11px;
+	color: rgba(244, 238, 227, 0.55);
+}
+.vh-finale-msg.is-success { color: #8fce8f; }
+.vh-finale-msg.is-error { color: #ff9d93; }
+.vh-finale-actions {
+	display: inline-flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin-top: clamp(36px, 5vw, 52px);
+}
+@media (max-width: 600px) {
+	.vh-finale-vf .vf-frame { display: none; }
+}
 .vh-newsletter-cta-inner { max-width: 760px; margin: 0 auto; }
 .vh-newsletter-cta-label { color: var(--vh-accent); margin-bottom: 24px; }
 .vh-newsletter-cta-title {

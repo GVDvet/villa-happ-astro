@@ -1,0 +1,91 @@
+---
+// Finale — Frame 002: leeg polaroid, jouw naam in het archief.
+// Callback naar de hero (Frame 001): de cirkel is rond.
+---
+<section class="vh-finale" id="vh-finale">
+
+  <!-- Viewfinder keert terug -->
+  <div class="vh-finale-vf" aria-hidden="true">
+    <span class="vf-corner vf-tl"></span>
+    <span class="vf-corner vf-tr"></span>
+    <span class="vf-corner vf-bl"></span>
+    <span class="vf-corner vf-br"></span>
+    <span class="vf-rec"><i></i>REC</span>
+    <span class="vf-frame">FRAME 002 / VILLA HAPP</span>
+  </div>
+
+  <div class="vh-finale-inner">
+    <p class="vh-finale-label vh-mono">09 / Het volgende frame</p>
+    <h2 class="vh-finale-title vh-reveal">
+      Het archief is open.<br />Het volgende frame ben <span class="vh-italic-accent vh-finale-em">jij</span>.
+    </h2>
+
+    <div class="vh-finale-polaroid vh-reveal" data-finale-polaroid>
+      <div class="vh-finale-flash" aria-hidden="true"></div>
+      <div class="vh-finale-shot">
+        <img src="/img/products/hoodie-grey-lifestyle.webp" alt="" class="vh-finale-img" loading="lazy" />
+        <span class="vh-finale-placeholder" aria-hidden="true">Jij?</span>
+      </div>
+      <form class="vh-finale-form" id="vh-finale-form" novalidate>
+        <label class="vh-sr-only" for="vh-finale-email">E-mailadres</label>
+        <input id="vh-finale-email" type="email" placeholder="Schrijf je naam in het archief" autocomplete="email" required />
+        <button type="submit" aria-label="Inschrijven">→</button>
+      </form>
+      <p class="vh-finale-cap vh-mono" data-finale-cap>Frame 002 · Gereserveerd</p>
+    </div>
+    <p class="vh-finale-msg vh-mono" data-finale-msg role="status" aria-live="polite"></p>
+
+    <div class="vh-finale-actions vh-reveal">
+      <a href="/shop" class="vh-btn vh-btn--light" data-magnetic>
+        <span>Shop de collectie</span>
+        <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <a href="/drops" class="vh-btn vh-btn--ghost"><span>Bekijk drops</span></a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('vh-finale-form') as HTMLFormElement | null;
+  const polaroid = document.querySelector('[data-finale-polaroid]') as HTMLElement | null;
+  const cap = document.querySelector('[data-finale-cap]') as HTMLElement | null;
+  const msg = document.querySelector('[data-finale-msg]') as HTMLElement | null;
+
+  if (form && polaroid) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input') as HTMLInputElement;
+      const email = input.value.trim();
+      if (!email || !email.includes('@')) {
+        if (msg) { msg.textContent = 'Vul een geldig e-mailadres in.'; msg.className = 'vh-finale-msg vh-mono is-error'; }
+        return;
+      }
+
+      // Flits + ontwikkel de polaroid (ook bij netwerkfout: de beleving telt)
+      polaroid.classList.add('is-flashing');
+      setTimeout(() => {
+        polaroid.classList.remove('is-flashing');
+        polaroid.classList.add('is-developed');
+        if (cap) cap.textContent = 'Welkom in het archief ✦';
+      }, 380);
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: 'finale' }),
+        });
+        const data = await res.json();
+        if (msg) {
+          msg.textContent = res.ok && data.success ? (data.message || 'Je staat in het archief.') : (data.message || 'Er ging iets mis, probeer opnieuw.');
+          msg.className = `vh-finale-msg vh-mono ${res.ok && data.success ? 'is-success' : 'is-error'}`;
+        }
+        if (res.ok && data.success) input.value = '';
+      } catch {
+        if (msg) { msg.textContent = 'Verbinding mislukt. Probeer opnieuw.'; msg.className = 'vh-finale-msg vh-mono is-error'; }
+      }
+    });
+  }
+</script>
