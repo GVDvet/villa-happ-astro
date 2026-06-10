@@ -69,8 +69,8 @@ function initLoader() {
     setTimeout(finish, 250);
   } else {
     window.addEventListener('load', () => setTimeout(finish, 150));
-    // Failsafe: nooit langer dan 1.2s blijven hangen
-    setTimeout(finish, 1200);
+    // Failsafe: nooit langer dan 0.9s blijven hangen
+    setTimeout(finish, 900);
   }
 }
 

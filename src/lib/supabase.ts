@@ -14,9 +14,16 @@ const SUPABASE_SERVICE = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 let _public: SupabaseClient | null = null;
 let _admin: SupabaseClient | null = null;
 
+function isConfigured(url?: string, key?: string) {
+  if (!url || !key || !url.startsWith('https://')) return false;
+  // Vang alle voorbeeld-/placeholder-waarden af: nooit een hangende fetch.
+  const fake = ['placeholder', 'your-project', 'example', 'xxx'];
+  return !fake.some((f) => url.includes(f) || key.includes(f));
+}
+
 export function getSupabase() {
-  if (!SUPABASE_URL || !SUPABASE_ANON) {
-    console.warn('[Villa Happ] Supabase env vars ontbreken — running zonder DB.');
+  if (!isConfigured(SUPABASE_URL, SUPABASE_ANON)) {
+    // Geen (echte) keys: meteen fallback-content, nooit een hangende fetch.
     return null;
   }
   if (!_public) {
@@ -31,8 +38,8 @@ export function getSupabase() {
  * Admin client — server-only. Bypass RLS. Gebruik alleen in API routes.
  */
 export function getSupabaseAdmin() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE) {
-    console.warn('[Villa Happ] Supabase admin keys ontbreken.');
+  if (!isConfigured(SUPABASE_URL, SUPABASE_SERVICE)) {
+    console.warn('[Villa Happ] Supabase admin keys ontbreken of zijn placeholders.');
     return null;
   }
   if (!_admin) {

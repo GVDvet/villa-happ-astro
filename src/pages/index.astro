@@ -1,4 +1,8 @@
 ---
+// Statisch gebouwd op deploy-moment: instant vanaf Vercel's CDN.
+// (Zodra Supabase live data nodig is per request, schakel om naar ISR.)
+export const prerender = true;
+
 import Base from '../layouts/Base.astro';
 import Loader from '../components/home/Loader.astro';
 import Hero from '../components/home/Hero.astro';
