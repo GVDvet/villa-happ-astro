@@ -39,26 +39,29 @@ function initLenis() {
   gsap.ticker.lagSmoothing(0);
 }
 
-/* ---------- Loader ---------- */
+/* ---------- Loader (jaarteller 1960 → 2026) ---------- */
 function initLoader() {
   const loader = document.getElementById('vh-loader');
   const hero = document.getElementById('vh-hero');
   if (!loader) { hero?.classList.add('is-ready'); return; }
   const bar = loader.querySelector('.vh-loader-bar span') as HTMLElement | null;
+  const yearEl = loader.querySelector('[data-loader-year]') as HTMLElement | null;
 
   function dismiss() {
     if (loader!.classList.contains('is-done')) return;
     if (bar) bar.style.width = '100%';
+    if (yearEl) yearEl.textContent = '2026';
     loader!.classList.add('is-done');
     hero?.classList.add('is-ready');
     setTimeout(() => loader!.remove(), 600);
   }
 
-  // Snel: vul progressbar in ~350ms, dismiss zodra pagina geladen is
+  // Snel: vul progressbar + tik de jaren op; dismiss zodra pagina geladen is
   let p = 0;
   const iv = setInterval(() => {
     p = Math.min(95, p + 22);
     if (bar) bar.style.width = p + '%';
+    if (yearEl) yearEl.textContent = String(1960 + Math.round((p / 95) * 66));
   }, 60);
 
   const finish = () => { clearInterval(iv); dismiss(); };
@@ -71,17 +74,54 @@ function initLoader() {
   }
 }
 
-/* ---------- Hero parallax ---------- */
-function initHero() {
+/* ---------- Hero: cinematic pull-back naar archief-polaroid ---------- */
+function initHeroCinema() {
   if (reduce) return;
-  const media = document.querySelector('.vh-hero-media');
-  if (media) {
-    gsap.to(media, {
-      yPercent: 18,
-      ease: 'none',
-      scrollTrigger: { trigger: '.vh-hero', start: 'top top', end: 'bottom top', scrub: true },
-    });
+  const hero = document.getElementById('vh-hero');
+  if (!hero) return;
+  const media = hero.querySelector('.vh-hero-media') as HTMLElement | null;
+  const img = hero.querySelector('.vh-hero-media img') as HTMLElement | null;
+  const stage = hero.querySelector('.vh-hero-stage') as HTMLElement | null;
+  const chrome = hero.querySelector('.vh-hero-chrome') as HTMLElement | null;
+  const scrim = hero.querySelector('.vh-hero-scrim') as HTMLElement | null;
+
+  if (!isDesktop || !media || !stage) {
+    // Mobiel: alleen subtiele parallax
+    if (img) {
+      gsap.fromTo(img, { yPercent: 0 }, {
+        yPercent: -8,
+        ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+      });
+    }
+    return;
   }
+
+  gsap.set(media, { clipPath: 'inset(0% 0% 0% 0% round 0px)' });
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: hero,
+      pin: true,
+      scrub: 1,
+      end: '+=130%',
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+    },
+  });
+
+  tl.to(img, { yPercent: -8, ease: 'none', duration: 1 }, 0)
+    .to('.vh-hero-inner', { opacity: 0, y: -60, duration: 0.22, ease: 'power1.in' }, 0)
+    .to(['.vh-viewfinder', '.vh-seal', '.vh-hero-scroll-cue'], { opacity: 0, duration: 0.15 }, 0.04)
+    .to(media, {
+      clipPath: 'inset(15% 31% 23% 31% round 14px)',
+      duration: 0.5,
+      ease: 'power2.inOut',
+    }, 0.22)
+    .to(scrim, { opacity: 0, duration: 0.4 }, 0.22)
+    .to(stage, { rotate: -3, duration: 0.5, ease: 'power2.inOut' }, 0.22)
+    .to(hero, { backgroundColor: '#F4EEE3', duration: 0.35, ease: 'none' }, 0.3)
+    .fromTo(chrome, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0.52);
 }
 
 /* ---------- Manifesto word fill ---------- */
@@ -178,15 +218,80 @@ function initKinetic() {
   });
 }
 
-/* ---------- Lookbook parallax ---------- */
-function initLookbook() {
+/* ---------- Yearmask: foto pant binnenin de letters ---------- */
+function initYearMask() {
+  const el = document.querySelector<HTMLElement>('[data-yearmask]');
+  if (!el) return;
+  if (reduce) { el.style.backgroundPosition = '50% 50%'; return; }
+  gsap.fromTo(el, { backgroundPosition: '50% 18%' }, {
+    backgroundPosition: '50% 82%',
+    ease: 'none',
+    scrollTrigger: { trigger: '.vh-yearmask', start: 'top bottom', end: 'bottom top', scrub: 1 },
+  });
+}
+
+/* ---------- Filmstrip: sleepbaar + auto-drift + inertia ---------- */
+function initFilmstrip() {
+  const wrap = document.querySelector<HTMLElement>('.vh-film');
+  const track = document.querySelector<HTMLElement>('[data-film-track]');
+  if (!wrap || !track) return;
   if (reduce) return;
-  gsap.utils.toArray<HTMLElement>('.vh-lookbook-cell').forEach((cell, i) => {
-    const dir = i % 2 === 0 ? -1 : 1;
-    gsap.fromTo(cell, { y: 30 * dir }, {
-      y: -30 * dir,
+
+  const drift = -0.45;
+  let x = 0;
+  let vx = drift;
+  let dragging = false;
+  let lastX = 0;
+
+  wrap.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    lastX = e.clientX;
+    vx = 0;
+    wrap.setPointerCapture(e.pointerId);
+    wrap.classList.add('is-grabbing');
+  });
+  wrap.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    x += dx;
+    vx = dx;
+  });
+  const release = () => { dragging = false; wrap.classList.remove('is-grabbing'); };
+  wrap.addEventListener('pointerup', release);
+  wrap.addEventListener('pointercancel', release);
+  wrap.addEventListener('pointerleave', () => { if (dragging) release(); });
+
+  function loop() {
+    if (!dragging) {
+      x += vx;
+      vx += (drift - vx) * 0.035;
+    }
+    const half = track!.scrollWidth / 2;
+    if (half > 0) {
+      x = ((x % half) + half) % half;
+      track!.style.transform = `translate3d(${x - half}px, 0, 0)`;
+    }
+    const skew = Math.max(-5, Math.min(5, vx * 0.32));
+    track!.style.setProperty('--film-skew', skew.toFixed(2) + 'deg');
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ---------- Spin-stickers (scroll-driven rotatie) ---------- */
+function initSpin() {
+  if (reduce) return;
+  document.querySelectorAll<HTMLElement>('[data-spin]').forEach((el) => {
+    gsap.to(el, {
+      rotation: 200,
       ease: 'none',
-      scrollTrigger: { trigger: '.vh-lookbook-grid', start: 'top bottom', end: 'bottom top', scrub: true },
+      scrollTrigger: {
+        trigger: el.closest('section') || el,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1,
+      },
     });
   });
 }
@@ -252,9 +357,13 @@ function initCursor() {
   }
   render();
 
-  const hoverTargets = document.querySelectorAll('a, button, .vh-shop-card-media, .vh-spotlight-media, .vh-lookbook-cell');
+  const label = cursor.querySelector('.vh-cursor-label') as HTMLElement;
+  const hoverTargets = document.querySelectorAll<HTMLElement>('a, button, .vh-shop-card-media, .vh-spotlight-media, .vh-film, [data-cursor]');
   hoverTargets.forEach((el) => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('is-hover'));
+    el.addEventListener('mouseenter', () => {
+      label.textContent = el.dataset.cursor || 'View';
+      cursor.classList.add('is-hover');
+    });
     el.addEventListener('mouseleave', () => cursor.classList.remove('is-hover'));
   });
 }
@@ -360,12 +469,14 @@ function init() {
   initReveals();
   initCounters();
   initCountdown();
-  initHero();
+  initHeroCinema();
   initManifesto();
   initHeritage();
   initSpotlight();
+  initYearMask();
   initKinetic();
-  initLookbook();
+  initFilmstrip();
+  initSpin();
   initCursor();
   initMagnetic();
   initMarqueeVelocity();

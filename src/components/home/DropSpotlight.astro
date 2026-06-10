@@ -56,8 +56,9 @@ const isComing = d.status === 'coming-soon' && launchTs * 1000 > Date.now();
       </div>
     </div>
 
-    <div class="vh-spotlight-media vh-reveal-img">
+    <div class="vh-spotlight-media vh-reveal-img" data-cursor="Bekijk">
       <span class="vh-spotlight-badge vh-mono">Drop 001</span>
+      <span class="vh-sticker vh-sticker--solid" style="--rot: 6deg; bottom: 20px; right: 20px;">Limited ✦ 500</span>
       <img src={d.image_url} alt={d.title} width="900" height="1125" loading="lazy" />
     </div>
   </div>

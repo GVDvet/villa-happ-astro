@@ -10,6 +10,8 @@ export default defineConfig({
     imageService: true,
   }),
   vite: {
+    // Eigen cache-map: omzeilt het door antivirus geblokkeerde .vite/deps bestand
+    cacheDir: 'node_modules/.vite-vh',
     ssr: {
       // Mollie SDK is node-only
       noExternal: ['@mollie/api-client'],

@@ -1,28 +1,42 @@
 ---
-const cells = [
-  { img: '/img/products/hoodie-grey-lifestyle.webp', caption: 'Heritage FW26', cls: 'vh-lookbook-cell--1' },
-  { img: '/img/products/hoodie-blue-lifestyle.webp', caption: 'Tilburg Blue', cls: 'vh-lookbook-cell--2' },
-  { img: '/img/products/hoodie-logo-detail.webp', caption: 'Het detail', cls: 'vh-lookbook-cell--3' },
-  { img: '/img/products/hoodie-grey-back.webp', caption: 'Back embroidery', cls: 'vh-lookbook-cell--4' },
-  { img: '/img/products/hoodie-blue-front.webp', caption: 'Studio', cls: 'vh-lookbook-cell--5' },
+// Uit het archief — sleepbare 35mm filmstrook met perforatie
+const shots = [
+  { img: '/img/products/hoodie-grey-lifestyle.webp', id: 'VH·FR 01' },
+  { img: '/img/products/hoodie-blue-lifestyle.webp', id: 'VH·FR 02' },
+  { img: '/img/products/hoodie-logo-detail.webp', id: 'VH·FR 03' },
+  { img: '/img/products/hoodie-grey-back.webp', id: 'VH·FR 04' },
+  { img: '/img/heritage/origin-babyparadijs.webp', id: 'VH·FR 05' },
+  { img: '/img/products/hoodie-blue-front.webp', id: 'VH·FR 06' },
+  { img: '/img/products/hoodie-grey-front.webp', id: 'VH·FR 07' },
+  { img: '/img/products/hoodie-grey-new2.webp', id: 'VH·FR 08' },
 ];
 ---
-<section class="vh-lookbook">
-  <div class="vh-lookbook-inner">
-    <div class="vh-lookbook-header vh-reveal">
-      <p class="vh-lookbook-label vh-mono">07 / Lookbook</p>
-      <h2 class="vh-lookbook-title">Gemaakt om <span class="vh-italic-accent">geleefd</span> te worden</h2>
-      <p class="vh-lookbook-desc">
-        Geen seizoenscollecties die je na een jaar weggooit. Tijdloze stukken,
-        gemaakt van premium materialen, ontworpen om mee te gaan.
-      </p>
+<section class="vh-film-section">
+  <div class="vh-film-header vh-reveal">
+    <div>
+      <p class="vh-film-label vh-mono">07 / Uit het archief</p>
+      <h2 class="vh-film-title">Gedragen door <span class="vh-italic-accent">generaties</span></h2>
     </div>
-    <div class="vh-lookbook-grid">
-      {cells.map((c) => (
-        <figure class={`vh-lookbook-cell ${c.cls}`}>
-          <img src={c.img} alt={c.caption} loading="lazy" />
-          <figcaption class="vh-lookbook-caption">{c.caption}</figcaption>
-        </figure>
+    <p class="vh-film-hint vh-mono">Sleep de strook ↔</p>
+  </div>
+
+  <div class="vh-film" data-cursor="Drag">
+    <div class="vh-film-track" data-film-track>
+      {shots.map((s) => (
+        <div class="vh-film-frame">
+          <div class="vh-film-shot">
+            <img src={s.img} alt="" loading="lazy" draggable="false" />
+            <span class="vh-film-id vh-mono">{s.id}</span>
+          </div>
+        </div>
+      ))}
+      {shots.map((s) => (
+        <div class="vh-film-frame" aria-hidden="true">
+          <div class="vh-film-shot">
+            <img src={s.img} alt="" loading="lazy" draggable="false" />
+            <span class="vh-film-id vh-mono">{s.id}</span>
+          </div>
+        </div>
       ))}
     </div>
   </div>

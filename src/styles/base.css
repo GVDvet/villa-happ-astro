@@ -47,6 +47,17 @@ input, textarea, select {
 
 ::selection { background: var(--vh-accent); color: var(--vh-white); }
 
+/* Custom scrollbar — signature detail */
+html { scrollbar-width: thin; scrollbar-color: var(--vh-ink) var(--vh-paper); }
+::-webkit-scrollbar { width: 9px; }
+::-webkit-scrollbar-track { background: var(--vh-paper); }
+::-webkit-scrollbar-thumb {
+	background: var(--vh-ink);
+	border-radius: 99px;
+	border: 2px solid var(--vh-paper);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--vh-accent); }
+
 /* Editorial italic accent — Fraunces italic for emphasized words */
 .vh-italic,
 .vh-italic-accent {

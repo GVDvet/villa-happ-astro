@@ -34,6 +34,12 @@ const year = new Date().getFullYear();
 <footer class="vh-footer">
   <div class="vh-footer-inner vh-container">
 
+    <div class="vh-footer-mega" aria-hidden="true">
+      {[...'VILLA HAPP'].map((ch) =>
+        ch === ' ' ? <span class="vh-mega-sp"></span> : <span class="vh-mega-ch">{ch}</span>
+      )}
+    </div>
+
     <div class="vh-footer-top">
       <!-- Brand + Newsletter -->
       <div class="vh-footer-brand-col">
@@ -101,7 +107,38 @@ const year = new Date().getFullYear();
     background: var(--vh-ink);
     color: var(--vh-paper);
     padding: clamp(60px, 8vw, 100px) 0 32px;
+    overflow: hidden;
   }
+
+  /* Mega wordmark — outline letters, vullen oranje per letter bij hover */
+  .vh-footer-mega {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    user-select: none;
+    margin: 0 0 clamp(48px, 7vw, 90px);
+    white-space: nowrap;
+  }
+
+  .vh-mega-ch {
+    font-family: var(--vh-font-serif);
+    font-weight: 500;
+    font-size: clamp(52px, 12.5vw, 230px);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(244, 238, 227, 0.32);
+    transition: color 0.35s ease, -webkit-text-stroke-color 0.35s ease, transform 0.4s var(--vh-ease-out);
+    cursor: default;
+  }
+
+  .vh-mega-ch:hover {
+    color: var(--vh-accent);
+    -webkit-text-stroke-color: var(--vh-accent);
+    transform: translateY(-5%) rotate(-2deg);
+  }
+
+  .vh-mega-sp { width: 0.32em; }
 
   .vh-footer-top {
     display: grid;
