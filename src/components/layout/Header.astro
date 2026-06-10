@@ -1,11 +1,11 @@
 ---
 const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Shop', href: '/shop' },
-  { label: 'Brands', href: '/brands' },
-  { label: 'Drops', href: '/drops' },
-  { label: 'Story', href: '/story' },
-  { label: 'Journal', href: '/journal' },
+  { label: 'Home', href: '/', preview: '/img/products/hoodie-grey-lifestyle.png' },
+  { label: 'Shop', href: '/shop', preview: '/img/products/hoodie-grey-front.png' },
+  { label: 'Brands', href: '/brands', preview: '/img/products/hoodie-blue-lifestyle.png' },
+  { label: 'Drops', href: '/drops', preview: '/img/products/hoodie-blue-front.png' },
+  { label: 'Story', href: '/story', preview: '/img/heritage/origin-babyparadijs.png' },
+  { label: 'Journal', href: '/journal', preview: '/img/products/hoodie-logo-detail.png' },
 ];
 ---
 
@@ -18,12 +18,17 @@ const navLinks = [
     <ul class="vh-header-nav-list" role="list">
       {navLinks.map((link, idx) => (
         <>
-          <li><a href={link.href} class="vh-header-nav-link">{link.label}</a></li>
+          <li><a href={link.href} class="vh-header-nav-link" data-nav-preview={link.preview}>{link.label}</a></li>
           {idx < navLinks.length - 1 && <span class="vh-header-nav-sep" aria-hidden="true">·</span>}
         </>
       ))}
     </ul>
   </nav>
+
+  <!-- Nav hover-reveal preview -->
+  <div class="vh-nav-preview" id="vh-nav-preview" aria-hidden="true">
+    <img src="" alt="" />
+  </div>
 
   <div class="vh-header-actions">
     <button type="button" class="vh-header-icon" aria-label="Zoeken">
@@ -272,6 +277,27 @@ const navLinks = [
     font-weight: 400;
     letter-spacing: var(--vh-tracking-tight);
   }
+
+  /* Nav hover-reveal preview */
+  .vh-nav-preview {
+    position: fixed;
+    top: 0; left: 0;
+    width: 180px; height: 230px;
+    z-index: calc(var(--vh-z-nav) - 1);
+    pointer-events: none;
+    border-radius: var(--vh-radius-md);
+    overflow: hidden;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9) rotate(-3deg);
+    transition: opacity 0.4s var(--vh-ease-out), transform 0.5s var(--vh-ease-out);
+    box-shadow: var(--vh-shadow-lg);
+  }
+  .vh-nav-preview.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(-3deg);
+  }
+  .vh-nav-preview img { width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 900px) { .vh-nav-preview { display: none; } }
 </style>
 
 <script>
@@ -327,6 +353,46 @@ const navLinks = [
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) closeMenu();
+    });
+  }
+
+  // Nav hover-reveal preview (desktop)
+  const preview = document.getElementById('vh-nav-preview');
+  const previewImg = preview?.querySelector('img') as HTMLImageElement | null;
+  const canHover = window.matchMedia('(hover: hover)').matches;
+
+  if (preview && previewImg && canHover) {
+    let raf = 0;
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+    let visible = false;
+
+    function follow() {
+      cx += (tx - cx) * 0.14;
+      cy += (ty - cy) * 0.14;
+      preview!.style.left = cx + 'px';
+      preview!.style.top = cy + 'px';
+      raf = requestAnimationFrame(follow);
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-nav-preview]').forEach((link) => {
+      link.addEventListener('mouseenter', (e) => {
+        const src = link.dataset.navPreview;
+        if (!src) return;
+        previewImg!.src = src;
+        tx = cx = (e as MouseEvent).clientX;
+        ty = cy = (e as MouseEvent).clientY + 140;
+        preview!.classList.add('is-visible');
+        if (!visible) { visible = true; follow(); }
+      });
+      link.addEventListener('mousemove', (e) => {
+        tx = (e as MouseEvent).clientX;
+        ty = (e as MouseEvent).clientY + 140;
+      });
+      link.addEventListener('mouseleave', () => {
+        preview!.classList.remove('is-visible');
+        visible = false;
+        cancelAnimationFrame(raf);
+      });
     });
   }
 </script>

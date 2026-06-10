@@ -1,0 +1,12 @@
+---
+// Oversized kinetic wordmark — beweegt horizontaal op scroll
+const word = 'Villa Happ';
+const repeat = 6;
+---
+<section class="vh-kinetic" aria-hidden="true">
+  <div class="vh-kinetic-row" data-kinetic-row>
+    {Array.from({ length: repeat }).map((_, i) => (
+      <span class={`vh-kinetic-word${i % 2 === 1 ? ' is-outline' : ''}`}>{word}<i class="vh-kinetic-star">✦</i></span>
+    ))}
+  </div>
+</section>

@@ -701,6 +701,47 @@
 }
 
 /* ============================================================
+   KINETIC WORDMARK — oversized, scroll-driven horizontal
+   ============================================================ */
+.vh-kinetic {
+	overflow: hidden;
+	padding: clamp(50px, 9vw, 130px) 0;
+	background: var(--vh-paper);
+	border-top: 1px solid var(--vh-ink-hairline);
+	border-bottom: 1px solid var(--vh-ink-hairline);
+}
+.vh-kinetic-row {
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	width: max-content;
+	will-change: transform;
+}
+.vh-kinetic-word {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--vh-font-serif);
+	font-size: clamp(72px, 16vw, 260px);
+	line-height: 0.9;
+	font-weight: 500;
+	letter-spacing: -0.04em;
+	color: var(--vh-ink);
+	padding-right: 0.18em;
+}
+.vh-kinetic-word.is-outline {
+	color: transparent;
+	-webkit-text-stroke: 1.5px var(--vh-ink);
+	text-stroke: 1.5px var(--vh-ink);
+}
+.vh-kinetic-star {
+	font-size: 0.32em;
+	font-style: normal;
+	color: var(--vh-accent);
+	margin: 0 0.3em;
+	-webkit-text-stroke: 0;
+}
+
+/* ============================================================
    BRANDS — H_APProved
    ============================================================ */
 .vh-brands { padding: clamp(80px, 12vh, 140px) var(--vh-gutter); background: var(--vh-espresso); color: var(--vh-paper); }

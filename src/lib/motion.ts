@@ -147,6 +147,25 @@ function initSpotlight() {
   }
 }
 
+/* ---------- Kinetic wordmark horizontal scroll ---------- */
+function initKinetic() {
+  if (reduce) return;
+  const row = document.querySelector('[data-kinetic-row]') as HTMLElement | null;
+  if (!row) return;
+  const overflow = row.scrollWidth - window.innerWidth;
+  gsap.fromTo(row, { x: 0 }, {
+    x: -overflow,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '.vh-kinetic',
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: 1,
+      invalidateOnRefresh: true,
+    },
+  });
+}
+
 /* ---------- Lookbook parallax ---------- */
 function initLookbook() {
   if (reduce) return;
@@ -333,6 +352,7 @@ function init() {
   initManifesto();
   initHeritage();
   initSpotlight();
+  initKinetic();
   initLookbook();
   initCursor();
   initMagnetic();

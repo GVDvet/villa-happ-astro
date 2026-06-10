@@ -1,0 +1,49 @@
+---
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  text?: string;
+}
+const { eyebrow = 'Binnenkort', title, text = 'Deze pagina is in de maak. Kom binnenkort terug, of schrijf je in voor onze nieuwsbrief om als eerste op de hoogte te zijn.' } = Astro.props;
+---
+<section class="vh-placeholder">
+  <div class="vh-placeholder-inner">
+    <p class="vh-placeholder-eyebrow vh-mono">{eyebrow}</p>
+    <h1 class="vh-placeholder-title">{title}</h1>
+    <p class="vh-placeholder-text">{text}</p>
+    <a href="/" class="vh-btn vh-btn--primary" data-magnetic>
+      <span>Terug naar home</span>
+      <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </a>
+  </div>
+</section>
+
+<style>
+  .vh-placeholder {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 140px var(--vh-gutter) 80px;
+    background: var(--vh-paper);
+    text-align: center;
+  }
+  .vh-placeholder-inner { max-width: 640px; }
+  .vh-placeholder-eyebrow { color: var(--vh-accent); margin: 0 0 24px; }
+  .vh-placeholder-title {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(48px, 8vw, 120px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    margin: 0 0 24px;
+  }
+  .vh-placeholder-text {
+    font-size: clamp(15px, 1.3vw, 18px);
+    line-height: 1.6;
+    color: var(--vh-ink-soft);
+    margin: 0 0 40px;
+  }
+</style>
