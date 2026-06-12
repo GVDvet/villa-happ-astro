@@ -643,28 +643,37 @@ function initHeroSkew() {
 }
 
 function init() {
-  initLenis();
-  initLoader();
-  initReveals();
-  initCounters();
-  initCountdown();
-  initHeroCinema();
-  initManifesto();
-  initHeritage();
-  initHeritageMobile();
-  initCinematic();
-  initDrift();
-  initHeroMouse();
-  initGyro();
-  initYearMask();
-  initKinetic();
-  initFilmstrip();
-  initSpin();
-  initCursor();
-  initMagnetic();
-  initMarqueeVelocity();
-  initTilt();
-  initHeroSkew();
+  // Eén falende init mag nooit de rest van de motion-keten slopen.
+  // De eerste fout bewaren we voor de ?vh-debug overlay.
+  const safe = (name: string, fn: () => void) => {
+    try { fn(); } catch (e) {
+      const w = window as unknown as { __vhErr?: string };
+      if (!w.__vhErr) w.__vhErr = name + ': ' + (e instanceof Error ? e.message : String(e));
+    }
+  };
+  safe('lenis', initLenis);
+  safe('loader', initLoader);
+  safe('reveals', initReveals);
+  safe('counters', initCounters);
+  safe('countdown', initCountdown);
+  safe('heroCinema', initHeroCinema);
+  safe('manifesto', initManifesto);
+  safe('heritage', initHeritage);
+  safe('heritageMobile', initHeritageMobile);
+  safe('cinematic', initCinematic);
+  safe('drift', initDrift);
+  safe('heroMouse', initHeroMouse);
+  safe('gyro', initGyro);
+  safe('yearMask', initYearMask);
+  safe('kinetic', initKinetic);
+  safe('filmstrip', initFilmstrip);
+  safe('spin', initSpin);
+  safe('cursor', initCursor);
+  safe('magnetic', initMagnetic);
+  safe('marqueeVelocity', initMarqueeVelocity);
+  safe('tilt', initTilt);
+  safe('heroSkew', initHeroSkew);
+  (window as unknown as { __vhMotion?: boolean }).__vhMotion = true;
   // Refresh after fonts/images settle
   window.addEventListener('load', () => setTimeout(() => ScrollTrigger.refresh(), 200));
 }

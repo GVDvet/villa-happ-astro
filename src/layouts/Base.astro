@@ -41,6 +41,37 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
   />
   <link rel="preload" as="image" href="/img/products/hoodie-grey-lifestyle.webp" fetchpriority="high" />
   <script is:inline>document.documentElement.classList.remove('no-js');</script>
+  <script is:inline>
+  // Diagnose: vangt de eerste JS-fout; met ?vh-debug in de URL verschijnt
+  // een statusoverlay (build, reduce-motion, pins, scrollY, fouten).
+  (function () {
+    window.addEventListener('error', function (e) {
+      if (!window.__vhErr) window.__vhErr = (e.message || 'script error') + ' @ ' + String(e.filename || '').split('/').pop() + ':' + e.lineno;
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      if (!window.__vhErr) window.__vhErr = 'promise: ' + e.reason;
+    });
+    if (location.search.indexOf('vh-debug') === -1) return;
+    function start() {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;z-index:99999;background:rgba(0,0,0,.85);color:#7CFC00;font:11px/1.6 monospace;padding:10px 12px;border-radius:8px;pointer-events:none;white-space:pre-wrap;';
+      document.body.appendChild(d);
+      setInterval(function () {
+        var meta = document.querySelector('meta[name="vh-build"]');
+        var red = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        d.textContent =
+          'build ' + (meta ? meta.getAttribute('content') : '?') +
+          ' | ' + innerWidth + 'x' + innerHeight +
+          ' | scrollY ' + Math.round(scrollY) +
+          '\nreduce-motion: ' + (red ? 'AAN, site staat bewust op statisch' : 'uit') +
+          ' | pins: ' + document.querySelectorAll('.pin-spacer').length +
+          ' | motion: ' + (window.__vhMotion ? 'gestart' : 'NIET GESTART') +
+          '\nfout: ' + (window.__vhErr || 'geen');
+      }, 400);
+    }
+    if (document.body) start(); else addEventListener('DOMContentLoaded', start);
+  })();
+  </script>
 
   <title>{title}</title>
   <meta name="description" content={description} />
