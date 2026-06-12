@@ -1,26 +1,48 @@
 ---
-// Horizontale pinned timeline — pant zijwaarts terwijl je naar beneden scrolt
+// Horizontale pinned timeline, het echte verhaal in zes hoofdstukken.
+// Volledige versie staat op /story.
 const steps = [
   {
-    num: '02 / Het begin',
+    num: 'Hoofdstuk 01 · Het begin',
     year: '1960',
-    title: 'Het begon in Tilburg',
-    text: 'Wat startte als Babyparadijs groeide uit tot de basis van een familiegeschiedenis die de Nederlandse kindermode blijvend zou beïnvloeden.',
+    title: 'Een moeder, vier kinderen, één winkel',
+    text: 'Toni Kuijpers opent Babyparadijs in Tilburg: babykleding, kinderwagens, kinderkamers. Ze staat er alleen voor, met vier jonge kinderen. De jongste is twee weken oud. De winkel blijft open.',
     img: '/img/heritage/origin-babyparadijs.webp',
   },
   {
-    num: '03 / De groei',
-    year: '1999',
-    title: 'Een eigen gezicht',
-    text: 'Met een eigen winkelconcept en herkenbare stijl werd Villa Happ meer dan een producent. Het werd een merkbeleving, geliefd door een hele generatie.',
+    num: 'Hoofdstuk 02 · De gok',
+    year: '1965',
+    title: 'Van zand en grind naar kinderkleding',
+    text: 'Noud van Happen ruilt het zand- en grindbedrijf van de familie in voor stof en garen. Met zijn laatste spaarcenten reist hij naar het Verre Oosten om een eigen productielijn op te zetten. Die gok wordt het fundament.',
     img: null,
   },
   {
-    num: '04 / De comeback',
-    year: '2024',
-    title: 'Terug waar het hoort',
-    text: 'Met de derde generatie keert Villa Happ terug. Niet als herhaling van vroeger, maar als een nieuwe vertaling van een rijk verleden.',
+    num: 'Hoofdstuk 03 · De stille jaren',
+    year: "'80s",
+    title: 'De marktleider die je niet zag',
+    text: 'Van Happen Fashion Groep kleedt een hele generatie, van Wibra en Zeeman tot HEMA en V&D. Grote kans dat je het droeg zonder het te weten. Eigen labels als VHF en Artoni draaien op volle toeren.',
+    img: null,
+  },
+  {
+    num: 'Hoofdstuk 04 · Het gezicht',
+    year: '1999',
+    title: 'Een eigen naam in de Koopgoot',
+    text: 'De eerste Villa Happ winkel opent in de Rotterdamse Koopgoot, de tweede in Nijmegen. Het groeit uit tot 80 winkels door Europa, geleid vanuit Kasteel Zwijnsbergen in Brabant, met ambities tot Dubai aan toe.',
     img: '/img/products/hoodie-logo-detail.webp',
+  },
+  {
+    num: 'Hoofdstuk 05 · De val, twee keer',
+    year: '2×',
+    title: 'The Comeback Kid',
+    text: 'Verkocht, gevallen, teruggekocht, opnieuw opgebouwd, opnieuw gevallen. De vakpers gaf Villa Happ in 2007 al een bijnaam: The Comeback Kid. Opstaan zit in het DNA van dit merk.',
+    img: null,
+  },
+  {
+    num: 'Hoofdstuk 06 · Nu',
+    year: '2024',
+    title: 'De derde generatie',
+    text: 'Rutger van Happen, kleinzoon van Toni en Noud, haalt in 2021 de merkrechten terug naar de familie. In 2024 keert Villa Happ terug als lifestylelabel. Niet als herhaling van vroeger, maar als hoofdstuk drie. Stap voor stap.',
+    img: '/img/products/hoodie-grey-lifestyle.webp',
   },
 ];
 ---
@@ -30,9 +52,9 @@ const steps = [
     <!-- Intro panel -->
     <div class="vh-heritage-panel vh-heritage-panel--intro">
       <span class="vh-sticker vh-sticker--light" style="--rot: -7deg; top: 20%; right: 14%;">Est. 1960 ✦ Tilburg</span>
-      <span class="vh-sticker vh-sticker--light" style="--rot: 4deg; bottom: 18%; left: 12%;">Familie-archief</span>
+      <span class="vh-sticker vh-sticker--light" style="--rot: 4deg; bottom: 18%; left: 12%;">The Comeback Kid · 2007</span>
       <div>
-        <p class="vh-heritage-intro-label vh-mono">Het verhaal</p>
+        <p class="vh-heritage-intro-label vh-mono">02 / Het verhaal</p>
         <h2 class="vh-heritage-intro-title">65 jaar, drie generaties, één <span class="vh-italic-accent">verhaal</span></h2>
         <p class="vh-heritage-intro-hint vh-mono">Scroll om te ontdekken</p>
       </div>
@@ -50,7 +72,7 @@ const steps = [
         <div class={`vh-heritage-media${step.img ? '' : ' vh-heritage-media--placeholder'}`}>
           {step.img
             ? <img src={step.img} alt={step.title} loading="lazy" />
-            : <span>{step.year.slice(2)}</span>
+            : <span>{step.year}</span>
           }
         </div>
       </div>

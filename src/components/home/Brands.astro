@@ -1,13 +1,14 @@
 ---
-// H_APProved — twee tegengesteld scrollende marquee-regels
-const brands = ['Patta', 'Daily Paper', 'Olaf', 'Filling Pieces', 'Arte', 'New Amsterdam'];
-const rowA = [...brands, ...brands];
-const rowB = [...[...brands].reverse(), ...[...brands].reverse()];
+// De merkenfamilie: de echte labels uit 65 jaar Villa Happ archief.
+const labels = ['B-Happ', 'Happz', 'Happarita', 'Zhapp', 'Happ-X', 'VHF', 'Artoni', 'Rebble-Pebble', 'Hot-Gossip', 'Square Deal'];
+const rowA = [...labels.slice(0, 5), ...labels.slice(0, 5)];
+const rowB = [...labels.slice(5), ...labels.slice(5)];
 ---
 <section class="vh-brands">
   <div class="vh-brands-head">
-    <p class="vh-brands-label vh-mono">08 / H_APProved</p>
-    <h2 class="vh-brands-title vh-reveal">Merken die wij dragen, <span class="vh-italic-accent">gecureerd</span> voor jou.</h2>
+    <p class="vh-brands-label vh-mono">06 / De merkenfamilie</p>
+    <h2 class="vh-brands-title vh-reveal">Eén familie, <span class="vh-italic-accent">veel namen</span>.</h2>
+    <p class="vh-brands-sub">De labels die generaties kleedden, allemaal uit hetzelfde nest.</p>
   </div>
 
   <div class="vh-brands-marquee" aria-hidden="true">
@@ -19,8 +20,16 @@ const rowB = [...[...brands].reverse(), ...[...brands].reverse()];
     </div>
   </div>
 
-  <p class="vh-brands-cta"><a href="/brands" class="vh-shop-link">Ontdek alle merken
+  <p class="vh-brands-cta"><a href="/story" class="vh-shop-link">Lees het hele verhaal
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     </svg></a></p>
 </section>
+
+<style>
+  .vh-brands-sub {
+    margin: 14px 0 0;
+    font-size: 14px;
+    color: rgba(244, 238, 227, 0.55);
+  }
+</style>

@@ -2,9 +2,286 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
-import Placeholder from '../components/Placeholder.astro';
+
+const chapters = [
+  {
+    num: 'Hoofdstuk 01',
+    year: '1960',
+    title: 'Een moeder, vier kinderen, één winkel',
+    img: '/img/heritage/origin-babyparadijs.webp',
+    paras: [
+      'Het verhaal van Villa Happ begint niet met een merk, maar met een moeder. In de jaren zestig opent Toni Kuijpers in Tilburg een speciaalzaak met de naam Babyparadijs: babykleding, kinderwagens en alles voor de kinderkamer.',
+      'Ze staat er alleen voor, met vier jonge kinderen. De jongste is op dat moment twee weken oud. En toch gaat elke ochtend de deur van de winkel open. Dat is geen anekdote, dat is het fundament van alles wat volgde: doorgaan, wat er ook gebeurt.',
+    ],
+  },
+  {
+    num: 'Hoofdstuk 02',
+    year: '1965',
+    title: 'Van zand en grind naar kinderkleding',
+    img: null,
+    paras: [
+      'Noud van Happen werkt na de oorlog in het zand- en grindbedrijf van de familie. In 1965 maakt hij een keuze die niemand ziet aankomen: hij stapt in de kinderkleding.',
+      'Met zijn laatste spaarcenten reist hij naar het Verre Oosten om de mogelijkheden voor een eigen productielijn te onderzoeken. Een gok, met alles wat hij had. Toni en Noud vinden elkaar, krijgen samen nog drie kinderen, en bouwen samen verder aan wat een familiebedrijf in de echte zin van het woord wordt.',
+    ],
+  },
+  {
+    num: 'Hoofdstuk 03',
+    year: "Jaren '70, '80, '90",
+    title: 'De marktleider die je niet zag',
+    img: null,
+    paras: [
+      'Babyparadijs groeit uit tot Van Happen Fashion Groep, en die groep wordt in de jaren tachtig marktleider in private-label kinderkleding. De namen op de labels: Wibra, Zeeman, HEMA, V&D.',
+      'Grote kans dus dat jij, je ouders of je grootouders kleding van deze familie droegen zonder het ooit te weten. Daarnaast draaien eigen merken als VHF en Artoni op volle toeren. Halverwege de jaren negentig verandert de markt en verliest het bedrijf terrein, maar het vakmanschap blijft.',
+    ],
+  },
+  {
+    num: 'Hoofdstuk 04',
+    year: '1999',
+    title: 'Een eigen naam in de Koopgoot',
+    img: '/img/products/hoodie-logo-detail.webp',
+    paras: [
+      'In 1999 krijgt het familieverhaal een eigen gezicht: de eerste Villa Happ winkel opent in de Beursgallery in de Rotterdamse Koopgoot. Nummer twee volgt in de Marikenstraat in Nijmegen.',
+      'Het concept slaat aan. Op het hoogtepunt telt Villa Happ 80 winkels verspreid over Europa en meer dan 120 verkooppunten, met eigen labels als Rebble-Pebble, Hot-Gossip en Square Deal naast merken als Brunotti en Cars. Het hoofdkantoor zetelt in Kasteel Zwijnsbergen in Helvoirt, een echt kasteel in Brabant. De ambities reiken verder: eigen fabrieken in China en Bangladesh, een internationaal kantoor in Dubai, plannen voor Düsseldorf, Athene en Istanboel.',
+    ],
+  },
+  {
+    num: 'Hoofdstuk 05',
+    year: 'Twee keer',
+    title: 'The Comeback Kid',
+    img: null,
+    paras: [
+      'Geen eerlijk verhaal zonder de val. In 2004 wordt de keten verkocht aan een investeringsmaatschappij, en binnen een jaar gaat het mis. De familie koopt het bedrijf terug en maakt een doorstart. De vakpers geeft Villa Happ in 2007 een bijnaam die blijft hangen: The Comeback Kid.',
+      'In 2010 valt het doek opnieuw, als de financiering van het uitkopen van franchisenemers te zwaar blijkt. Villa Happ verdwijnt uit het straatbeeld. Maar niet uit het geheugen, en niet uit de familie. Twee keer vallen is geen einde. Het is bewijs dat opstaan kan.',
+    ],
+  },
+  {
+    num: 'Hoofdstuk 06',
+    year: '2021 tot nu',
+    title: 'De derde generatie',
+    img: '/img/products/hoodie-grey-lifestyle.webp',
+    paras: [
+      'In 2021 haalt Rutger van Happen, kleinzoon van Toni en Noud, de merkrechten terug naar de familie. Twee jaar lang onderzoekt hij hoe de comeback eruit moet zien. De pandemie vertraagt de plannen, maar niet de overtuiging.',
+      'In 2024 keert Villa Happ terug. Niet als kinderkledingketen, maar als lifestylelabel voor de generatie die ermee opgroeide en de generatie daarna. De eerste producten zeggen alles: een Back-Cap in een oplage van 500 genummerde stuks met certificaat, en sokken met de naam Stap voor Stap. Want zo gaat dit verhaal verder. Stap voor stap.',
+    ],
+  },
+];
 ---
-<Base title="Story · Villa Happ">
-  <Placeholder eyebrow="Sinds 1960" title="Het verhaal" text="65 jaar, drie generaties, één verhaal. Het volledige Villa Happ verhaal komt binnenkort." />
+<Base title="Het verhaal · Villa Happ" description="65 jaar Villa Happ: van Toni's Babyparadijs in Tilburg tot The Comeback Kid. Twee keer gevallen, drie keer opgestaan.">
+
+  <!-- Hero -->
+  <header class="st-hero">
+    <p class="st-hero-label vh-mono">Het verhaal · Sinds 1960</p>
+    <h1 class="st-hero-title">
+      Twee keer gevallen.<br />
+      <span class="vh-italic-accent st-accent">Drie keer</span> opgestaan.
+    </h1>
+    <p class="st-hero-sub">
+      Van een babyzaak in Tilburg tot 80 winkels door Europa, en terug.
+      Dit is het echte verhaal van Villa Happ, verteld in zes hoofdstukken.
+    </p>
+    <span class="st-hero-cue vh-mono">Scroll</span>
+  </header>
+
+  <!-- Chapters -->
+  <main class="st-main">
+    {chapters.map((ch, i) => (
+      <article class={`st-chapter${i % 2 === 1 ? ' st-chapter--flip' : ''} st-reveal`}>
+        <div class="st-chapter-text">
+          <p class="st-chapter-num vh-mono">{ch.num}</p>
+          <p class="st-chapter-year">{ch.year}</p>
+          <h2 class="st-chapter-title">{ch.title}</h2>
+          {ch.paras.map((p) => <p class="st-chapter-para">{p}</p>)}
+        </div>
+        <div class={`st-chapter-media${ch.img ? '' : ' is-placeholder'}`}>
+          {ch.img
+            ? <img src={ch.img} alt={ch.title} loading="lazy" />
+            : <span>{ch.year}</span>}
+        </div>
+      </article>
+    ))}
+
+    <!-- Pull quote -->
+    <aside class="st-quote st-reveal">
+      <p class="st-quote-text">De drager van toen, zijn de <span class="vh-italic-accent st-accent">dragers</span> van nu.</p>
+      <p class="st-quote-attr vh-mono">Villa Happ · Tilburg, NL</p>
+    </aside>
+
+    <!-- CTA -->
+    <section class="st-cta st-reveal">
+      <h2 class="st-cta-title">Hoofdstuk drie is <span class="vh-italic-accent st-accent">begonnen</span>.</h2>
+      <div class="st-cta-actions">
+        <a href="/shop" class="vh-btn vh-btn--accent"><span>Shop de collectie</span>
+          <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="/drops" class="vh-btn vh-btn--ghost"><span>Bekijk drops</span></a>
+      </div>
+    </section>
+  </main>
 </Base>
-<script>import '../lib/cart';</script>
+
+<style>
+  .st-hero {
+    min-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 140px var(--vh-gutter) 80px;
+    background: var(--vh-espresso);
+    color: var(--vh-paper);
+    position: relative;
+  }
+  .st-hero-label { color: var(--vh-accent); margin: 0 0 26px; }
+  .st-hero-title {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(44px, 7.5vw, 110px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    margin: 0 0 28px;
+  }
+  .st-accent { color: var(--vh-accent); }
+  .st-hero-sub {
+    font-size: clamp(15px, 1.3vw, 18px);
+    line-height: 1.6;
+    color: rgba(244, 238, 227, 0.7);
+    max-width: 520px;
+    margin: 0;
+  }
+  .st-hero-cue {
+    position: absolute;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(244, 238, 227, 0.5);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+  }
+
+  .st-main { background: var(--vh-paper); padding: clamp(70px, 10vw, 130px) var(--vh-gutter); }
+
+  .st-chapter {
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: clamp(36px, 6vw, 90px);
+    align-items: center;
+    max-width: 1180px;
+    margin: 0 auto clamp(80px, 12vw, 160px);
+  }
+  .st-chapter--flip .st-chapter-text { order: 2; }
+  .st-chapter--flip .st-chapter-media { order: 1; }
+
+  .st-chapter-num { color: var(--vh-ink-muted); margin: 0 0 14px; }
+  .st-chapter-year {
+    font-family: var(--vh-font-serif);
+    font-style: italic;
+    font-size: clamp(36px, 4.5vw, 64px);
+    color: var(--vh-accent);
+    line-height: 1;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+  }
+  .st-chapter-title {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(26px, 3vw, 44px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 22px;
+  }
+  .st-chapter-para {
+    font-size: clamp(15px, 1.15vw, 17px);
+    line-height: 1.75;
+    color: var(--vh-ink-soft);
+    margin: 0 0 16px;
+    max-width: 54ch;
+  }
+  .st-chapter-para:first-of-type::first-letter {
+    font-family: var(--vh-font-serif);
+    font-style: italic;
+    font-size: 2.6em;
+    line-height: 0.8;
+    float: left;
+    padding: 6px 8px 0 0;
+    color: var(--vh-accent);
+  }
+
+  .st-chapter-media {
+    aspect-ratio: 4/5;
+    border-radius: var(--vh-radius-md);
+    overflow: hidden;
+    background: var(--vh-paper-soft);
+  }
+  .st-chapter-media img { width: 100%; height: 100%; object-fit: cover; }
+  .st-chapter-media.is-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--vh-font-serif);
+    font-style: italic;
+    font-size: clamp(34px, 4.5vw, 72px);
+    color: var(--vh-ink-faint);
+    text-align: center;
+    padding: 20px;
+  }
+
+  .st-quote {
+    background: var(--vh-espresso);
+    color: var(--vh-paper);
+    border-radius: var(--vh-radius-lg);
+    max-width: 1180px;
+    margin: 0 auto clamp(80px, 12vw, 160px);
+    padding: clamp(56px, 9vw, 120px) clamp(28px, 6vw, 100px);
+    text-align: center;
+  }
+  .st-quote-text {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(28px, 4vw, 58px);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin: 0 0 26px;
+  }
+  .st-quote-attr { color: rgba(244, 238, 227, 0.5); margin: 0; }
+
+  .st-cta { text-align: center; max-width: 760px; margin: 0 auto; }
+  .st-cta-title {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(32px, 4.5vw, 64px);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    margin: 0 0 32px;
+  }
+  .st-cta-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* Reveals */
+  .st-reveal { opacity: 0; transform: translateY(30px); }
+  .st-reveal.is-visible {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 1s var(--vh-ease-out), transform 1s var(--vh-ease-out);
+  }
+  :global(.no-js) .st-reveal { opacity: 1; transform: none; }
+
+  @media (max-width: 820px) {
+    .st-chapter { grid-template-columns: 1fr; gap: 28px; }
+    .st-chapter--flip .st-chapter-text { order: 1; }
+    .st-chapter--flip .st-chapter-media { order: 2; }
+    .st-chapter-media { max-height: 52vh; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .st-reveal { opacity: 1; transform: none; }
+  }
+</style>
+
+<script>
+  import '../lib/cart';
+
+  const els = document.querySelectorAll('.st-reveal');
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach((el) => obs.observe(el));
+  } else {
+    els.forEach((el) => el.classList.add('is-visible'));
+  }
+</script>
