@@ -44,6 +44,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
   <title>{title}</title>
   <meta name="description" content={description} />
+  <meta name="vh-build" content={(process.env.VERCEL_GIT_COMMIT_SHA || 'local').slice(0, 7)} />
   <link rel="canonical" href={canonicalURL.toString()} />
 
   <meta property="og:title" content={title} />
