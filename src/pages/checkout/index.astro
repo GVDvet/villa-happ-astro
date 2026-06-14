@@ -4,7 +4,7 @@ export const prerender = true;
 import Base from '../../layouts/Base.astro';
 import '../../styles/shop.css';
 ---
-<Base title="Afrekenen · Villa Happ" showFooter={false}>
+<Base title="Afrekenen · Villa Happ" showFooter={false} noindex={true}>
   <section class="vh-page">
     <div class="vh-page-inner">
 
@@ -84,7 +84,13 @@ import '../../styles/shop.css';
             <span id="vh-co-pay-label">Betaal veilig</span>
             <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <p class="vh-pay-note">🔒 iDEAL · Bancontact · creditcard — via Mollie</p>
+          <div class="vh-pay-methods" aria-label="Betaalmethoden">
+            <span class="vh-pay-chip">iDEAL</span>
+            <span class="vh-pay-chip">Bancontact</span>
+            <span class="vh-pay-chip">Mastercard</span>
+            <span class="vh-pay-chip">VISA</span>
+          </div>
+          <p class="vh-pay-note">🔒 Versleutelde betaling via Mollie. Je gegevens blijven van jou.</p>
         </aside>
       </div>
 

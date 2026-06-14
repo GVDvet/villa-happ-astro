@@ -23,17 +23,39 @@ const products = await getCatalog();
           <a href={`/shop/${p.slug}`} class="vh-card">
             <div class="vh-card-media">
               <span class="vh-card-num">0{i + 1}</span>
-              {p.badge && <span class="vh-card-badge">{p.badge}</span>}
-              <img src={p.images[0]} alt={p.name} class="vh-card-img main" width="600" height="750" loading={i < 3 ? 'eager' : 'lazy'} />
+              {p.compare_at_cents
+                ? <span class="vh-card-badge vh-card-badge--sale">−{Math.round((1 - p.price_cents / p.compare_at_cents) * 100)}%</span>
+                : p.badge && <span class="vh-card-badge">{p.badge}</span>}
+              <img src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width="600" height="750" loading={i < 3 ? 'eager' : 'lazy'} />
               {p.images[1] && <img src={p.images[1]} alt="" class="vh-card-img alt" width="600" height="750" loading="lazy" aria-hidden="true" />}
             </div>
             <div class="vh-card-info">
               <p class="vh-card-name">{p.name}</p>
-              <p class="vh-card-price">{formatPrice(p.price_cents)}</p>
+              <p class="vh-card-price">
+                {p.compare_at_cents && <del>{formatPrice(p.compare_at_cents)}</del>}
+                {formatPrice(p.price_cents)}
+              </p>
             </div>
             <p class="vh-card-meta">{p.meta}</p>
           </a>
         ))}
+      </div>
+
+      <div class="vh-shop-intro">
+        <h2>Heritage, gemaakt om te dragen</h2>
+        <p>
+          Villa Happ begon in 1960 in Tilburg en groeide uit tot een naam die een
+          generatie kleedde. De collectie van vandaag bouwt op dat vakmanschap voort:
+          biologisch katoen, geborduurde emblemen en stukken die in beperkte,
+          genummerde oplages worden gemaakt. Geen overproductie, geen wegwerpmode.
+          Elk stuk wordt in Tilburg ontworpen en geleverd met de zorg van een merk
+          dat al 65 jaar weet wat blijven betekent.
+        </p>
+        <p>
+          Benieuwd naar het verhaal achter het merk? Lees over
+          <a href="/story"> drie generaties Villa Happ</a> of ontdek de nieuwste
+          <a href="/drops"> limited edition drops</a>.
+        </p>
       </div>
 
     </div>

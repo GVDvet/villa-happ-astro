@@ -38,12 +38,71 @@ const sizeType: 'apparel' | 'socks' | 'onesize' =
   : 'onesize';
 
 const apparelRows = [
-  { size: 'S', len: '168–174', chest: '88–94' },
-  { size: 'M', len: '174–180', chest: '94–100' },
-  { size: 'L', len: '180–186', chest: '100–106' },
-  { size: 'XL', len: '186–192', chest: '106–112' },
-  { size: 'XXL', len: '192–198', chest: '112–120' },
+  { size: 'S', len: '168 tot 174', chest: '88 tot 94' },
+  { size: 'M', len: '174 tot 180', chest: '94 tot 100' },
+  { size: 'L', len: '180 tot 186', chest: '100 tot 106' },
+  { size: 'XL', len: '186 tot 192', chest: '106 tot 112' },
+  { size: 'XXL', len: '192 tot 198', chest: '112 tot 120' },
 ];
+
+// SEO: structured data (Product + Breadcrumb + FAQ)
+const siteOrigin = Astro.site?.origin || Astro.url.origin;
+const productUrl = `${siteOrigin}/shop/${product.slug}`;
+const absImages = product.images.map((i) => (i.startsWith('http') ? i : siteOrigin + i));
+
+const productLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: `${product.name} ${product.color}`,
+  image: absImages,
+  description: product.short_desc,
+  sku: product.variants[0]?.sku,
+  brand: { '@type': 'Brand', name: 'Villa Happ' },
+  offers: {
+    '@type': 'Offer',
+    url: productUrl,
+    priceCurrency: 'EUR',
+    price: (product.price_cents / 100).toFixed(2),
+    availability: soldOut ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+    itemCondition: 'https://schema.org/NewCondition',
+  },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteOrigin}/` },
+    { '@type': 'ListItem', position: 2, name: 'Shop', item: `${siteOrigin}/shop` },
+    { '@type': 'ListItem', position: 3, name: product.name, item: productUrl },
+  ],
+};
+
+const sizingAnswer =
+  sizeType === 'apparel'
+    ? 'Onze stukken vallen ruim en zijn unisex. Twijfel je tussen twee maten, kies dan de kleinere voor een strakkere pasvorm. In de maatgids vind je lengte en borstwijdte per maat.'
+    : sizeType === 'socks'
+      ? 'Kies je sokmaat op basis van je gewone schoenmaat: 36/41 of 42/46.'
+      : 'One size, verstelbaar via de clipsluiting achter. Past comfortabel op een hoofdomtrek van circa 54 tot 61 cm.';
+
+const faqItems = [
+  { q: 'Hoe vallen de maten?', a: sizingAnswer },
+  { q: 'Wat zijn de levertijd en verzendkosten?', a: 'Voor 16:00 besteld, dezelfde werkdag verzonden via PostNL en meestal de volgende werkdag in huis. Verzending binnen Nederland is gratis vanaf € 75, daaronder € 4,95.' },
+  { q: 'Kan ik retourneren?', a: 'Ja, je hebt 30 dagen bedenktijd. Past het niet of bevalt het niet, dan retourneer je kosteloos.' },
+  { q: 'Is dit een origineel Villa Happ stuk?', a: edition
+      ? `Ja. Dit komt uit een genummerde oplage van ${edition} stuks en wordt geleverd met een certificaat van echtheid.`
+      : 'Ja. Elk stuk wordt in Tilburg ontworpen en met zorg gemaakt, in beperkte oplage.' },
+];
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
 
 // Data voor het client-script (maatselectie + add-to-cart)
 const pdpData = {
@@ -201,6 +260,16 @@ const pdpData = {
               Niet goed? Retourneren kan kosteloos binnen 30 dagen.
             </div>
           </details>
+
+          <div class="vh-pdp-faq">
+            <p class="vh-pdp-faq-head vh-mono">Veelgestelde vragen</p>
+            {faqItems.map((f) => (
+              <details class="vh-acc">
+                <summary>{f.q}</summary>
+                <div class="vh-acc-body">{f.a}</div>
+              </details>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -305,6 +374,11 @@ const pdpData = {
   </div>
 
   <script type="application/json" id="vh-pdp-data" set:html={JSON.stringify(pdpData)}></script>
+
+  <!-- SEO: structured data voor rich results -->
+  <script type="application/ld+json" set:html={JSON.stringify(productLd)} is:inline></script>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} is:inline></script>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} is:inline></script>
 
   {product.model && (
     <script is:inline type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -468,7 +542,7 @@ const pdpData = {
     function render() {
       const all = load();
       if (!all.length) {
-        aggEl.innerHTML = '<span class="vh-reviews-empty">Nog geen reviews — wees de eerste die dit stuk beoordeelt.</span>';
+        aggEl.innerHTML = '<span class="vh-reviews-empty">Nog geen reviews. Wees de eerste die dit stuk beoordeelt.</span>';
         listEl.innerHTML = '';
         return;
       }

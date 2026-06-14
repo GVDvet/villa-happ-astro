@@ -74,6 +74,8 @@
 .vh-card-info { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
 .vh-card-name { font-size: 15px; font-weight: 500; margin: 0; }
 .vh-card-price { font-family: var(--vh-font-serif); font-size: 16px; margin: 0; white-space: nowrap; }
+.vh-card-price del { color: var(--vh-ink-muted); font-size: 0.8em; margin-right: 7px; }
+.vh-card-badge--sale { background: var(--vh-ink); color: var(--vh-paper); }
 .vh-card-meta {
 	font-family: var(--vh-font-mono); font-size: 10px;
 	letter-spacing: 0.06em; text-transform: uppercase;
@@ -82,6 +84,23 @@
 }
 @media (max-width: 900px) { .vh-listing { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 540px) { .vh-listing { grid-template-columns: 1fr; } }
+
+/* SEO-intro onder de collectie */
+.vh-shop-intro {
+	max-width: 640px;
+	margin: clamp(56px, 8vw, 96px) auto 0;
+	text-align: center;
+}
+.vh-shop-intro h2 {
+	font-family: var(--vh-font-serif);
+	font-size: clamp(24px, 3vw, 34px);
+	font-weight: 400; margin: 0 0 16px;
+}
+.vh-shop-intro p {
+	font-size: 15px; line-height: 1.75; color: var(--vh-ink-soft);
+	margin: 0 0 14px;
+}
+.vh-shop-intro a { color: var(--vh-accent); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ============================================================
    PDP
@@ -428,6 +447,22 @@
 .vh-rev-star.is-on { color: var(--vh-accent); }
 .vh-reviews-stars-input.is-error .vh-rev-star { color: var(--vh-danger, #c0392b); }
 .vh-reviews-note { color: var(--vh-ink-muted); margin: 0; }
+
+/* FAQ op de PDP (content + FAQPage schema) */
+.vh-pdp-faq { margin-top: 8px; }
+.vh-pdp-faq-head {
+	color: var(--vh-ink-muted); margin: 20px 0 4px;
+	padding-top: 18px; border-top: 1px solid var(--vh-ink-hairline);
+}
+
+/* Betaalmethode-chips op checkout (vertrouwen op betaalmoment) */
+.vh-pay-methods { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 10px; }
+.vh-pay-chip {
+	font-family: var(--vh-font-mono); font-size: 10px;
+	letter-spacing: 0.08em; color: var(--vh-ink-soft);
+	border: 1px solid var(--vh-ink-faint); border-radius: var(--vh-radius-sm);
+	padding: 5px 9px; background: var(--vh-paper);
+}
 
 /* Accordion */
 .vh-acc { border-bottom: 1px solid var(--vh-ink-hairline); }

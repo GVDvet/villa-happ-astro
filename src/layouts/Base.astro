@@ -13,6 +13,7 @@ export interface Props {
   bodyClass?: string;
   showHeader?: boolean;
   showFooter?: boolean;
+  noindex?: boolean;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   bodyClass = '',
   showHeader = true,
   showFooter = true,
+  noindex = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
@@ -75,6 +77,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, follow" />}
   <meta name="vh-build" content={(process.env.VERCEL_GIT_COMMIT_SHA || 'local').slice(0, 7)} />
   <link rel="canonical" href={canonicalURL.toString()} />
 
