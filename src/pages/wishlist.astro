@@ -2,9 +2,64 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
-import Placeholder from '../components/Placeholder.astro';
+import '../styles/shop.css';
 ---
-<Base title="Wishlist · Villa Happ">
-  <Placeholder eyebrow="Bewaard" title="Wishlist" text="Jouw favoriete stukken, op één plek. Deze functie komt binnenkort beschikbaar." />
+<Base title="Verlanglijst · Villa Happ" noindex={true}>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Bewaard</p>
+        <h1 class="vh-page-title">Jouw <span class="vh-italic-accent">verlanglijst</span></h1>
+        <p class="vh-page-sub" id="vh-wish-sub"></p>
+      </header>
+
+      <div class="vh-listing" id="vh-wish-list"></div>
+
+      <div class="vh-empty" id="vh-wish-empty" hidden>
+        <p>Je verlanglijst is nog leeg. Bewaar stukken met het hartje op een productpagina, dan vind je ze hier terug.</p>
+        <a href="/shop" class="vh-btn vh-btn--primary"><span>Ontdek de collectie</span></a>
+      </div>
+    </div>
+  </section>
 </Base>
-<script>import '../lib/cart';</script>
+
+<script>
+  import { getWishlist, removeWish, onWishlistChange } from '../lib/wishlist';
+
+  const listEl = document.getElementById('vh-wish-list')!;
+  const emptyEl = document.getElementById('vh-wish-empty')!;
+  const subEl = document.getElementById('vh-wish-sub')!;
+  const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+
+  function render() {
+    const items = getWishlist();
+    emptyEl.hidden = items.length > 0;
+    subEl.textContent = items.length ? `${items.length} stuk${items.length > 1 ? 'ken' : ''} bewaard.` : '';
+    listEl.innerHTML = items.map((w) => `
+      <div class="vh-card" data-wish-slug="${w.slug}">
+        <a href="/shop/${w.slug}" class="vh-card-media-link">
+          <div class="vh-card-media vh-skeleton">
+            <img src="${w.image_url}" alt="${w.name}" class="vh-card-img" width="600" height="750" loading="lazy" style="opacity:0;transition:opacity .4s ease" onload="this.style.opacity=1;this.parentElement.classList.remove('vh-skeleton')" />
+          </div>
+        </a>
+        <div class="vh-card-info">
+          <p class="vh-card-name">${w.name}</p>
+          <p class="vh-card-price">${w.compare_at_cents ? `<del>${eur(w.compare_at_cents)}</del>` : ''}${eur(w.price_cents)}</p>
+        </div>
+        <div class="vh-wish-actions">
+          <a href="/shop/${w.slug}" class="vh-btn vh-btn--primary"><span>Bekijk &amp; kies maat</span></a>
+          <button type="button" class="vh-wish-remove" data-remove>Verwijder</button>
+        </div>
+      </div>`).join('');
+  }
+
+  listEl.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('[data-remove]');
+    if (!btn) return;
+    const card = btn.closest('[data-wish-slug]') as HTMLElement | null;
+    if (card) removeWish(card.dataset.wishSlug!);
+  });
+
+  onWishlistChange(render);
+  render();
+</script>

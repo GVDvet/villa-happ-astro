@@ -20,15 +20,20 @@ const products = await getCatalog();
 
       <div class="vh-listing">
         {products.map((p, i) => (
-          <a href={`/shop/${p.slug}`} class="vh-card">
+          <article class="vh-card">
             <div class="vh-card-media">
               <span class="vh-card-num">0{i + 1}</span>
               {p.compare_at_cents
                 ? <span class="vh-card-badge vh-card-badge--sale">−{Math.round((1 - p.price_cents / p.compare_at_cents) * 100)}%</span>
                 : p.badge && <span class="vh-card-badge">{p.badge}</span>}
+              <button type="button" class="vh-card-wish" aria-label="Bewaar op verlanglijst"
+                data-wish-slug={p.slug} data-wish-name={p.name}
+                data-wish-price={p.price_cents} data-wish-compare={p.compare_at_cents || ''}
+                data-wish-image={p.images[0]} data-wish-color={p.color}>♡</button>
               <img src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width="600" height="750" loading={i < 3 ? 'eager' : 'lazy'} />
               {p.images[1] && <img src={p.images[1]} alt="" class="vh-card-img alt" width="600" height="750" loading="lazy" aria-hidden="true" />}
             </div>
+            <a href={`/shop/${p.slug}`} class="vh-card-link" aria-label={p.name}></a>
             <div class="vh-card-info">
               <p class="vh-card-name">{p.name}</p>
               <p class="vh-card-price">
@@ -37,7 +42,7 @@ const products = await getCatalog();
               </p>
             </div>
             <p class="vh-card-meta">{p.meta}</p>
-          </a>
+          </article>
         ))}
       </div>
 
@@ -64,4 +69,30 @@ const products = await getCatalog();
 
 <script>
   import '../../lib/cart';
+  import { toggleWishlist, inWishlist } from '../../lib/wishlist';
+
+  document.querySelectorAll<HTMLButtonElement>('.vh-card-wish').forEach((btn) => {
+    const slug = btn.dataset.wishSlug!;
+    const sync = (on: boolean) => {
+      btn.classList.toggle('is-on', on);
+      btn.textContent = on ? '♥' : '♡';
+      btn.setAttribute('aria-label', on ? 'Bewaard op verlanglijst' : 'Bewaar op verlanglijst');
+    };
+    sync(inWishlist(slug));
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const compare = btn.dataset.wishCompare ? parseInt(btn.dataset.wishCompare, 10) : undefined;
+      const on = toggleWishlist({
+        slug,
+        name: btn.dataset.wishName!,
+        price_cents: parseInt(btn.dataset.wishPrice!, 10),
+        compare_at_cents: compare,
+        image_url: btn.dataset.wishImage!,
+        color: btn.dataset.wishColor,
+      });
+      sync(on);
+      window.dispatchEvent(new CustomEvent('vh:toast', { detail: on ? 'Bewaard op je verlanglijst ✦' : 'Verwijderd van verlanglijst' }));
+    });
+  });
 </script>

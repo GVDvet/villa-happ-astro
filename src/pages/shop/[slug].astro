@@ -229,6 +229,10 @@ const pdpData = {
             <button type="button" class="vh-btn vh-btn--accent" id="vh-pdp-add" disabled={soldOut}>
               <span id="vh-pdp-add-label">{soldOut ? 'Uitverkocht' : 'Kies je maat'}</span>
             </button>
+            <button type="button" class="vh-pdp-wish" id="vh-pdp-wish" aria-pressed="false">
+              <span class="vh-pdp-wish-ico" aria-hidden="true">♡</span>
+              <span class="vh-pdp-wish-label">Zet op verlanglijst</span>
+            </button>
           </div>
 
           <!-- Bezorgdatum (onzekerheidsreductie): client-side berekend -->
@@ -305,6 +309,11 @@ const pdpData = {
           <p class="vh-reviews-note vh-mono">Demo: reviews worden lokaal in je browser bewaard tot de database live staat.</p>
         </form>
       </section>
+
+      <div class="vh-pdp-related vh-recent" id="vh-recent" hidden>
+        <h2>Onlangs <span class="vh-italic-accent">bekeken</span></h2>
+        <div class="vh-listing" id="vh-recent-list"></div>
+      </div>
 
       {related.length > 0 && (
         <div class="vh-pdp-related">
@@ -387,6 +396,9 @@ const pdpData = {
 
 <script>
   import { addToCart, openCart } from '../../lib/cart';
+  import { toggleWishlist, inWishlist } from '../../lib/wishlist';
+  import { recordRecent, getRecent } from '../../lib/recent';
+  import { flyToCart } from '../../lib/fx';
 
   const data = JSON.parse(document.getElementById('vh-pdp-data')!.textContent!);
 
@@ -444,7 +456,7 @@ const pdpData = {
     });
   });
 
-  function add() {
+  function add(e?: Event) {
     if (!selected) {
       stockMsg.textContent = 'Kies eerst een maat';
       document.getElementById('vh-pdp-sizes')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -460,12 +472,56 @@ const pdpData = {
       image_url: data.image,
       slug: data.slug,
     });
+    // Vlieg-naar-mandje vanaf de geklikte knop, dan pas de drawer openen
+    const btn = (e?.currentTarget as HTMLElement) || addBtn;
+    const r = btn.getBoundingClientRect();
+    flyToCart(data.image, r.left + r.width / 2, r.top + r.height / 2);
     window.dispatchEvent(new CustomEvent('vh:toast', { detail: 'Toegevoegd aan je mandje ✦' }));
-    openCart();
+    setTimeout(() => openCart(), 520);
   }
 
   addBtn.addEventListener('click', add);
   stickyBtn?.addEventListener('click', add);
+
+  /* Onlangs bekeken vastleggen (mere-exposure) */
+  recordRecent({ slug: data.slug, name: data.name, price_cents: data.price_cents, image_url: data.image });
+
+  /* Verlanglijst-knop */
+  const wishBtn = document.getElementById('vh-pdp-wish');
+  if (wishBtn) {
+    const ico = wishBtn.querySelector('.vh-pdp-wish-ico')!;
+    const lbl = wishBtn.querySelector('.vh-pdp-wish-label')!;
+    const sync = (on: boolean) => {
+      wishBtn.classList.toggle('is-on', on);
+      wishBtn.setAttribute('aria-pressed', String(on));
+      ico.textContent = on ? '♥' : '♡';
+      lbl.textContent = on ? 'Bewaard op verlanglijst' : 'Zet op verlanglijst';
+    };
+    sync(inWishlist(data.slug));
+    wishBtn.addEventListener('click', () => {
+      const on = toggleWishlist({ slug: data.slug, name: data.name, price_cents: data.price_cents, image_url: data.image, color: data.color });
+      sync(on);
+      window.dispatchEvent(new CustomEvent('vh:toast', { detail: on ? 'Bewaard op je verlanglijst ✦' : 'Verwijderd van verlanglijst' }));
+    });
+  }
+
+  /* Onlangs bekeken rail (huidige product uitgesloten) */
+  (function renderRecent() {
+    const box = document.getElementById('vh-recent');
+    const list = document.getElementById('vh-recent-list');
+    if (!box || !list) return;
+    const items = getRecent().filter((r) => r.slug !== data.slug).slice(0, 4);
+    if (!items.length) return;
+    const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+    list.innerHTML = items.map((r) => `
+      <a href="/shop/${r.slug}" class="vh-card">
+        <div class="vh-card-media vh-skeleton">
+          <img src="${r.image_url}" alt="${r.name}" class="vh-card-img" width="600" height="750" loading="lazy" style="opacity:0;transition:opacity .4s ease" onload="this.style.opacity=1;this.parentElement.classList.remove('vh-skeleton')" />
+        </div>
+        <div class="vh-card-info"><p class="vh-card-name">${r.name}</p><p class="vh-card-price">${eur(r.price_cents)}</p></div>
+      </a>`).join('');
+    box.removeAttribute('hidden');
+  })();
 
   /* Back-in-stock formulier (demo: lokaal opslaan) */
   const notifyForm = document.getElementById('vh-pdp-notify-form') as HTMLFormElement;

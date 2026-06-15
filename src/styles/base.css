@@ -111,6 +111,28 @@ p { margin: 0; }
 }
 .vh-skip-link:focus { top: 0; }
 
+/* Vlieg-naar-mandje (micro-feedback, peak-end) */
+.vh-fly {
+	position: fixed;
+	z-index: 9500;
+	width: 60px; height: 76px;
+	object-fit: cover;
+	border-radius: var(--vh-radius-sm);
+	pointer-events: none;
+	transform: translate(-50%, -50%);
+	transition: transform 0.66s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.66s ease;
+	box-shadow: 0 12px 32px rgba(28, 24, 19, 0.3);
+}
+
+/* Skeleton-shimmer voor client-gerenderde kaartbeelden (Doherty/aesthetic) */
+@keyframes vh-shimmer { 100% { background-position: -200% 0; } }
+.vh-skeleton {
+	background: linear-gradient(90deg, var(--vh-ink-faint) 0%, var(--vh-paper-soft) 50%, var(--vh-ink-faint) 100%);
+	background-size: 200% 100%;
+	animation: vh-shimmer 1.3s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .vh-skeleton { animation: none; } }
+
 /* Reduced motion baseline */
 @media (prefers-reduced-motion: reduce) {
 	*, *::before, *::after {

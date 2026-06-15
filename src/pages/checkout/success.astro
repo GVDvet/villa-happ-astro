@@ -5,23 +5,45 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/shop.css';
 ---
 <Base title="Bedankt · Villa Happ" noindex={true}>
-  <section class="vh-page">
-    <div class="vh-result">
-      <div class="vh-result-stamp">
-        <b>Welkom in het archief</b>
-        <span>Est. 1960 · Tilburg</span>
+  <section class="vh-success">
+    <div class="vh-success-inner">
+
+      <div class="vh-success-seal" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <defs>
+            <path id="vh-success-path" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+          </defs>
+          <text>
+            <textPath href="#vh-success-path" startOffset="0">
+              VILLA HAPP · BESTELLING BEVESTIGD · EST. 1960 ·&nbsp;
+            </textPath>
+          </text>
+        </svg>
+        <span class="vh-success-check">✓</span>
       </div>
-      <h1>Je frame is <span class="vh-italic-accent">vastgelegd</span>.</h1>
-      <p>
-        Bedankt voor je bestelling. Je ontvangt een bevestiging per e-mail
-        zodra de betaling is verwerkt.
-        <br /><br />
-        <span class="vh-result-ordernr" id="vh-ordernr"></span>
+
+      <p class="vh-success-eyebrow vh-mono">Frame vastgelegd · Est. 1960 · Tilburg</p>
+      <h1 class="vh-success-title">Welkom in het <span class="vh-italic-accent">archief</span>.</h1>
+      <p class="vh-success-lead">
+        Bedankt voor je bestelling. Je hoort nu bij de mensen die dit merk weer
+        tot leven brengen. Je ontvangt een bevestiging per e-mail zodra de
+        betaling is verwerkt.
       </p>
+
+      <div class="vh-success-card">
+        <div class="vh-success-row"><span>Bestelnummer</span><b id="vh-ordernr">…</b></div>
+        <div class="vh-success-row"><span>Verwachte bezorging</span><b id="vh-deliv">…</b></div>
+        <div class="vh-success-row"><span>Verzending</span><b>PostNL · met track &amp; trace</b></div>
+      </div>
+
       <div class="vh-result-actions">
-        <a href="/shop" class="vh-btn vh-btn--primary"><span>Verder shoppen</span></a>
+        <a href="/shop" class="vh-btn vh-btn--accent"><span>Verder shoppen</span>
+          <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
         <a href="/" class="vh-btn vh-btn--ghost"><span>Naar home</span></a>
       </div>
+
+      <p class="vh-success-foot vh-mono">Vragen over je bestelling? Reageer op de bevestigingsmail, we helpen je graag.</p>
     </div>
   </section>
 </Base>
@@ -33,5 +55,20 @@ import '../../styles/shop.css';
   clearCart();
 
   const nr = new URLSearchParams(window.location.search).get('order');
-  if (nr) document.getElementById('vh-ordernr')!.textContent = `Bestelnummer · ${nr}`;
+  document.getElementById('vh-ordernr')!.textContent = nr ? `#${nr}` : 'Volgt per e-mail';
+
+  // Verwachte bezorging (zelfde logica als de PDP)
+  (function deliv() {
+    const el = document.getElementById('vh-deliv');
+    if (!el) return;
+    const days = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+    const months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+    const nextBiz = (d: Date) => { do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6); return d; };
+    const now = new Date();
+    let ship = new Date(now);
+    if (now.getHours() >= 16) ship = nextBiz(ship);
+    while (ship.getDay() === 0 || ship.getDay() === 6) ship = nextBiz(ship);
+    const d = nextBiz(ship);
+    el.textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+  })();
 </script>
