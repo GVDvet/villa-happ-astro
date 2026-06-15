@@ -1,6 +1,25 @@
 ---
 // Globale cart drawer — client-rendered vanuit localStorage.
 // Open via window event 'vh:open-cart' (header-icoon, add-to-cart).
+import { getCatalog } from '../../lib/catalog';
+
+const catalog = await getCatalog();
+// Cross-sell kandidaten, goedkoopste eerst (natuurlijke "voeg iets kleins toe").
+// Quick-add kan alleen bij precies één variant op voorraad; anders link naar PDP.
+const upsell = catalog
+  .map((p) => {
+    const inStock = p.variants.filter((v) => v.stock > 0);
+    return {
+      slug: p.slug,
+      name: p.name,
+      image: p.images[0],
+      price_cents: p.price_cents,
+      color: p.color,
+      variant: inStock.length === 1 ? { id: inStock[0].id, size: inStock[0].size } : null,
+    };
+  })
+  .filter((p) => p.image)
+  .sort((a, b) => a.price_cents - b.price_cents);
 ---
 <div class="vh-drawer" id="vh-drawer" aria-hidden="true">
   <button type="button" class="vh-drawer-overlay" data-drawer-close aria-label="Sluit winkelmandje"></button>
@@ -17,9 +36,13 @@
 
     <div class="vh-drawer-body" data-drawer-body></div>
 
+    <div class="vh-drawer-upsell" data-drawer-upsell></div>
+
     <footer class="vh-drawer-foot" data-drawer-foot></footer>
   </aside>
 </div>
+
+<script type="application/json" id="vh-upsell-data" set:html={JSON.stringify(upsell)}></script>
 
 <div class="vh-toast vh-mono" id="vh-toast" role="status" aria-live="polite"></div>
 
@@ -155,6 +178,31 @@
   }
   .vh-drawer-actions { display: grid; gap: 10px; }
 
+  /* Cross-sell: maak het compleet */
+  .vh-drawer-upsell:not(:empty) {
+    padding: 16px 24px;
+    border-top: 1px solid var(--vh-ink-hairline);
+    background: var(--vh-paper-soft);
+  }
+  .vh-upsell-label {
+    font-family: var(--vh-font-mono); font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--vh-ink-muted); margin: 0 0 12px;
+  }
+  .vh-upsell-item { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; }
+  .vh-upsell-item img { width: 52px; height: 64px; object-fit: cover; border-radius: var(--vh-radius-sm); }
+  .vh-upsell-name { font-size: 13px; font-weight: 500; margin: 0 0 2px; }
+  .vh-upsell-price { font-family: var(--vh-font-serif); font-size: 14px; margin: 0; color: var(--vh-ink-soft); }
+  .vh-upsell-add {
+    border: 1px solid var(--vh-ink); border-radius: 99px;
+    background: none; cursor: pointer;
+    font-family: var(--vh-font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 14px; color: var(--vh-ink); white-space: nowrap;
+    transition: background var(--vh-dur-fast) ease, color var(--vh-dur-fast) ease;
+  }
+  .vh-upsell-add:hover { background: var(--vh-ink); color: var(--vh-paper); }
+
   /* Toast */
   .vh-toast {
     position: fixed;
@@ -172,15 +220,20 @@
 </style>
 
 <script>
-  import { getCart, updateQuantity, removeFromCart, cartSubtotal, cartCount, onCartChange, shippingCostCents, FREE_SHIPPING_CENTS } from '../../lib/cart';
+  import { getCart, addToCart, updateQuantity, removeFromCart, cartSubtotal, cartCount, onCartChange, shippingCostCents, FREE_SHIPPING_CENTS } from '../../lib/cart';
 
   const drawer = document.getElementById('vh-drawer')!;
   const panel = drawer.querySelector('.vh-drawer-panel') as HTMLElement;
   const body = drawer.querySelector('[data-drawer-body]') as HTMLElement;
   const foot = drawer.querySelector('[data-drawer-foot]') as HTMLElement;
   const shipbar = drawer.querySelector('[data-drawer-shipbar]') as HTMLElement;
+  const upsellBox = drawer.querySelector('[data-drawer-upsell]') as HTMLElement;
   const countEl = drawer.querySelector('[data-drawer-count]') as HTMLElement;
   const toast = document.getElementById('vh-toast')!;
+
+  type Upsell = { slug: string; name: string; image: string; price_cents: number; color: string; variant: { id: string; size: string } | null };
+  let upsellData: Upsell[] = [];
+  try { upsellData = JSON.parse(document.getElementById('vh-upsell-data')!.textContent!); } catch {}
 
   const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
   let lastFocus: HTMLElement | null = null;
@@ -200,6 +253,7 @@
     if (!items.length) {
       shipbar.innerHTML = '';
       foot.innerHTML = '';
+      upsellBox.innerHTML = '';
       body.innerHTML = `
         <div class="vh-drawer-empty">
           <p>Je mandje is nog leeg.</p>
@@ -237,15 +291,35 @@
         </div>
       </div>`).join('');
 
+    // Sticker-shock weg: toon de verzendkosten concreet, niet pas bij afrekenen
+    const nlShip = shippingCostCents('NL', subtotal);
+    const shipText = nlShip === 0
+      ? 'Inclusief gratis verzending in Nederland'
+      : `+ ${eur(nlShip)} verzending in NL · gratis vanaf ${eur(FREE_SHIPPING_CENTS)}`;
+
     foot.innerHTML = `
       <div class="vh-drawer-subtotal"><span>Subtotaal</span><b>${eur(subtotal)}</b></div>
-      <small>Verzendkosten berekend bij het afrekenen · NL gratis vanaf € 75</small>
+      <small>${shipText}</small>
       <div class="vh-drawer-actions">
         <a href="/checkout" class="vh-btn vh-btn--accent"><span>Afrekenen</span>
           <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a href="/cart" class="vh-btn vh-btn--ghost"><span>Bekijk winkelmandje</span></a>
       </div>`;
+
+    // Cross-sell: eerste kandidaat die nog niet in het mandje zit
+    const cartSlugs = new Set(items.map((i) => i.slug));
+    const pick = upsellData.find((u) => !cartSlugs.has(u.slug));
+    upsellBox.innerHTML = pick
+      ? `<p class="vh-upsell-label">Maak het compleet</p>
+         <div class="vh-upsell-item" data-upsell-slug="${pick.slug}">
+           <a href="/shop/${pick.slug}"><img src="${pick.image}" alt="" loading="lazy" /></a>
+           <div><p class="vh-upsell-name">${pick.name}</p><p class="vh-upsell-price">${eur(pick.price_cents)}</p></div>
+           ${pick.variant
+             ? `<button type="button" class="vh-upsell-add" data-upsell-add>Voeg toe</button>`
+             : `<a href="/shop/${pick.slug}" class="vh-upsell-add">Bekijk</a>`}
+         </div>`
+      : '';
   }
 
   function open() {
@@ -282,6 +356,27 @@
     if (target.closest('[data-inc]')) updateQuantity(vid, item.quantity + 1);
     else if (target.closest('[data-dec]')) updateQuantity(vid, item.quantity - 1);
     else if (target.closest('[data-remove]')) removeFromCart(vid);
+  });
+
+  // Cross-sell quick-add
+  upsellBox.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('[data-upsell-add]');
+    if (!btn) return;
+    const row = btn.closest('[data-upsell-slug]') as HTMLElement | null;
+    if (!row) return;
+    const u = upsellData.find((x) => x.slug === row.dataset.upsellSlug);
+    if (!u || !u.variant) return;
+    addToCart({
+      variant_id: u.variant.id,
+      product_id: u.slug,
+      quantity: 1,
+      name: u.name,
+      variant_label: `${u.color} / ${u.variant.size}`,
+      unit_price_cents: u.price_cents,
+      image_url: u.image,
+      slug: u.slug,
+    });
+    showToast('Toegevoegd aan je mandje ✦');
   });
 
   onCartChange(() => { if (drawer.classList.contains('is-open')) render(); });

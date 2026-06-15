@@ -610,7 +610,41 @@
 }
 .vh-field input:focus, .vh-field select:focus { border-color: var(--vh-ink); }
 .vh-field input.is-invalid { border-color: var(--vh-danger); }
+/* Inline validatie: groen vinkje bij geldig veld, foutmelding bij fout */
+.vh-field { position: relative; }
+.vh-field input.is-valid { border-color: var(--vh-olive, #6b7a4e); }
+.vh-field input.is-valid + .vh-field-msg::before,
+.vh-field:has(input.is-valid) label::after { content: ' ✓'; color: var(--vh-olive, #6b7a4e); }
+.vh-field-msg { font-size: 11px; color: var(--vh-danger); min-height: 13px; }
 @media (max-width: 560px) { .vh-form-row { grid-template-columns: 1fr; } }
+
+/* Stappenindicator (goal-gradient) */
+.vh-steps {
+	display: flex; gap: 8px; flex-wrap: wrap;
+	list-style: none; margin: 0 0 36px; padding: 0;
+}
+.vh-step {
+	display: flex; align-items: center; gap: 9px;
+	flex: 1; min-width: 110px;
+	padding: 13px 16px;
+	border: 1px solid var(--vh-ink-hairline);
+	border-radius: var(--vh-radius-sm);
+	font-family: var(--vh-font-mono); font-size: 11px;
+	letter-spacing: 0.06em; text-transform: uppercase;
+	color: var(--vh-ink-muted);
+	transition: border-color var(--vh-dur-fast) ease, color var(--vh-dur-fast) ease;
+}
+.vh-step-dot {
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 22px; height: 22px; border-radius: 50%;
+	border: 1px solid currentColor; font-size: 9px;
+}
+.vh-step.is-active { color: var(--vh-ink); border-color: var(--vh-ink); }
+.vh-step.is-done { color: var(--vh-olive, #6b7a4e); border-color: var(--vh-olive, #6b7a4e); }
+.vh-step.is-done .vh-step-dot { background: var(--vh-olive, #6b7a4e); color: var(--vh-paper); border-color: transparent; }
+.vh-step.is-done .vh-step-dot::after { content: '✓'; }
+.vh-step.is-done .vh-step-dot { font-size: 0; }
+.vh-step.is-done .vh-step-dot::after { font-size: 11px; }
 
 .vh-pay-note {
 	display: flex; align-items: center; gap: 10px;

@@ -13,6 +13,12 @@ import '../../styles/shop.css';
         <h1 class="vh-page-title">Bijna <span class="vh-italic-accent">van jou</span></h1>
       </header>
 
+      <ol class="vh-steps" id="vh-steps" aria-label="Voortgang afrekenen">
+        <li class="vh-step is-active" data-step="contact"><span class="vh-step-dot">01</span> Contact</li>
+        <li class="vh-step" data-step="address"><span class="vh-step-dot">02</span> Bezorging</li>
+        <li class="vh-step" data-step="pay"><span class="vh-step-dot">03</span> Betaling</li>
+      </ol>
+
       <div class="vh-commerce-grid" id="vh-co-grid" hidden>
 
         <form class="vh-form" id="vh-co-form" novalidate>
@@ -149,20 +155,59 @@ import '../../styles/shop.css';
   countrySel.addEventListener('change', renderSummary);
   renderSummary();
 
+  /* Stappenindicator (goal-gradient): vult zich terwijl je vordert */
+  const stepEls = {
+    contact: document.querySelector('[data-step="contact"]') as HTMLElement,
+    address: document.querySelector('[data-step="address"]') as HTMLElement,
+    pay: document.querySelector('[data-step="pay"]') as HTMLElement,
+  };
+  const filled = (name: string) => {
+    const el = form.querySelector<HTMLInputElement>(`[name="${name}"]`);
+    return !!el && !!el.value.trim();
+  };
+  function updateSteps() {
+    const emailEl = form.querySelector<HTMLInputElement>('[name="email"]')!;
+    const contactDone = !!emailEl.value.trim() && /.+@.+\..+/.test(emailEl.value);
+    const addressDone = ['first_name', 'last_name', 'street', 'house_number', 'postal_code', 'city'].every(filled);
+    stepEls.contact.classList.toggle('is-done', contactDone);
+    stepEls.contact.classList.toggle('is-active', !contactDone);
+    stepEls.address.classList.toggle('is-done', addressDone);
+    stepEls.address.classList.toggle('is-active', contactDone && !addressDone);
+    stepEls.pay.classList.toggle('is-active', contactDone && addressDone);
+  }
+
+  /* Inline validatie (cognitive load + Doherty): per veld op blur */
+  const reqInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[required]'));
+  function fieldMsg(input: HTMLInputElement): HTMLElement {
+    let m = input.parentElement!.querySelector('.vh-field-msg') as HTMLElement | null;
+    if (!m) { m = document.createElement('small'); m.className = 'vh-field-msg'; input.parentElement!.appendChild(m); }
+    return m;
+  }
+  function validateField(input: HTMLInputElement): boolean {
+    const v = input.value.trim();
+    let ok = !!v;
+    if (ok && input.type === 'email') ok = /.+@.+\..+/.test(v);
+    input.classList.toggle('is-invalid', !ok);
+    input.classList.toggle('is-valid', ok);
+    fieldMsg(input).textContent = ok ? '' : (input.type === 'email' ? 'Vul een geldig e-mailadres in' : 'Dit veld is verplicht');
+    return ok;
+  }
+  reqInputs.forEach((input) => {
+    input.addEventListener('blur', () => { validateField(input); updateSteps(); });
+    input.addEventListener('input', () => { if (input.classList.contains('is-invalid')) validateField(input); updateSteps(); });
+  });
+  updateSteps();
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errNote.classList.remove('is-visible');
 
-    // Validatie
     let valid = true;
-    form.querySelectorAll<HTMLInputElement>('input[required]').forEach((input) => {
-      const bad = !input.value.trim() || (input.type === 'email' && !input.value.includes('@'));
-      input.classList.toggle('is-invalid', bad);
-      if (bad) valid = false;
-    });
+    reqInputs.forEach((input) => { if (!validateField(input)) valid = false; });
     if (!valid) {
       errNote.textContent = 'Vul de gemarkeerde velden in.';
       errNote.classList.add('is-visible');
+      form.querySelector<HTMLInputElement>('.is-invalid')?.focus();
       return;
     }
     if (cartHasDemo()) return;
