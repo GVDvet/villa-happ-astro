@@ -4,11 +4,18 @@
  * Mollie callback bij payment status changes.
  * Body: form-encoded { id: 'tr_xxx' } — we moeten Mollie API zelf
  * raadplegen voor de actuele status (security best practice).
+ *
+ * Idempotent: Mollie mag deze webhook meermaals aanroepen. De
+ * statusovergang (mapMollieStatus) garandeert dat een order die al
+ * 'paid' is nooit een tweede voorraadaftrek of statuswissel krijgt.
  */
 
 import type { APIRoute } from 'astro';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getMollie } from '../../../lib/mollie';
+import { mapMollieStatus } from '../../../lib/checkout-logic';
+import { finalizeInventory, releaseInventory } from '../../../lib/inventory';
+import { sendOrderConfirmation } from '../../../lib/mail';
 
 export const prerender = false;
 
@@ -21,8 +28,15 @@ export const POST: APIRoute = async ({ request }) => {
   const paymentId = params.get('id');
   if (!paymentId) return new Response('', { status: 400 });
 
-  const mollie = getMollie();
-  const payment = await mollie.payments.get(paymentId);
+  let payment;
+  try {
+    const mollie = getMollie();
+    payment = await mollie.payments.get(paymentId);
+  } catch (err) {
+    console.error('[webhook] Mollie payment ophalen faalde:', err);
+    // 503 zodat Mollie het later opnieuw probeert
+    return new Response('', { status: 503 });
+  }
 
   const { data: order } = await sb
     .from('orders')
@@ -32,61 +46,44 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!order) return new Response('', { status: 404 });
 
-  let newPaymentStatus = order.payment_status;
-  let newOrderStatus = order.status;
-  let paidAt = order.paid_at;
+  const transition = mapMollieStatus(payment.status, {
+    payment_status: order.payment_status,
+    status: order.status,
+  });
 
-  switch (payment.status) {
-    case 'paid':
-      newPaymentStatus = 'paid';
-      newOrderStatus = 'paid';
-      paidAt = new Date().toISOString();
-      // Decrement voorraad echt nu (van reserved naar verkocht)
-      for (const item of order.order_items || []) {
-        await sb.rpc('finalize_inventory', { v_id: item.variant_id, qty: item.quantity })
-          .then(() => null)
-          .catch(async () => {
-            // Fallback: direct update
-            const { data: inv } = await sb.from('inventory').select('*').eq('variant_id', item.variant_id).single();
-            if (inv) {
-              await sb.from('inventory').update({
-                quantity: Math.max(0, inv.quantity - item.quantity),
-                reserved: Math.max(0, inv.reserved - item.quantity),
-              }).eq('variant_id', item.variant_id);
-            }
-          });
-      }
-      // TODO: trigger order confirmation email
-      break;
-    case 'failed':
-    case 'canceled':
-    case 'expired':
-      newPaymentStatus = payment.status === 'canceled' ? 'failed' : payment.status as any;
-      newOrderStatus = 'cancelled';
-      // Release reserved voorraad
-      for (const item of order.order_items || []) {
-        const { data: inv } = await sb.from('inventory').select('*').eq('variant_id', item.variant_id).single();
-        if (inv) {
-          await sb.from('inventory').update({
-            reserved: Math.max(0, inv.reserved - item.quantity),
-          }).eq('variant_id', item.variant_id);
-        }
-      }
-      break;
-    case 'authorized':
-      newPaymentStatus = 'authorized';
-      break;
-    case 'pending':
-    case 'open':
-      newPaymentStatus = 'open';
-      break;
+  // Niets te doen (bijv. dubbele webhook-call op een al betaalde order)
+  const noChange =
+    transition.action === 'none' &&
+    transition.payment_status === order.payment_status &&
+    transition.status === order.status;
+  if (noChange) return new Response('', { status: 200 });
+
+  if (transition.action === 'finalize') {
+    // Reservering wordt verkoop: quantity en reserved beide omlaag
+    for (const item of order.order_items || []) {
+      const ok = await finalizeInventory(sb, item.variant_id, item.quantity);
+      if (!ok) console.error('[webhook] finalize_inventory faalde voor variant', item.variant_id);
+    }
+  } else if (transition.action === 'release') {
+    // Betaling mislukt/verlopen/geannuleerd: reservering vrijgeven
+    for (const item of order.order_items || []) {
+      const ok = await releaseInventory(sb, item.variant_id, item.quantity);
+      if (!ok) console.error('[webhook] release_inventory faalde voor variant', item.variant_id);
+    }
   }
 
   await sb.from('orders').update({
-    payment_status: newPaymentStatus,
-    status: newOrderStatus,
-    paid_at: paidAt,
+    payment_status: transition.payment_status,
+    status: transition.status,
+    paid_at: transition.markPaidAt ? new Date().toISOString() : order.paid_at,
   }).eq('id', order.id);
+
+  if (transition.markPaidAt) {
+    // Orderbevestiging (env-gated via RESEND_API_KEY; faalt nooit hard)
+    await sendOrderConfirmation(order).catch((err) =>
+      console.error('[webhook] orderbevestiging versturen faalde:', err),
+    );
+  }
 
   // Mollie verwacht 200 OK
   return new Response('', { status: 200 });
