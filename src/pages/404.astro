@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
 import { getCatalog } from '../lib/catalog';
 import { formatPrice } from '../lib/commerce';
 import '../styles/shop.css';
@@ -39,7 +40,7 @@ const suggestions = catalog.slice(0, 3);
                 <div class="vh-card-media">
                   <span class="vh-card-num">0{i + 1}</span>
                   {p.badge && <span class="vh-card-badge">{p.badge}</span>}
-                  <img src={p.images[0]} alt={p.name} class="vh-card-img main" width="600" height="750" loading="lazy" />
+                  <Pic src={p.images[0]} alt={p.name} class="vh-card-img main" width={600} height={750} loading="lazy" />
                 </div>
                 <div class="vh-card-info">
                   <p class="vh-card-name">{p.name}</p>

@@ -3,6 +3,14 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import CartDrawer from '../components/commerce/CartDrawer.astro';
 import { isPreviewHost } from '../lib/site';
+import { srcsetFor, optimizedSrc } from '../lib/img';
+
+// Self-hosted fonts (geen Google Fonts CDN: sneller, geen third-party, AVG-proof)
+import '@fontsource-variable/inter/index.css';
+import '@fontsource-variable/fraunces/standard.css';
+import '@fontsource-variable/fraunces/standard-italic.css';
+import '@fontsource/space-mono/index.css';
+
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/buttons.css';
@@ -15,6 +23,8 @@ export interface Props {
   showHeader?: boolean;
   showFooter?: boolean;
   noindex?: boolean;
+  /** LCP-beeld van deze pagina; wordt responsive gepreload */
+  preloadImage?: string;
 }
 
 const {
@@ -25,6 +35,7 @@ const {
   showHeader = true,
   showFooter = true,
   noindex = false,
+  preloadImage,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
@@ -41,13 +52,16 @@ const preview = isPreviewHost(canonicalURL.origin);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/favicon.ico" sizes="32x32" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Mono&display=swap"
-  />
-  <link rel="preload" as="image" href="/img/products/hoodie-grey-lifestyle.webp" fetchpriority="high" />
+  {preloadImage && (
+    <link
+      rel="preload"
+      as="image"
+      href={optimizedSrc(preloadImage, 1080)}
+      imagesrcset={srcsetFor(preloadImage)}
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+  )}
   <script is:inline>document.documentElement.classList.remove('no-js');</script>
   <script is:inline>
   // Diagnose: vangt de eerste JS-fout; met ?vh-debug in de URL verschijnt

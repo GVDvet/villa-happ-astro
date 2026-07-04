@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import Base from '../../layouts/Base.astro';
+import Pic from '../../components/Pic.astro';
 import { getCatalog } from '../../lib/catalog';
 import { formatPrice } from '../../lib/commerce';
 import '../../styles/shop.css';
@@ -30,8 +31,8 @@ const products = await getCatalog();
                 data-wish-slug={p.slug} data-wish-name={p.name}
                 data-wish-price={p.price_cents} data-wish-compare={p.compare_at_cents || ''}
                 data-wish-image={p.images[0]} data-wish-color={p.color}>♡</button>
-              <img src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width="600" height="750" loading={i < 3 ? 'eager' : 'lazy'} />
-              {p.images[1] && <img src={p.images[1]} alt="" class="vh-card-img alt" width="600" height="750" loading="lazy" aria-hidden="true" />}
+              <Pic src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width={600} height={750} loading={i < 3 ? 'eager' : 'lazy'} />
+              {p.images[1] && <Pic src={p.images[1]} alt="" class="vh-card-img alt" width={600} height={750} loading="lazy" aria-hidden="true" />}
             </div>
             <a href={`/shop/${p.slug}`} class="vh-card-link" aria-label={p.name}></a>
             <div class="vh-card-info">

@@ -11,7 +11,18 @@ export default defineConfig({
   adapter: vercel({
     webAnalytics: { enabled: true },
     imageService: true,
+    // Breedtes moeten matchen met IMG_WIDTHS in src/lib/img.ts
+    imagesConfig: {
+      sizes: [160, 320, 480, 640, 768, 1080, 1440, 1920],
+      formats: ['image/avif', 'image/webp'],
+      domains: [],
+    },
   }),
+  prefetch: {
+    // Interne links prefetchen bij hover: merkbaar snellere navigatie
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
   vite: {
     // Eigen cache-map: omzeilt het door antivirus geblokkeerde .vite/deps bestand
     cacheDir: 'node_modules/.vite-vh',

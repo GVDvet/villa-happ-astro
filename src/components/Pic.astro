@@ -1,0 +1,48 @@
+---
+/**
+ * Responsive <img> met Vercel Image Optimization (AVIF/WebP + srcset).
+ * Gebruik voor alle content-beelden; in dev valt hij terug op het origineel.
+ */
+import { optimizedSrc, srcsetFor } from '../lib/img';
+
+interface Props {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  /** Kandidaat-breedtes; moeten voorkomen in imagesConfig.sizes */
+  widths?: number[];
+  /** sizes-attribuut; beschrijf hoe breed het beeld in de layout staat */
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  class?: string;
+  id?: string;
+  'aria-hidden'?: 'true' | 'false';
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  widths = [320, 480, 640, 768],
+  sizes = '(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw',
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  class: className,
+  ...rest
+} = Astro.props;
+---
+<img
+  src={optimizedSrc(src, width)}
+  srcset={srcsetFor(src, widths)}
+  sizes={sizes}
+  alt={alt}
+  width={width}
+  height={height}
+  loading={loading}
+  fetchpriority={fetchpriority}
+  class={className}
+  {...rest}
+/>
