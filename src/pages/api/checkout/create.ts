@@ -6,49 +6,26 @@
  * Flow:
  * 1. Validate cart items + voorraad
  * 2. Calculate totals server-side (klant kan prijzen niet manipuleren)
- * 3. Reserve inventory
+ * 3. Reserve inventory (atomair; bij tekort alles terugdraaien)
  * 4. Create order in Supabase (status=pending, payment_status=open)
- * 5. Create Mollie payment
+ * 5. Create Mollie payment (bij falen: reserveringen vrijgeven + order annuleren)
  * 6. Return Mollie checkout URL
  */
 
 import type { APIRoute } from 'astro';
-import { z } from 'zod';
+import { Locale } from '@mollie/api-client';
+import type { Payment } from '@mollie/api-client';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getMollie } from '../../../lib/mollie';
+import { CheckoutSchema, shippingCost } from '../../../lib/checkout-logic';
+import { reserveInventory, releaseInventory } from '../../../lib/inventory';
+import { rateLimit, clientKey, tooManyRequests } from '../../../lib/rate-limit';
 
 export const prerender = false;
 
-const Schema = z.object({
-  items: z.array(z.object({
-    variant_id: z.string().uuid(),
-    quantity: z.number().int().min(1).max(20),
-  })).min(1),
-  customer: z.object({
-    email: z.string().email(),
-    first_name: z.string().min(1),
-    last_name: z.string().min(1),
-    accepts_marketing: z.boolean().optional(),
-  }),
-  shipping: z.object({
-    street: z.string().min(1),
-    house_number: z.string().min(1),
-    postal_code: z.string().min(1),
-    city: z.string().min(1),
-    country: z.enum(['NL', 'BE', 'DE']).default('NL'),
-    phone: z.string().optional(),
-  }),
-});
-
-function shippingCost(country: string, subtotalCents: number): number {
-  // Free shipping boven €75
-  if (subtotalCents >= 7500) return 0;
-  if (country === 'NL') return 495;
-  if (country === 'BE') return 695;
-  return 895;
-}
-
 export const POST: APIRoute = async ({ request }) => {
+  if (!rateLimit(clientKey(request, 'checkout'), 10)) return tooManyRequests();
+
   const sb = getSupabaseAdmin();
   if (!sb) {
     return new Response(JSON.stringify({ error: 'Supabase niet geconfigureerd' }), { status: 503 });
@@ -56,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   let body;
   try {
-    body = Schema.parse(await request.json());
+    body = CheckoutSchema.parse(await request.json());
   } catch (err: any) {
     return new Response(JSON.stringify({ error: 'Invalid request', details: err?.issues }), { status: 400 });
   }
@@ -72,28 +49,13 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Een of meer producten zijn niet meer beschikbaar.' }), { status: 400 });
   }
 
-  const { data: inventoryRows } = await sb
-    .from('inventory')
-    .select('*')
-    .in('variant_id', variantIds);
-  const stockMap = Object.fromEntries((inventoryRows || []).map((r: any) => [r.variant_id, r]));
-
-  // 2. Validate voorraad + bouw line items
+  // 2. Bouw line items (voorraadcheck gebeurt atomair bij het reserveren)
   let subtotal = 0;
   const lineItems = [];
   for (const reqItem of body.items) {
     const variant = variants.find((v: any) => v.id === reqItem.variant_id);
     if (!variant || (variant.products as any)?.status !== 'published') {
       return new Response(JSON.stringify({ error: 'Product niet beschikbaar.' }), { status: 400 });
-    }
-    const stock = stockMap[variant.id];
-    const available = stock ? stock.quantity - stock.reserved : 0;
-    if (available < reqItem.quantity) {
-      return new Response(JSON.stringify({
-        error: `Onvoldoende voorraad voor ${(variant.products as any).name}.`,
-        variant_id: variant.id,
-        available,
-      }), { status: 409 });
     }
     const unitPrice = variant.price_cents || (variant.products as any).price_cents;
     const lineTotal = unitPrice * reqItem.quantity;
@@ -114,24 +76,30 @@ export const POST: APIRoute = async ({ request }) => {
   const tax = 0; // BTW is al verwerkt in prijs (Dutch BTW-inclusief gebruikelijk)
   const total = subtotal + shipping + tax;
 
-  // 3. Reserve voorraad (atomisch via update — naïef voor demo)
+  // 3. Reserveer voorraad atomair; bij tekort alle eerdere reserveringen terugdraaien
+  const reserved: { variant_id: string; quantity: number; product_name: string }[] = [];
+  const rollback = async () => {
+    for (const r of reserved) {
+      await releaseInventory(sb, r.variant_id, r.quantity);
+    }
+  };
+
   for (const item of lineItems) {
-    await sb.rpc('reserve_inventory', {
-      v_id: item.variant_id,
-      qty: item.quantity,
-    }).then(() => {
-      // RPC nog niet bestaat — fallback naar direct update
-    }).catch(async () => {
-      const cur = stockMap[item.variant_id];
-      await sb.from('inventory').update({
-        reserved: (cur?.reserved || 0) + item.quantity,
-      }).eq('variant_id', item.variant_id);
-    });
+    const ok = await reserveInventory(sb, item.variant_id, item.quantity);
+    if (!ok) {
+      await rollback();
+      return new Response(JSON.stringify({
+        error: `Onvoldoende voorraad voor ${item.product_name}.`,
+        variant_id: item.variant_id,
+      }), { status: 409 });
+    }
+    reserved.push({ variant_id: item.variant_id, quantity: item.quantity, product_name: item.product_name });
   }
 
   // 4. Create order
-  const { data: orderNumberData } = await sb.rpc('generate_order_number');
-  const orderNumber = orderNumberData || `VH-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`;
+  const { data: orderNumberData, error: onErr } = await sb.rpc('generate_order_number');
+  const orderNumber = (!onErr && orderNumberData)
+    || `VH-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`;
 
   // Upsert customer
   const { data: cust } = await sb.from('customers').upsert({
@@ -155,27 +123,43 @@ export const POST: APIRoute = async ({ request }) => {
   }).select().single();
 
   if (orderErr || !order) {
+    await rollback();
     return new Response(JSON.stringify({ error: 'Kon bestelling niet aanmaken.' }), { status: 500 });
   }
 
-  // Order items
-  await sb.from('order_items').insert(
+  const { error: itemsErr } = await sb.from('order_items').insert(
     lineItems.map(li => ({ ...li, order_id: order.id }))
   );
+  if (itemsErr) {
+    await rollback();
+    await sb.from('orders').update({ status: 'cancelled', payment_status: 'failed' }).eq('id', order.id);
+    return new Response(JSON.stringify({ error: 'Kon bestelling niet aanmaken.' }), { status: 500 });
+  }
 
-  // 5. Mollie payment
+  // 5. Mollie payment; bij falen niets gereserveerd of open laten hangen
   const siteUrl = import.meta.env.PUBLIC_SITE_URL || new URL(request.url).origin;
-  const mollie = getMollie();
-
-  const payment = await mollie.payments.create({
-    amount: { currency: 'EUR', value: (total / 100).toFixed(2) },
-    description: `Villa Happ ${orderNumber}`,
-    redirectUrl: `${siteUrl}/checkout/success?order=${order.order_number}`,
-    cancelUrl: `${siteUrl}/checkout/cancelled?order=${order.order_number}`,
-    webhookUrl: `${siteUrl}/api/checkout/webhook`,
-    metadata: { order_id: order.id, order_number: order.order_number },
-    locale: 'nl_NL',
-  });
+  let payment: Payment | undefined;
+  try {
+    const mollie = getMollie();
+    payment = await mollie.payments.create({
+      amount: { currency: 'EUR', value: (total / 100).toFixed(2) },
+      description: `Villa Happ ${orderNumber}`,
+      redirectUrl: `${siteUrl}/checkout/success?order=${order.order_number}`,
+      cancelUrl: `${siteUrl}/checkout/cancelled?order=${order.order_number}`,
+      webhookUrl: `${siteUrl}/api/checkout/webhook`,
+      metadata: { order_id: order.id, order_number: order.order_number },
+      locale: Locale.nl_NL,
+    });
+  } catch (err) {
+    console.error('[checkout] Mollie payment create faalde:', err);
+    await rollback();
+    await sb.from('orders').update({ status: 'cancelled', payment_status: 'failed' }).eq('id', order.id);
+    return new Response(JSON.stringify({ error: 'Betaling kon niet worden gestart. Probeer het opnieuw.' }), { status: 502 });
+  }
+  if (!payment) {
+    await rollback();
+    return new Response(JSON.stringify({ error: 'Betaling kon niet worden gestart. Probeer het opnieuw.' }), { status: 502 });
+  }
 
   // 6. Save Mollie id op order
   await sb.from('orders').update({
