@@ -19,7 +19,8 @@ export function getSiteOrigin(): string {
  */
 export function isPreviewHost(origin: string = getSiteOrigin()): boolean {
   try {
-    return new URL(origin).hostname.endsWith('.vercel.app');
+    const host = new URL(origin).hostname;
+    return host.endsWith('.vercel.app') || host === 'localhost' || host === '127.0.0.1';
   } catch {
     return true; // onbekend domein: veilig default = niet indexeren
   }
