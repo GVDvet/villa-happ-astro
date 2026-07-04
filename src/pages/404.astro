@@ -1,0 +1,74 @@
+---
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+import { getCatalog } from '../lib/catalog';
+import { formatPrice } from '../lib/commerce';
+import '../styles/shop.css';
+
+const catalog = await getCatalog();
+const suggestions = catalog.slice(0, 3);
+---
+<Base
+  title="Pagina niet gevonden · Villa Happ"
+  description="Deze pagina bestaat niet (meer). Bekijk de collectie of ga terug naar de homepage."
+  noindex={true}
+>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+
+      <header class="vh-page-head vh-404-head">
+        <p class="vh-page-label vh-mono">404 · Niet gevonden</p>
+        <h1 class="vh-page-title">Dit stuk zit niet <span class="vh-italic-accent">in het archief</span></h1>
+        <p class="vh-404-sub">
+          De pagina die je zocht bestaat niet of is verhuisd.
+          Geen zorgen: de collectie hangt hier om de hoek.
+        </p>
+        <div class="vh-404-actions">
+          <a href="/shop" class="vh-btn vh-btn--accent"><span>Naar de shop</span></a>
+          <a href="/" class="vh-btn vh-btn--ghost"><span>Naar de homepage</span></a>
+        </div>
+      </header>
+
+      {suggestions.length > 0 && (
+        <div class="vh-pdp-related">
+          <h2>Misschien zocht je <span class="vh-italic-accent">dit</span></h2>
+          <div class="vh-listing">
+            {suggestions.map((p, i) => (
+              <a href={`/shop/${p.slug}`} class="vh-card">
+                <div class="vh-card-media">
+                  <span class="vh-card-num">0{i + 1}</span>
+                  {p.badge && <span class="vh-card-badge">{p.badge}</span>}
+                  <img src={p.images[0]} alt={p.name} class="vh-card-img main" width="600" height="750" loading="lazy" />
+                </div>
+                <div class="vh-card-info">
+                  <p class="vh-card-name">{p.name}</p>
+                  <p class="vh-card-price">{formatPrice(p.price_cents)}</p>
+                </div>
+                <p class="vh-card-meta">{p.meta}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+    </div>
+  </section>
+
+  <style>
+    .vh-404-head { text-align: center; }
+    .vh-404-sub {
+      max-width: 46ch;
+      margin: 16px auto 0;
+      line-height: 1.7;
+      color: var(--vh-ink-soft, #6b6357);
+    }
+    .vh-404-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+  </style>
+</Base>

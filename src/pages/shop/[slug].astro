@@ -50,6 +50,25 @@ const siteOrigin = Astro.site?.origin || Astro.url.origin;
 const productUrl = `${siteOrigin}/shop/${product.slug}`;
 const absImages = product.images.map((i) => (i.startsWith('http') ? i : siteOrigin + i));
 
+// Merchant-velden (verzending, retour, prijsgeldigheid) maken het
+// aanbod compleet voor Google's productresultaten
+const shippingDetailsLd = (['NL', 'BE', 'DE'] as const).map((country) => ({
+  '@type': 'OfferShippingDetails',
+  shippingRate: {
+    '@type': 'MonetaryAmount',
+    value: (({ NL: 4.95, BE: 6.95, DE: 8.95 })[country]).toFixed(2),
+    currency: 'EUR',
+  },
+  shippingDestination: { '@type': 'DefinedRegion', addressCountry: country },
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime',
+    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+    transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+  },
+}));
+
+const priceValidUntil = `${new Date().getFullYear()}-12-31`;
+
 const productLd = {
   '@context': 'https://schema.org',
   '@type': 'Product',
@@ -63,8 +82,18 @@ const productLd = {
     url: productUrl,
     priceCurrency: 'EUR',
     price: (product.price_cents / 100).toFixed(2),
+    priceValidUntil,
     availability: soldOut ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',
+    shippingDetails: shippingDetailsLd,
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: ['NL', 'BE', 'DE'],
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: 30,
+      returnMethod: 'https://schema.org/ReturnByMail',
+      returnFees: 'https://schema.org/FreeReturn',
+    },
   },
 };
 

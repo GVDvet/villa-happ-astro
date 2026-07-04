@@ -10,7 +10,7 @@ import { getSupabaseAdmin } from '../../lib/supabase';
 export const prerender = false;
 
 const Schema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   source: z.string().optional().default('footer'),
 });
 

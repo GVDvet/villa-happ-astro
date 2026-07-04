@@ -13,6 +13,8 @@
  */
 
 import type { APIRoute } from 'astro';
+import { Locale } from '@mollie/api-client';
+import type { Payment } from '@mollie/api-client';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getMollie } from '../../../lib/mollie';
 import { CheckoutSchema, shippingCost } from '../../../lib/checkout-logic';
@@ -133,7 +135,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // 5. Mollie payment; bij falen niets gereserveerd of open laten hangen
   const siteUrl = import.meta.env.PUBLIC_SITE_URL || new URL(request.url).origin;
-  let payment;
+  let payment: Payment | undefined;
   try {
     const mollie = getMollie();
     payment = await mollie.payments.create({
@@ -143,12 +145,16 @@ export const POST: APIRoute = async ({ request }) => {
       cancelUrl: `${siteUrl}/checkout/cancelled?order=${order.order_number}`,
       webhookUrl: `${siteUrl}/api/checkout/webhook`,
       metadata: { order_id: order.id, order_number: order.order_number },
-      locale: 'nl_NL',
+      locale: Locale.nl_NL,
     });
   } catch (err) {
     console.error('[checkout] Mollie payment create faalde:', err);
     await rollback();
     await sb.from('orders').update({ status: 'cancelled', payment_status: 'failed' }).eq('id', order.id);
+    return new Response(JSON.stringify({ error: 'Betaling kon niet worden gestart. Probeer het opnieuw.' }), { status: 502 });
+  }
+  if (!payment) {
+    await rollback();
     return new Response(JSON.stringify({ error: 'Betaling kon niet worden gestart. Probeer het opnieuw.' }), { status: 502 });
   }
 

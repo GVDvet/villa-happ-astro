@@ -22,11 +22,11 @@ export function shippingCost(country: string, subtotalCents: number): number {
 
 export const CheckoutSchema = z.object({
   items: z.array(z.object({
-    variant_id: z.string().uuid(),
+    variant_id: z.uuid(),
     quantity: z.number().int().min(1).max(20),
   })).min(1).max(30),
   customer: z.object({
-    email: z.string().email(),
+    email: z.email(),
     first_name: z.string().min(1).max(80),
     last_name: z.string().min(1).max(80),
     accepts_marketing: z.boolean().optional(),
