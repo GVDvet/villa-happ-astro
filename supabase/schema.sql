@@ -186,6 +186,34 @@ CREATE TABLE IF NOT EXISTS drop_notifications (
 );
 
 -- ============================================================
+-- PRODUCT REVIEWS (moderatie: approved-vlag)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS product_reviews (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_slug  TEXT NOT NULL,
+  name          TEXT NOT NULL,
+  rating        INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  body          TEXT NOT NULL,
+  approved      BOOLEAN DEFAULT FALSE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_slug ON product_reviews(product_slug, approved);
+
+-- ============================================================
+-- BACK-IN-STOCK MELDINGEN (per product + maat)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS back_in_stock (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_slug  TEXT NOT NULL,
+  size          TEXT,
+  email         TEXT NOT NULL,
+  notified_at   TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (product_slug, size, email)
+);
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- ============================================================
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
@@ -197,6 +225,8 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE back_in_stock ENABLE ROW LEVEL SECURITY;
 
 -- Public read: published products + drops
 CREATE POLICY "Public read published products" ON products
@@ -212,6 +242,9 @@ CREATE POLICY "Public read inventory" ON inventory
 
 CREATE POLICY "Public read drops" ON drops
   FOR SELECT USING (status IN ('coming-soon', 'live', 'sold-out'));
+
+CREATE POLICY "Public read approved reviews" ON product_reviews
+  FOR SELECT USING (approved = TRUE);
 
 -- Writes alleen via service-role key (server-side endpoints).
 -- Geen public INSERT/UPDATE/DELETE policies = blocked by default.

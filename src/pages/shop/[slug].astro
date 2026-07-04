@@ -351,7 +351,7 @@ const pdpData = {
             <textarea id="vh-rev-text" rows="3" required maxlength="500" placeholder="Hoe zit het, hoe voelt het, zou je het aanraden?"></textarea>
           </div>
           <button type="submit" class="vh-btn vh-btn--accent"><span>Plaats review</span></button>
-          <p class="vh-reviews-note vh-mono">Demo: reviews worden lokaal in je browser bewaard tot de database live staat.</p>
+          <p class="vh-reviews-note vh-mono" id="vh-reviews-note">Demo: reviews worden lokaal in je browser bewaard tot de database live staat.</p>
         </form>
       </section>
 
@@ -702,19 +702,31 @@ const pdpData = {
     box.removeAttribute('hidden');
   })();
 
-  /* Back-in-stock formulier (demo: lokaal opslaan) */
+  /* Back-in-stock formulier: naar de database, lokaal als demo-fallback */
   const notifyForm = document.getElementById('vh-pdp-notify-form') as HTMLFormElement;
   const notifyEmail = document.getElementById('vh-pdp-notify-email') as HTMLInputElement;
   const notifyDone = document.getElementById('vh-pdp-notify-done')!;
-  notifyForm?.addEventListener('submit', (e) => {
+  notifyForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!notifyEmail.value || !/.+@.+\..+/.test(notifyEmail.value)) { notifyEmail.focus(); return; }
+    const size = (notifySize.textContent || '').replace(/^maat\s+/i, '');
+    let saved = false;
     try {
-      const key = 'vh_backinstock';
-      const list = JSON.parse(localStorage.getItem(key) || '[]');
-      list.push({ slug: data.slug, size: notifySize.textContent, email: notifyEmail.value });
-      localStorage.setItem(key, JSON.stringify(list));
+      const res = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: data.slug, size, email: notifyEmail.value }),
+      });
+      saved = res.ok;
     } catch {}
+    if (!saved) {
+      try {
+        const key = 'vh_backinstock';
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.push({ slug: data.slug, size, email: notifyEmail.value });
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch {}
+    }
     notifyForm.setAttribute('hidden', '');
     notifyDone.removeAttribute('hidden');
   });
@@ -781,23 +793,28 @@ const pdpData = {
     });
   })();
 
-  /* Reviews (sociaal bewijs): eerlijke lege staat, echte input, lokaal bewaard */
+  /* Reviews (sociaal bewijs): database-first met moderatie; zonder DB
+     valt alles terug op het lokale demo-gedrag */
   (function reviews() {
     const KEY = `vh_reviews_${data.slug}`;
     const aggEl = document.getElementById('vh-reviews-agg')!;
     const listEl = document.getElementById('vh-reviews-list')!;
     const toggle = document.getElementById('vh-reviews-toggle')!;
     const form = document.getElementById('vh-reviews-form') as HTMLFormElement;
+    const note = document.getElementById('vh-reviews-note')!;
     const starsInput = document.getElementById('vh-rev-stars')!;
     const nameEl = document.getElementById('vh-rev-name') as HTMLInputElement;
     const textEl = document.getElementById('vh-rev-text') as HTMLTextAreaElement;
     let rating = 0;
+    let serverMode = false;
 
-    const load = (): any[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+    type Review = { name: string; rating: number; text: string; date: string };
+
+    const loadLocal = (): Review[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
     const stars = (n: number) => '★★★★★☆☆☆☆☆'.slice(5 - Math.round(n), 10 - Math.round(n));
+    function esc(s: string) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-    function render() {
-      const all = load();
+    function render(all: Review[]) {
       if (!all.length) {
         aggEl.innerHTML = '<span class="vh-reviews-empty">Nog geen reviews. Wees de eerste die dit stuk beoordeelt.</span>';
         listEl.innerHTML = '';
@@ -805,11 +822,32 @@ const pdpData = {
       }
       const avg = all.reduce((s, r) => s + r.rating, 0) / all.length;
       aggEl.innerHTML = `<span class="vh-reviews-stars">${stars(avg)}</span><span class="vh-reviews-score">${avg.toFixed(1)}</span><span class="vh-reviews-count">${all.length} review${all.length > 1 ? 's' : ''}</span>`;
-      listEl.innerHTML = all.slice().reverse().map((r) =>
+      listEl.innerHTML = all.map((r) =>
         `<article class="vh-review"><div class="vh-review-top"><span class="vh-reviews-stars">${stars(r.rating)}</span><b>${esc(r.name)}</b><time>${esc(r.date)}</time></div><p>${esc(r.text)}</p></article>`
       ).join('');
     }
-    function esc(s: string) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    const fmtDate = (iso: string) => {
+      const d = new Date(iso);
+      return isNaN(d.valueOf()) ? '' : `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+    };
+
+    async function init() {
+      try {
+        const res = await fetch(`/api/reviews?slug=${encodeURIComponent(data.slug)}`);
+        if (res.ok) {
+          const json = await res.json();
+          serverMode = true;
+          note.setAttribute('hidden', '');
+          render((json.reviews || []).map((r: any) => ({
+            name: r.name, rating: r.rating, text: r.body, date: fmtDate(r.created_at),
+          })));
+          return;
+        }
+      } catch {}
+      // Demo-fallback: lokaal bewaarde reviews (nieuwste eerst)
+      render(loadLocal().slice().reverse());
+    }
 
     starsInput.querySelectorAll<HTMLButtonElement>('.vh-rev-star').forEach((b) => {
       b.addEventListener('click', () => {
@@ -823,27 +861,40 @@ const pdpData = {
       if (open) { form.removeAttribute('hidden'); nameEl.focus(); } else { form.setAttribute('hidden', ''); }
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!rating) { starsInput.classList.add('is-error'); return; }
       starsInput.classList.remove('is-error');
-      const all = load();
-      const d = new Date();
-      all.push({
-        name: nameEl.value.trim() || 'Anoniem',
-        rating,
-        text: textEl.value.trim(),
-        date: `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`,
-      });
-      try { localStorage.setItem(KEY, JSON.stringify(all)); } catch {}
+      const review = { name: nameEl.value.trim() || 'Anoniem', rating, text: textEl.value.trim() };
+
+      let toastMsg = 'Bedankt voor je review ✦';
+      if (serverMode) {
+        try {
+          const res = await fetch('/api/reviews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: data.slug, ...review }),
+          });
+          if (!res.ok) throw new Error();
+          toastMsg = 'Bedankt! Je review verschijnt na een korte controle ✦';
+        } catch {
+          toastMsg = 'Opslaan lukte niet, probeer het later opnieuw';
+        }
+      } else {
+        const d = new Date();
+        const all = loadLocal();
+        all.push({ ...review, date: `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}` });
+        try { localStorage.setItem(KEY, JSON.stringify(all)); } catch {}
+        render(all.slice().reverse());
+      }
+
       form.reset();
       rating = 0;
       starsInput.querySelectorAll('.vh-rev-star').forEach((s) => s.classList.remove('is-on'));
       form.setAttribute('hidden', '');
-      render();
-      window.dispatchEvent(new CustomEvent('vh:toast', { detail: 'Bedankt voor je review ✦' }));
+      window.dispatchEvent(new CustomEvent('vh:toast', { detail: toastMsg }));
     });
 
-    render();
+    init();
   })();
 </script>
