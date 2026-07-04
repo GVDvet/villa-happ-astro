@@ -6,15 +6,18 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { getSupabaseAdmin } from '../../lib/supabase';
+import { rateLimit, clientKey, tooManyRequests } from '../../lib/rate-limit';
 
 export const prerender = false;
 
 const Schema = z.object({
   email: z.email(),
-  source: z.string().optional().default('footer'),
+  source: z.string().max(40).optional().default('footer'),
 });
 
 export const POST: APIRoute = async ({ request }) => {
+  if (!rateLimit(clientKey(request, 'newsletter'), 5)) return tooManyRequests();
+
   let body;
   try {
     body = Schema.parse(await request.json());

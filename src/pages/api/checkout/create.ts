@@ -19,10 +19,13 @@ import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getMollie } from '../../../lib/mollie';
 import { CheckoutSchema, shippingCost } from '../../../lib/checkout-logic';
 import { reserveInventory, releaseInventory } from '../../../lib/inventory';
+import { rateLimit, clientKey, tooManyRequests } from '../../../lib/rate-limit';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+  if (!rateLimit(clientKey(request, 'checkout'), 10)) return tooManyRequests();
+
   const sb = getSupabaseAdmin();
   if (!sb) {
     return new Response(JSON.stringify({ error: 'Supabase niet geconfigureerd' }), { status: 503 });

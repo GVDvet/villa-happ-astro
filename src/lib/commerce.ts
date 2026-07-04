@@ -35,17 +35,6 @@ export async function getFeaturedProducts(limit = 3): Promise<Product[]> {
   return (data as Product[]) || [];
 }
 
-export async function getAllProducts(): Promise<Product[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('products')
-    .select('*')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false });
-  return (data as Product[]) || [];
-}
-
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const sb = getSupabase();
   if (!sb) return null;
@@ -56,31 +45,6 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .eq('status', 'published')
     .single();
   return (data as Product) || null;
-}
-
-export async function getProductVariants(productId: string): Promise<ProductVariant[]> {
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data } = await sb
-    .from('product_variants')
-    .select('*')
-    .eq('product_id', productId);
-  return (data as ProductVariant[]) || [];
-}
-
-export async function getInventoryForVariants(variantIds: string[]): Promise<Record<string, InventoryRow>> {
-  const sb = getSupabase();
-  if (!sb || variantIds.length === 0) return {};
-  const { data } = await sb
-    .from('inventory')
-    .select('*')
-    .in('variant_id', variantIds);
-
-  const map: Record<string, InventoryRow> = {};
-  for (const row of (data as InventoryRow[]) || []) {
-    map[row.variant_id] = row;
-  }
-  return map;
 }
 
 /**
