@@ -73,7 +73,9 @@ function updateBadge(n: number) {
   });
 }
 
-// Init badge bij page load
+// Init badge bij page load (en na elke View Transitions-swap)
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => updateBadge(wishlistCount()));
+  const syncBadge = () => updateBadge(wishlistCount());
+  window.addEventListener('DOMContentLoaded', syncBadge);
+  document.addEventListener('astro:page-load', syncBadge);
 }

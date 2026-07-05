@@ -72,7 +72,11 @@ import '../styles/shop.css';
 </Base>
 
 <script>
-  const form = document.getElementById('vh-contact-form') as HTMLFormElement;
+  import { onPageReady } from '../lib/page';
+
+  onPageReady(() => {
+  const form = document.getElementById('vh-contact-form') as HTMLFormElement | null;
+  if (!form) return;
   const done = document.getElementById('vh-contact-done')!;
 
   const reqInputs = Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]'));
@@ -105,4 +109,5 @@ import '../styles/shop.css';
     done.removeAttribute('hidden');
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+  }); // einde onPageReady
 </script>

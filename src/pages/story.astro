@@ -272,16 +272,20 @@ const chapters = [
 
 <script>
   import '../lib/cart';
+  import { onPageReady } from '../lib/page';
 
-  const els = document.querySelectorAll('.st-reveal');
-  if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    els.forEach((el) => obs.observe(el));
-  } else {
-    els.forEach((el) => el.classList.add('is-visible'));
-  }
+  onPageReady(() => {
+    const els = document.querySelectorAll('.st-reveal');
+    if (!els.length) return;
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      els.forEach((el) => obs.observe(el));
+    } else {
+      els.forEach((el) => el.classList.add('is-visible'));
+    }
+  }); // einde onPageReady
 </script>

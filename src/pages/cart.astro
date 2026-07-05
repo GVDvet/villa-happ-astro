@@ -46,6 +46,10 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
 
 <script>
   import { getCart, updateQuantity, removeFromCart, cartSubtotal, shippingCostCents, onCartChange } from '../lib/cart';
+  import { onPageReady } from '../lib/page';
+
+  onPageReady(() => {
+  if (!document.getElementById('vh-cart-grid')) return;
 
   const grid = document.getElementById('vh-cart-grid')!;
   const empty = document.getElementById('vh-cart-empty')!;
@@ -97,6 +101,9 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
     else if (target.closest('[data-remove]')) removeFromCart(vid);
   });
 
-  onCartChange(render);
+  const offCartChange = onCartChange(render);
   render();
+
+  return () => offCartChange();
+  }); // einde onPageReady
 </script>

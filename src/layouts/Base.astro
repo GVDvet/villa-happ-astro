@@ -1,6 +1,7 @@
 ---
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
 import CartDrawer from '../components/commerce/CartDrawer.astro';
 import { isPreviewHost } from '../lib/site';
 import { srcsetFor, optimizedSrc } from '../lib/img';
@@ -113,6 +114,9 @@ const preview = isPreviewHost(canonicalURL.origin);
 
   <meta name="theme-color" content="#F7F3EC" />
 
+  <!-- SPA-navigatie met shared-element morph (productfoto grid → PDP) -->
+  <ClientRouter />
+
   <!-- JSON-LD: Organization -->
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
@@ -129,12 +133,11 @@ const preview = isPreviewHost(canonicalURL.origin);
 <body class={`vh-body ${bodyClass}`}>
   <a class="vh-skip-link" href="#main-content">Ga naar inhoud</a>
 
-  <!-- Page transition wipe -->
-  <div class="vh-wipe" id="vh-wipe" aria-hidden="true">
-    <span class="vh-wipe-mark">Villa Happ</span>
-  </div>
-
-  {showHeader && <Header />}
+  {showHeader && (
+    <div transition:persist="vh-header">
+      <Header />
+    </div>
+  )}
 
   <main id="main-content">
     <slot />
@@ -142,101 +145,23 @@ const preview = isPreviewHost(canonicalURL.origin);
 
   {showFooter && <Footer />}
 
-  <CartDrawer />
+  <div transition:persist="vh-cartdrawer">
+    <CartDrawer />
+  </div>
 
-  <style>
-    .vh-wipe {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: var(--vh-espresso);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform: scaleY(0);
-      transform-origin: bottom;
-      pointer-events: none;
-    }
-    .vh-wipe.cover {
-      transform: scaleY(1);
-      transform-origin: bottom;
-      transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
-      pointer-events: all;
-    }
-    .vh-wipe.cover-instant {
-      transform: scaleY(1);
-      transform-origin: top;
-      transition: none;
-    }
-    .vh-wipe.reveal {
-      transform: scaleY(0);
-      transform-origin: top;
-      transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
-    }
-    .vh-wipe-mark {
-      font-family: var(--vh-font-serif);
-      font-style: italic;
-      font-size: clamp(28px, 4vw, 48px);
-      color: var(--vh-paper);
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    .vh-wipe.cover .vh-wipe-mark,
-    .vh-wipe.cover-instant .vh-wipe-mark {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .vh-wipe { display: none; }
-    }
-  </style>
-
-  <script is:inline>
-    (function () {
-      var wipe = document.getElementById('vh-wipe');
-      if (!wipe) return;
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Reveal bij binnenkomst (alleen na interne navigatie)
-      if (!reduce && sessionStorage.getItem('vh-nav')) {
-        sessionStorage.removeItem('vh-nav');
-        wipe.classList.add('cover-instant');
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            wipe.classList.remove('cover-instant');
-            wipe.classList.add('reveal');
-            setTimeout(function () { wipe.classList.remove('reveal'); }, 600);
-          });
-        });
+  <script>
+    // Homepage buiten de SPA-router houden: de GSAP/Lenis-motion daar
+    // verwacht klassieke pageloads. Links naar én vanaf home worden dus
+    // een volledige navigatie; de rest van de site swapt met morph.
+    function markReloadLinks() {
+      document.querySelectorAll('a[href="/"]').forEach((a) => a.setAttribute('data-astro-reload', ''));
+      if (document.body.classList.contains('vh-home')) {
+        document.querySelectorAll('a[href^="/"]').forEach((a) => a.setAttribute('data-astro-reload', ''));
       }
-
-      // Cover bij interne link-klik
-      document.addEventListener('click', function (e) {
-        if (reduce) return;
-        var a = e.target.closest && e.target.closest('a');
-        if (!a) return;
-        if (a.hasAttribute('data-no-wipe')) return;
-        var href = a.getAttribute('href');
-        if (!href || href.charAt(0) === '#' || a.target === '_blank') return;
-        if (href.indexOf('http') === 0 && href.indexOf(window.location.origin) !== 0) return;
-        if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return;
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-        // Zelfde pagina? niets doen
-        var url = new URL(href, window.location.href);
-        if (url.pathname === window.location.pathname) return;
-
-        e.preventDefault();
-        sessionStorage.setItem('vh-nav', '1');
-        wipe.classList.add('cover');
-        setTimeout(function () { window.location.href = url.href; }, 560);
-      });
-
-      // Bij terug-knop (bfcache) reset wipe
-      window.addEventListener('pageshow', function (ev) {
-        if (ev.persisted) { wipe.className = 'vh-wipe'; }
-      });
-    })();
+    }
+    document.addEventListener('astro:page-load', markReloadLinks);
+    if (document.readyState !== 'loading') markReloadLinks();
+    else document.addEventListener('DOMContentLoaded', markReloadLinks, { once: true });
   </script>
 </body>
 </html>

@@ -50,12 +50,17 @@ import '../../styles/shop.css';
 
 <script>
   import { clearCart } from '../../lib/cart';
+  import { onPageReady } from '../../lib/page';
+
+  onPageReady(() => {
+  const nrEl = document.getElementById('vh-ordernr');
+  if (!nrEl) return;
 
   // Mandje leegmaken: de bestelling is geplaatst.
   clearCart();
 
   const nr = new URLSearchParams(window.location.search).get('order');
-  document.getElementById('vh-ordernr')!.textContent = nr ? `#${nr}` : 'Volgt per e-mail';
+  nrEl.textContent = nr ? `#${nr}` : 'Volgt per e-mail';
 
   // Verwachte bezorging (zelfde logica als de PDP)
   (function deliv() {
@@ -71,4 +76,5 @@ import '../../styles/shop.css';
     const d = nextBiz(ship);
     el.textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
   })();
+  }); // einde onPageReady
 </script>
