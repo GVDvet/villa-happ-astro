@@ -163,28 +163,49 @@ const pdpData = {
         <!-- Gallery: gestapelde archief-tegels (desktop scrolt, mobiel swipet) -->
         <div class="vh-pdp-media">
           <div class="vh-pdp-gallery" id="vh-pdp-gallery">
-            {product.images.map((img, i) => (
+            <figure class="vh-pdp-tile" transition:name={`product-${product.slug}`}>
+              <button
+                type="button"
+                class="vh-pdp-tile-btn"
+                data-full={optimizedSrc(product.images[0], 1920)}
+                aria-label={`Foto 1 van ${product.name} groot bekijken`}
+              >
+                <Pic
+                  src={product.images[0]}
+                  alt={`${product.name} ${product.color}`}
+                  width={900}
+                  height={1125}
+                  widths={[480, 640, 768, 1080]}
+                  sizes="(max-width: 900px) 88vw, 55vw"
+                  loading="eager"
+                  fetchpriority="high"
+                />
+                {soldOut && <span class="vh-stamp" aria-hidden="true">Uitverkocht</span>}
+              </button>
+              <figcaption class="vh-pdp-frame-tag">
+                Archief · {skuPrefix} · 01/{String(product.images.length).padStart(2, '0')}
+              </figcaption>
+            </figure>
+            {product.images.slice(1).map((img, i) => (
               <figure class="vh-pdp-tile">
                 <button
                   type="button"
                   class="vh-pdp-tile-btn"
                   data-full={optimizedSrc(img, 1920)}
-                  aria-label={`Foto ${i + 1} van ${product.name} groot bekijken`}
+                  aria-label={`Foto ${i + 2} van ${product.name} groot bekijken`}
                 >
                   <Pic
                     src={img}
-                    alt={i === 0 ? `${product.name} ${product.color}` : `${product.name}, foto ${i + 1}`}
+                    alt={`${product.name}, foto ${i + 2}`}
                     width={900}
                     height={1125}
                     widths={[480, 640, 768, 1080]}
                     sizes="(max-width: 900px) 88vw, 55vw"
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    fetchpriority={i === 0 ? 'high' : 'auto'}
+                    loading="lazy"
                   />
-                  {i === 0 && soldOut && <span class="vh-stamp" aria-hidden="true">Uitverkocht</span>}
                 </button>
                 <figcaption class="vh-pdp-frame-tag">
-                  Archief · {skuPrefix} · {String(i + 1).padStart(2, '0')}/{String(product.images.length).padStart(2, '0')}
+                  Archief · {skuPrefix} · {String(i + 2).padStart(2, '0')}/{String(product.images.length).padStart(2, '0')}
                 </figcaption>
               </figure>
             ))}
@@ -378,7 +399,7 @@ const pdpData = {
           <div class="vh-listing">
             {related.map((p, i) => (
               <a href={`/shop/${p.slug}`} class="vh-card">
-                <div class="vh-card-media">
+                <div class="vh-card-media" transition:name={`product-${p.slug}`}>
                   <span class="vh-card-num">0{i + 1}</span>
                   {p.badge && <span class="vh-card-badge">{p.badge}</span>}
                   <Pic src={p.images[0]} alt={p.name} class="vh-card-img main" width={600} height={750} loading="lazy" />
@@ -522,8 +543,15 @@ const pdpData = {
   import { toggleWishlist, inWishlist } from '../../lib/wishlist';
   import { recordRecent, getRecent } from '../../lib/recent';
   import { flyToCart } from '../../lib/fx';
+  import { onPageReady } from '../../lib/page';
 
-  const data = JSON.parse(document.getElementById('vh-pdp-data')!.textContent!);
+  onPageReady(() => {
+  const dataEl = document.getElementById('vh-pdp-data');
+  if (!dataEl) return; // andere pagina in beeld (page-load vuurt sitebreed)
+  // Document-listeners van deze weergave; wordt geaborteerd vóór de volgende swap
+  const ac = new AbortController();
+
+  const data = JSON.parse(dataEl.textContent!);
 
   /* 3D-viewer alleen laden op producten met een model (eigen bundle,
      code-split; geen Google CDN meer) */
@@ -585,7 +613,7 @@ const pdpData = {
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !box.hasAttribute('hidden')) close();
-    });
+    }, { signal: ac.signal });
   })();
 
   /* Maatselectie + back-in-stock */
@@ -853,7 +881,7 @@ const pdpData = {
     };
     openBtn.addEventListener('click', open);
     modal.querySelectorAll('[data-sizeguide-close]').forEach((el) => el.addEventListener('click', close));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hasAttribute('hidden')) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hasAttribute('hidden')) close(); }, { signal: ac.signal });
     modal.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab') return;
       const els = focusables();
@@ -969,4 +997,7 @@ const pdpData = {
 
     init();
   })();
+
+  return () => ac.abort();
+  }); // einde onPageReady
 </script>

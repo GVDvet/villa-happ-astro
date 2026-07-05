@@ -118,13 +118,15 @@ export function openCart() {
   }
 }
 
-// Init badge bij page load
+// Init badge bij page load (en na elke View Transitions-swap)
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
+  const syncBadge = () => {
     const count = cartCount();
     document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach(el => {
       el.textContent = String(count);
       el.setAttribute('data-cart-count', String(count));
     });
-  });
+  };
+  window.addEventListener('DOMContentLoaded', syncBadge);
+  document.addEventListener('astro:page-load', syncBadge);
 }

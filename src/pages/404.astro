@@ -37,7 +37,7 @@ const suggestions = catalog.slice(0, 3);
           <div class="vh-listing">
             {suggestions.map((p, i) => (
               <a href={`/shop/${p.slug}`} class="vh-card">
-                <div class="vh-card-media">
+                <div class="vh-card-media" transition:name={`product-${p.slug}`}>
                   <span class="vh-card-num">0{i + 1}</span>
                   {p.badge && <span class="vh-card-badge">{p.badge}</span>}
                   <Pic src={p.images[0]} alt={p.name} class="vh-card-img main" width={600} height={750} loading="lazy" />

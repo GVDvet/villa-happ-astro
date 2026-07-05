@@ -25,6 +25,10 @@ import '../styles/shop.css';
 
 <script>
   import { getWishlist, removeWish, onWishlistChange } from '../lib/wishlist';
+  import { onPageReady } from '../lib/page';
+
+  onPageReady(() => {
+  if (!document.getElementById('vh-wish-list')) return;
 
   const listEl = document.getElementById('vh-wish-list')!;
   const emptyEl = document.getElementById('vh-wish-empty')!;
@@ -60,6 +64,9 @@ import '../styles/shop.css';
     if (card) removeWish(card.dataset.wishSlug!);
   });
 
-  onWishlistChange(render);
+  const offWishlistChange = onWishlistChange(render);
   render();
+
+  return () => offWishlistChange();
+  }); // einde onPageReady
 </script>

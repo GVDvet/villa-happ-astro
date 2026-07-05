@@ -63,7 +63,7 @@ const ficheOf = (p: Product) =>
             data-cat={categoryOf(p.name)}
             data-search={`${p.name} ${p.color} ${p.meta}`.toLowerCase()}
           >
-            <div class="vh-card-media">
+            <div class="vh-card-media" transition:name={`product-${p.slug}`}>
               <span class="vh-card-num">0{i + 1}</span>
               {p.compare_at_cents
                 ? <span class="vh-card-badge vh-card-badge--sale">−{Math.round((1 - p.price_cents / p.compare_at_cents) * 100)}%</span>
@@ -131,6 +131,10 @@ const ficheOf = (p: Product) =>
 <script>
   import '../../lib/cart';
   import { toggleWishlist, inWishlist } from '../../lib/wishlist';
+  import { onPageReady } from '../../lib/page';
+
+  onPageReady(() => {
+  if (!document.getElementById('vh-shop-listing')) return;
 
   document.querySelectorAll<HTMLButtonElement>('.vh-card-wish').forEach((btn) => {
     const slug = btn.dataset.wishSlug!;
@@ -221,6 +225,7 @@ const ficheOf = (p: Product) =>
 
     apply();
   })();
+  }); // einde onPageReady
 </script>
 
 <style>

@@ -111,6 +111,10 @@ import '../../styles/shop.css';
 
 <script>
   import { getCart, cartSubtotal, shippingCostCents, cartHasDemo } from '../../lib/cart';
+  import { onPageReady } from '../../lib/page';
+
+  onPageReady(() => {
+  if (!document.getElementById('vh-co-form')) return;
 
   const grid = document.getElementById('vh-co-grid')!;
   const empty = document.getElementById('vh-co-empty')!;
@@ -313,4 +317,5 @@ import '../../styles/shop.css';
       renderSummary();
     }
   });
+  }); // einde onPageReady
 </script>
