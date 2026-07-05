@@ -18,6 +18,12 @@ function categoryOf(name: string): string {
   return 'Overig';
 }
 const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
+
+type Product = (typeof products)[number];
+const stockOf = (p: Product) => p.variants.reduce((s, v) => s + v.stock, 0);
+const skuPrefixOf = (p: Product) => p.variants[0]?.sku?.split('-').slice(0, 2).join('-') || 'VH';
+const ficheOf = (p: Product) =>
+  p.edition ? `${skuPrefixOf(p)} · oplage ${p.edition} · nog ${stockOf(p)}` : `${skuPrefixOf(p)} · ${p.meta}`;
 ---
 <Base title="Shop · Villa Happ" description="De Villa Happ collectie: heritage hoodies en limited editions, genummerd en gemaakt met 65 jaar vakmanschap.">
   <section class="vh-page">
@@ -49,8 +55,9 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
 
       <div class="vh-listing" id="vh-shop-listing">
         {products.map((p, i) => (
+          <>
           <article
-            class="vh-card"
+            class={`vh-card${i === 0 ? ' vh-card--feature' : ''}`}
             data-index={i}
             data-price={p.price_cents}
             data-cat={categoryOf(p.name)}
@@ -67,6 +74,7 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
                 data-wish-image={p.images[0]} data-wish-color={p.color}>♡</button>
               <Pic src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width={600} height={750} loading={i < 3 ? 'eager' : 'lazy'} />
               {p.images[1] && <Pic src={p.images[1]} alt="" class="vh-card-img alt" width={600} height={750} loading="lazy" aria-hidden="true" />}
+              {stockOf(p) === 0 && <span class="vh-stamp" aria-hidden="true">Uitverkocht</span>}
             </div>
             <a href={`/shop/${p.slug}`} class="vh-card-link" aria-label={p.name}></a>
             <div class="vh-card-info">
@@ -76,8 +84,21 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
                 {formatPrice(p.price_cents)}
               </p>
             </div>
-            <p class="vh-card-meta">{p.meta}</p>
+            <p class="vh-card-meta vh-mono">{ficheOf(p)}</p>
           </article>
+          {i === 1 && (
+            <aside class="vh-card vh-card--editorial" id="vh-shop-editorial">
+              <a href="/story" class="vh-editorial-inner">
+                <Pic src="/img/heritage/origin-babyparadijs.webp" alt="" width={600} height={750} loading="lazy" aria-hidden="true" />
+                <div class="vh-editorial-body">
+                  <p class="vh-editorial-kicker vh-mono">Uit het archief · 1960</p>
+                  <p class="vh-editorial-quote">Twee keer gevallen, drie keer opgestaan. Elk stuk draagt dat verhaal.</p>
+                  <span class="vh-editorial-link vh-mono">Lees het verhaal →</span>
+                </div>
+              </a>
+            </aside>
+          )}
+          </>
         ))}
       </div>
 
@@ -146,7 +167,8 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
     const resetBtn = document.getElementById('vh-shop-reset');
     if (!listing || !countEl || !emptyEl || !searchEl || !sortEl) return;
 
-    const cards = Array.from(listing.querySelectorAll<HTMLElement>('.vh-card'));
+    const cards = Array.from(listing.querySelectorAll<HTMLElement>('.vh-card[data-price]'));
+    const editorial = document.getElementById('vh-shop-editorial');
     const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-cat-filter]'));
     let cat = 'alle';
 
@@ -169,6 +191,15 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
         card.style.display = show ? '' : 'none';
         if (show) visible++;
       });
+
+      // Redactionele tegel: alleen in de gecureerde standaardweergave,
+      // terug op zijn plek (positie 3) na het hersorteren hierboven
+      if (editorial) {
+        const curated = cat === 'alle' && !term && sort === 'new';
+        editorial.style.display = curated ? '' : 'none';
+        if (curated && sorted[2]) listing!.insertBefore(editorial, sorted[2]);
+      }
+
       countEl!.textContent = `${visible} ${visible === 1 ? 'stuk' : 'stuks'}`;
       emptyEl!.hidden = visible > 0;
     }
@@ -230,6 +261,56 @@ const categories = [...new Set(products.map((p) => categoryOf(p.name)))];
   .vh-shop-tools input[type='search']:focus,
   .vh-shop-tools select:focus { outline: 2px solid var(--vh-ink, #1e1e1b); outline-offset: 1px; }
   .vh-shop-count { margin: 0 0 18px; opacity: 0.6; font-size: 12px; }
+
+  /* Grid-ritme: de held van de collectie spant twee kolommen */
+  #vh-shop-listing :global(.vh-card--feature) { grid-column: span 2; }
+  #vh-shop-listing :global(.vh-card--feature .vh-card-media) { aspect-ratio: 8/7; }
+  #vh-shop-listing :global(.vh-card--feature .vh-card-name) { font-size: 20px; }
+
+  /* Redactionele archieftegel op positie 3 */
+  .vh-card--editorial { position: relative; }
+  .vh-editorial-inner {
+    position: relative;
+    display: block;
+    aspect-ratio: 4/5;
+    border-radius: var(--vh-radius-sm);
+    overflow: hidden;
+    background: var(--vh-ink, #1e1e1b);
+    color: var(--vh-paper, #f7f3ec);
+    text-decoration: none;
+  }
+  .vh-editorial-inner :global(img) {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.55;
+    filter: sepia(0.35);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+  }
+  .vh-card--editorial:hover .vh-editorial-inner :global(img) { transform: scale(1.04); opacity: 0.45; }
+  .vh-editorial-body {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .vh-editorial-kicker { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.75; margin: 0; }
+  .vh-editorial-quote {
+    font-family: var(--vh-font-serif);
+    font-style: italic;
+    font-size: clamp(19px, 1.8vw, 24px);
+    line-height: 1.3;
+    margin: 0;
+  }
+  .vh-editorial-link { font-size: 11px; opacity: 0.85; }
+  .vh-card--editorial:hover .vh-editorial-link { text-decoration: underline; text-underline-offset: 4px; }
+
+  @media (max-width: 540px) {
+    /* Eén kolom: span terugzetten, anders ontstaat een tweede impliciete kolom */
+    #vh-shop-listing :global(.vh-card--feature) { grid-column: auto; }
+    #vh-shop-listing :global(.vh-card--feature .vh-card-media) { aspect-ratio: 4/5; }
+  }
   @media (max-width: 700px) {
     .vh-shop-toolbar { flex-direction: column; align-items: stretch; }
     .vh-shop-tools { flex-wrap: wrap; }

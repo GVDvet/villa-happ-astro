@@ -264,20 +264,29 @@
 }
 .vh-pdp-back:hover { color: var(--vh-accent); }
 
-/* Gallery */
-.vh-pdp-gallery { position: sticky; top: 90px; }
-.vh-pdp-main {
+/* Gallery: gestapelde archief-tegels, info-kolom kleeft (desktop) */
+.vh-pdp-gallery {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+.vh-pdp-info { position: sticky; top: 96px; }
+.vh-pdp-tile {
 	position: relative;
-	aspect-ratio: 4/5;
+	margin: 0;
 	border-radius: var(--vh-radius-md);
 	overflow: hidden;
 	background: var(--vh-paper-soft);
-	margin-bottom: 14px;
 }
-.vh-pdp-main img {
-	width: 100%; height: 100%; object-fit: cover;
-	transition: opacity 0.35s ease;
+.vh-pdp-tile-btn {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: zoom-in;
 }
+.vh-pdp-tile img { width: 100%; height: auto; display: block; }
 .vh-pdp-frame-tag {
 	position: absolute; top: 16px; left: 16px;
 	font-family: var(--vh-font-mono); font-size: 10px;
@@ -287,20 +296,19 @@
 	padding: 6px 10px; border-radius: 4px;
 	backdrop-filter: blur(6px);
 	z-index: 2;
+	pointer-events: none;
 }
-/* 360° model-viewer in de gallery */
-.vh-pdp-main model-viewer {
+/* 360° model-viewer als eigen tegel */
+.vh-pdp-tile--3d { aspect-ratio: 4/5; }
+.vh-pdp-tile--3d model-viewer {
 	position: absolute;
 	inset: 0;
 	width: 100%;
 	height: 100%;
-	display: none;
 	background: var(--vh-paper-soft);
 	--progress-bar-color: var(--vh-accent);
 	--progress-mask: transparent;
 }
-.vh-pdp-main.show-3d model-viewer { display: block; }
-.vh-pdp-main.show-3d > img { visibility: hidden; }
 .vh-pdp-3d-hint {
 	position: absolute;
 	bottom: 14px;
@@ -312,37 +320,88 @@
 	border-radius: var(--vh-radius-pill);
 	font-size: 10px;
 	backdrop-filter: blur(6px);
-	display: none;
 	pointer-events: none;
 	z-index: 3;
 }
-.vh-pdp-main.show-3d .vh-pdp-3d-hint { display: inline-flex; }
+/* Swipe-dots (alleen mobiel zichtbaar) */
+.vh-pdp-dots { display: none; }
+.vh-pdp-dot {
+	width: 6px; height: 6px;
+	border-radius: 50%;
+	background: var(--vh-ink-hairline);
+	transition: background var(--vh-dur-fast) ease, transform var(--vh-dur-fast) ease;
+}
+.vh-pdp-dot.is-on { background: var(--vh-ink); transform: scale(1.25); }
 
-.vh-pdp-thumb--3d {
+/* Uitverkocht-stempel (archief-motief) */
+.vh-stamp {
+	position: absolute;
+	top: 50%; left: 50%;
+	transform: translate(-50%, -50%) rotate(-8deg);
+	padding: 10px 22px;
+	border: 2px solid var(--vh-espresso, #2b2620);
+	border-radius: 4px;
+	font-family: var(--vh-font-mono);
+	font-size: clamp(13px, 1.4vw, 17px);
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--vh-espresso, #2b2620);
+	background: rgba(244, 238, 227, 0.75);
+	box-shadow: inset 0 0 0 2px rgba(244, 238, 227, 0.6);
+	pointer-events: none;
+	z-index: 3;
+	opacity: 0.92;
+}
+
+/* Certificaat van echtheid (oplage-producten) */
+.vh-cert {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin: 18px 0 4px;
+	padding: 16px 18px;
+	border: 1px dashed var(--vh-ink-muted, #8a8072);
+	border-radius: var(--vh-radius-sm);
+	background: rgba(255, 255, 255, 0.35);
+}
+.vh-cert-seal {
+	flex: 0 0 auto;
+	width: 46px; height: 46px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--vh-ink);
-	color: var(--vh-paper);
-	font-size: 12px;
-	letter-spacing: 0.06em;
+	border: 1.5px solid var(--vh-ink);
+	border-radius: 50%;
+	font-family: var(--vh-font-serif);
+	font-style: italic;
+	font-size: 16px;
+	transform: rotate(-6deg);
 }
-.vh-pdp-thumb--3d.is-active { border-color: var(--vh-accent); }
+.vh-cert-title {
+	font-family: var(--vh-font-serif);
+	font-size: 16px;
+	margin: 0 0 2px;
+}
+.vh-cert-meta {
+	font-size: 10px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--vh-ink-soft);
+	margin: 0 0 6px;
+}
+.vh-cert-note { font-size: 12.5px; line-height: 1.55; color: var(--vh-ink-soft); margin: 0; }
 
-.vh-pdp-thumbs { display: flex; gap: 10px; }
-.vh-pdp-thumb {
-	width: 72px; height: 90px;
-	border-radius: var(--vh-radius-sm);
-	overflow: hidden;
-	background: var(--vh-paper-soft);
-	border: 1px solid transparent;
-	cursor: pointer; padding: 0;
-	transition: border-color var(--vh-dur-fast) ease, opacity var(--vh-dur-fast) ease;
-	opacity: 0.65;
+/* Inkt-stempel-effect bij toevoegen aan het mandje */
+.vh-btn.is-stamped { animation: vh-stamp-press 0.45s var(--vh-ease-out); }
+@keyframes vh-stamp-press {
+	0% { transform: scale(1); }
+	35% { transform: scale(0.94) rotate(-0.6deg); }
+	70% { transform: scale(1.03); }
+	100% { transform: scale(1); }
 }
-.vh-pdp-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.vh-pdp-thumb.is-active { border-color: var(--vh-ink); opacity: 1; }
-.vh-pdp-thumb:hover { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+	.vh-btn.is-stamped { animation: none; }
+}
 
 /* Info kolom */
 .vh-pdp-kicker { color: var(--vh-accent); margin: 0 0 14px; }
@@ -648,8 +707,32 @@
 .vh-pdp-sticky .vh-btn { flex: 1; padding: 14px; }
 @media (max-width: 900px) {
 	.vh-pdp { grid-template-columns: 1fr; }
-	.vh-pdp-gallery { position: static; }
+	.vh-pdp-info { position: static; }
 	.vh-pdp-sticky { display: flex; }
+	/* Galerij wordt een swipe-rij met snap */
+	.vh-pdp-gallery {
+		flex-direction: row;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		gap: 12px;
+		scrollbar-width: none;
+		margin: 0 calc(-1 * var(--vh-gutter, 20px));
+		padding: 0 var(--vh-gutter, 20px);
+	}
+	.vh-pdp-gallery::-webkit-scrollbar { display: none; }
+	.vh-pdp-tile {
+		flex: 0 0 86%;
+		aspect-ratio: 4/5;
+		scroll-snap-align: center;
+	}
+	.vh-pdp-tile-btn { height: 100%; }
+	.vh-pdp-tile img { height: 100%; object-fit: cover; }
+	.vh-pdp-dots {
+		display: flex;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 12px;
+	}
 }
 
 /* Verwante producten */
