@@ -19,6 +19,9 @@ interface Props {
   class?: string;
   id?: string;
   'aria-hidden'?: 'true' | 'false';
+  draggable?: 'true' | 'false' | boolean;
+  /** Overige HTML- en data-attributen (bv. data-cine-img) stromen via ...rest door */
+  [key: `data-${string}`]: unknown;
 }
 
 const {
