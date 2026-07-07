@@ -41,8 +41,10 @@ export const BRAND = {
   ],
   /** Onderwerpen waar het merk geloofwaardig over is (knowsAbout in schema) */
   knowsAbout: ['heritage mode', 'biologisch katoen', 'genummerde oplages', 'Tilburgs vakmanschap', 'lifestyle apparel'],
-  /** Echte social- en profiel-URL's; leeg tot bekend. Vul aan bij go-live. */
-  sameAs: [] as string[],
+  /** Echte profiel-URL's die de merkentiteit aan de kennisgraaf koppelen */
+  sameAs: ['https://www.linkedin.com/company/villahapp'] as string[],
+  /** Profiel-URL('s) van de merkverteller Rutger van Happen (Person-entiteit) */
+  stewardSameAs: ['https://www.linkedin.com/in/rutger-van-happen-a27b4727'] as string[],
 };
 
 /** Organization-node: de kern van de merkentiteit voor zoek- en AI-engines. */
@@ -93,10 +95,12 @@ export function websiteLd(origin: string = getSiteOrigin()) {
 
 /** Person-node voor de merkverteller: E-E-A-T-anker voor de journal. */
 export function stewardLd(origin: string = getSiteOrigin()) {
-  return {
+  const person: Record<string, unknown> = {
     '@type': 'Person',
     name: BRAND.steward,
     url: `${origin}/story`,
     worksFor: { '@id': `${origin}/#organization` },
   };
+  if (BRAND.stewardSameAs.length) person.sameAs = BRAND.stewardSameAs;
+  return person;
 }
