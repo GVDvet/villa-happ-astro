@@ -1,0 +1,314 @@
+/* ============================================================
+   Villa Happ — Het Atelier
+   Interactieve craftmanship-reis, papier-en-inkt-taal.
+   Sticky visual + scrollende copy per station (robuust, geen
+   GSAP-pinning). Reduced-motion en no-JS tonen alles statisch.
+   ============================================================ */
+
+.atl {
+  background: var(--vh-paper);
+  color: var(--vh-ink);
+  overflow-x: clip;
+}
+
+/* Voortgangs-dossierbalk boven in beeld */
+.atl-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 50;
+  background: var(--vh-ink-faint);
+}
+.atl-progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--vh-accent);
+  transition: width 0.1s linear;
+}
+
+/* ---------- Intro ---------- */
+.atl-intro {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+  position: relative;
+}
+.atl-frame-tag {
+  font-family: var(--vh-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--vh-ink-soft);
+  border: 1px solid var(--vh-ink-hairline);
+  padding: 7px 13px;
+  border-radius: 4px;
+}
+.atl-intro-title {
+  font-family: var(--vh-font-serif);
+  font-size: clamp(46px, 10vw, 128px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin: 26px 0 18px;
+  font-weight: 400;
+}
+.atl-intro-title em { font-style: italic; color: var(--vh-accent-ink); }
+.atl-intro-sub {
+  max-width: 52ch;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.7;
+  color: var(--vh-ink-soft);
+}
+.atl-scrollcue {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--vh-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vh-ink-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.atl-scrollcue::after {
+  content: '';
+  width: 1px;
+  height: 34px;
+  background: var(--vh-ink-faint);
+  animation: atl-cue 1.8s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes atl-cue { 0%, 100% { transform: scaleY(0.4); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+
+/* ---------- Station ---------- */
+.atl-station {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(30px, 5vw, 80px);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 56px);
+  align-items: start;
+}
+.atl-station:nth-child(even) .atl-visual { order: 2; }
+
+.atl-visual-wrap {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.atl-visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: 74svh;
+  border-radius: var(--vh-radius-md, 10px);
+  overflow: hidden;
+  background: var(--vh-paper-soft);
+  box-shadow: 0 30px 80px -50px rgba(28, 24, 19, 0.6);
+}
+.atl-visual .atl-frame-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+  background: rgba(244, 238, 227, 0.86);
+  backdrop-filter: blur(6px);
+}
+
+.atl-copy {
+  padding: clamp(90px, 22vh, 260px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 100svh;
+  justify-content: center;
+}
+.atl-copy-num {
+  font-family: var(--vh-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--vh-accent-ink);
+}
+.atl-copy h2 {
+  font-family: var(--vh-font-serif);
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-weight: 400;
+}
+.atl-copy p {
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.75;
+  color: var(--vh-ink-soft);
+  margin: 0;
+  max-width: 46ch;
+}
+.atl-spec {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--vh-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vh-ink-soft);
+  border-top: 1px solid var(--vh-ink-hairline);
+  padding-top: 16px;
+  margin-top: 6px;
+}
+.atl-spec b { font-family: var(--vh-font-serif); font-size: 26px; letter-spacing: 0; color: var(--vh-ink); }
+
+/* Reveal (JS aan). No-JS/safe-mode zet alles zichtbaar. */
+.atl-reveal { opacity: 0; transform: translateY(24px); }
+.vh-no-motion .atl-reveal,
+.atl-reveal.is-in { opacity: 1; transform: none; transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ---------- Station 1: de stof ---------- */
+.atl-weave { position: absolute; inset: 0; }
+.atl-weave img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); transform-origin: center; }
+.atl-loupe {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(28,24,19,0.05) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(90deg, rgba(28,24,19,0.05) 0 2px, transparent 2px 4px);
+  opacity: 0;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ---------- Station 2: de kleur ---------- */
+.atl-dye-base { position: absolute; inset: 0; background: var(--vh-paper-deep); }
+.atl-dye-fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0%;
+  background: var(--vh-olive);
+  transition: height 0.1s linear;
+}
+.atl-swatches { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 3; }
+.atl-swatch {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid rgba(244,238,227,0.85);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+.atl-swatch[aria-pressed="true"] { transform: scale(1.22); box-shadow: 0 0 0 2px var(--vh-ink); }
+
+/* ---------- Station 3: het borduursel ---------- */
+.atl-stitch { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.atl-stitch svg { width: 56%; height: auto; }
+.atl-stitch path, .atl-stitch line { stroke: var(--vh-ink); stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.atl-stitch .atl-stitch-draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+
+/* ---------- Station 4: de oplage ---------- */
+.atl-edition { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; }
+.atl-edition-num { font-family: var(--vh-font-serif); font-size: clamp(90px, 16vw, 200px); line-height: 0.9; letter-spacing: -0.04em; }
+.atl-edition-bar { width: 72%; height: 4px; background: var(--vh-ink-faint); border-radius: 2px; overflow: hidden; }
+.atl-edition-bar span { display: block; height: 100%; width: 0%; background: var(--vh-accent); }
+.atl-edition-note { font-family: var(--vh-font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vh-ink-soft); }
+
+/* ---------- Finale: jouw nummer ---------- */
+.atl-finale {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 100px 24px;
+  background: var(--vh-espresso);
+  color: var(--vh-paper);
+  text-align: center;
+}
+.atl-finale h2 { font-family: var(--vh-font-serif); font-size: clamp(30px, 5vw, 60px); margin: 0; font-weight: 400; }
+.atl-finale h2 em { font-style: italic; color: var(--vh-gold-soft); }
+.atl-finale p { max-width: 46ch; line-height: 1.7; color: rgba(244, 238, 227, 0.72); margin: 0; }
+
+/* Certificaat-kaart */
+.atl-cert {
+  width: min(440px, 92vw);
+  background: var(--vh-paper);
+  color: var(--vh-ink);
+  border-radius: var(--vh-radius-md, 10px);
+  padding: 30px 30px 26px;
+  text-align: left;
+  position: relative;
+  box-shadow: 0 40px 90px -50px rgba(0, 0, 0, 0.8);
+}
+.atl-cert::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px dashed var(--vh-ink-faint);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.atl-cert-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.atl-cert-seal {
+  width: 52px; height: 52px; border: 1.5px solid var(--vh-ink); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--vh-font-serif); font-style: italic; font-size: 18px; transform: rotate(-6deg);
+}
+.atl-cert-kicker { font-family: var(--vh-font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vh-ink-soft); }
+.atl-cert-title { font-family: var(--vh-font-serif); font-size: 22px; margin: 2px 0 0; }
+.atl-cert-number { font-family: var(--vh-font-serif); font-size: clamp(52px, 12vw, 76px); line-height: 1; letter-spacing: -0.02em; margin: 12px 0 6px; }
+.atl-cert-meta { font-family: var(--vh-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vh-ink-soft); }
+.atl-cert-foot { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--vh-ink-hairline); font-size: 12.5px; line-height: 1.5; color: var(--vh-ink-soft); }
+
+/* Claimformulier */
+.atl-form { width: min(440px, 92vw); display: flex; flex-direction: column; gap: 12px; }
+.atl-form input[type="email"], .atl-form input[type="text"] {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: var(--vh-radius-sm, 6px);
+  border: 1px solid rgba(244, 238, 227, 0.3);
+  background: rgba(244, 238, 227, 0.06);
+  color: var(--vh-paper);
+  font-size: 15px;
+}
+.atl-form input::placeholder { color: rgba(244, 238, 227, 0.5); }
+.atl-form input:focus { outline: 2px solid var(--vh-gold); outline-offset: 1px; }
+.atl-form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.atl-form-note { font-family: var(--vh-font-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(244, 238, 227, 0.5); }
+.atl-form-msg { font-size: 13px; min-height: 1em; }
+.atl-form-msg.is-error { color: #f0a27a; }
+
+.atl-finale-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* ---------- Mobiel ---------- */
+@media (max-width: 900px) {
+  .atl-station { grid-template-columns: 1fr; gap: 0; }
+  .atl-station:nth-child(even) .atl-visual { order: 0; }
+  .atl-visual-wrap { position: relative; height: auto; top: 0; padding-top: 40px; }
+  .atl-visual { max-height: none; }
+  .atl-copy { min-height: 0; padding: 40px 0 70px; }
+}
+
+/* ---------- Reduced motion / safe mode ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .atl-scrollcue::after { animation: none; }
+}
+.vh-no-motion .atl-visual-wrap { position: relative; height: auto; }
+.vh-no-motion .atl-copy { min-height: 0; padding: 40px 0; }
+.vh-no-motion .atl-loupe { opacity: 0.25; }
+.vh-no-motion .atl-dye-fill { height: 62%; }
+.vh-no-motion .atl-stitch .atl-stitch-draw { stroke-dashoffset: 0; }
+.vh-no-motion .atl-edition-bar span { width: 90%; }

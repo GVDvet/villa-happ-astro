@@ -6,7 +6,7 @@ import { getSiteOrigin } from '../lib/site';
 export const prerender = true;
 
 // Indexeerbare routes (transactiepagina's bewust weggelaten)
-const staticRoutes = ['', 'shop', 'story', 'drops', 'brands', 'journal', 'faq', 'verzending', 'retourneren', 'contact'];
+const staticRoutes = ['', 'shop', 'story', 'het-atelier', 'drops', 'brands', 'journal', 'faq', 'verzending', 'retourneren', 'contact'];
 
 export const GET: APIRoute = async () => {
   const site = getSiteOrigin();

@@ -151,7 +151,11 @@ const preview = isPreviewHost(canonicalURL.origin);
     // een volledige navigatie; de rest van de site swapt met morph.
     function markReloadLinks() {
       document.querySelectorAll('a[href="/"]').forEach((a) => a.setAttribute('data-astro-reload', ''));
-      if (document.body.classList.contains('vh-home')) {
+      // Links naar zware GSAP/Lenis-pagina's: volledige navigatie i.p.v. swap.
+      document.querySelectorAll('a[href="/het-atelier"]').forEach((a) => a.setAttribute('data-astro-reload', ''));
+      // Op zulke pagina's zelf: alle uitgaande links ook volledig herladen,
+      // zodat Lenis/ScrollTrigger nooit over een swap heen blijft hangen.
+      if (document.body.classList.contains('vh-home') || document.body.classList.contains('vh-atelier')) {
         document.querySelectorAll('a[href^="/"]').forEach((a) => a.setAttribute('data-astro-reload', ''));
       }
     }
