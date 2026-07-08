@@ -1,0 +1,348 @@
+---
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import { EDITION } from '../lib/atelier';
+import '../styles/atelier.css';
+
+const siteOrigin = Astro.site?.origin || Astro.url.origin;
+const pageUrl = `${siteOrigin}/het-atelier`;
+
+// CreativeWork-schema: dit is een merkervaring, geen artikel of product.
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: 'Het Atelier — van schets tot jouw nummer',
+  headline: 'Het Atelier',
+  description: 'Loop door hoe een Villa Happ stuk ontstaat: van bio-katoen en kleur tot het geborduurde embleem en jouw eigen nummer in de genummerde oplage.',
+  url: pageUrl,
+  inLanguage: 'nl-NL',
+  publisher: { '@id': `${siteOrigin}/#organization` },
+};
+---
+<Base
+  title="Het Atelier · Villa Happ"
+  description="Loop door hoe een Villa Happ stuk ontstaat: bio-katoen, kleur, het geborduurde embleem en jouw eigen nummer in de genummerde oplage."
+  ogImage="/img/products/hoodie-grey-lifestyle.webp"
+  bodyClass="vh-atelier"
+>
+  <div class="atl">
+    <div class="atl-progress" aria-hidden="true"><span></span></div>
+
+    <!-- Intro: de schets -->
+    <section class="atl-intro">
+      <span class="atl-frame-tag">Atelier · Tilburg · sinds 1960</span>
+      <h1 class="atl-intro-title">Het <em>Atelier</em></h1>
+      <p class="atl-intro-sub">
+        Elk stuk begint met een schets in Tilburg en eindigt met een nummer.
+        Loop mee langs de stof, de kleur en het borduursel, en claim aan het
+        eind jouw eigen plek in de oplage.
+      </p>
+      <span class="atl-scrollcue">Scrol om te beginnen</span>
+    </section>
+
+    <!-- Station 1: de stof -->
+    <section class="atl-station" id="station-stof" data-station="stof">
+      <div class="atl-visual-wrap">
+        <div class="atl-visual">
+          <span class="atl-frame-tag">Station 01 · De stof</span>
+          <div class="atl-weave">
+            <Pic src="/img/products/hoodie-logo-detail.webp" alt="Close-up van het geweven biologisch katoen" width={900} height={1125} widths={[480, 768, 1080]} sizes="(max-width: 900px) 100vw, 46vw" loading="lazy" />
+          </div>
+          <div class="atl-loupe" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="atl-copy">
+        <p class="atl-copy-num atl-reveal">Station 01</p>
+        <h2 class="atl-reveal">De stof draagt het verhaal</h2>
+        <p class="atl-reveal">
+          We beginnen zwaar: biologisch katoen van 350 gram per vierkante meter.
+          Dat valt beter, houdt warmte vast en slijt langzamer dan de dunne
+          kwaliteiten uit de winkelstraat. Zoom in en je ziet de weving zelf.
+        </p>
+        <span class="atl-spec atl-reveal"><b>350</b> gram / m² · biologisch katoen</span>
+      </div>
+    </section>
+
+    <!-- Station 2: de kleur -->
+    <section class="atl-station" id="station-kleur" data-station="kleur">
+      <div class="atl-visual-wrap">
+        <div class="atl-visual">
+          <span class="atl-frame-tag">Station 02 · De kleur</span>
+          <div class="atl-dye-base" aria-hidden="true"></div>
+          <div class="atl-dye-fill" id="atl-dye" aria-hidden="true"></div>
+          <div class="atl-swatches" role="group" aria-label="Kies een kleur">
+            <button type="button" class="atl-swatch" data-colour="olijfgroen" style="background:#6B7A4E" aria-pressed="true" aria-label="Olijfgroen"></button>
+            <button type="button" class="atl-swatch" data-colour="navy" style="background:#2c3a52" aria-pressed="false" aria-label="Navy"></button>
+            <button type="button" class="atl-swatch" data-colour="antraciet" style="background:#2f2d2b" aria-pressed="false" aria-label="Antraciet"></button>
+          </div>
+        </div>
+      </div>
+      <div class="atl-copy">
+        <p class="atl-copy-num atl-reveal">Station 02</p>
+        <h2 class="atl-reveal">De kleur trekt in de vezel</h2>
+        <p class="atl-reveal">
+          Geen oppervlaktelaagje dat na een paar wasbeurten verschiet, maar kleur
+          die in de vezel trekt. Olijfgroen, navy of antraciet. Kies alvast de
+          jouwe, dan komt hij straks terug op je certificaat.
+        </p>
+        <span class="atl-spec atl-reveal"><b>3</b> tinten · kleurecht gewassen op 30°</span>
+      </div>
+    </section>
+
+    <!-- Station 3: het borduursel -->
+    <section class="atl-station" id="station-borduursel" data-station="borduursel">
+      <div class="atl-visual-wrap">
+        <div class="atl-visual" style="background:var(--vh-paper-deep)">
+          <span class="atl-frame-tag">Station 03 · Het borduursel</span>
+          <div class="atl-stitch" aria-hidden="true">
+            <svg viewBox="0 0 200 200" role="img" aria-label="Het geborduurde VH-embleem">
+              <rect class="atl-stitch-draw" x="34" y="44" width="132" height="112" rx="10" pathLength="1"></rect>
+              <text class="atl-stitch-mark" x="100" y="118" text-anchor="middle" style="opacity:0; font-family:var(--vh-font-serif); font-style:italic; font-size:58px; fill:var(--vh-ink);">VH</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="atl-copy">
+        <p class="atl-copy-num atl-reveal">Station 03</p>
+        <h2 class="atl-reveal">Geborduurd, niet geprint</h2>
+        <p class="atl-reveal">
+          Een print barst na tien wasbeurten. Ons embleem wordt geborduurd, draad
+          voor draad, en blijft. Dat kost meer tijd en meer garen, en dat is
+          precies het punt: dit stuk gaat jaren mee.
+        </p>
+        <span class="atl-spec atl-reveal"><b>1960</b> · het jaar dat het begon</span>
+      </div>
+    </section>
+
+    <!-- Station 4: de oplage -->
+    <section class="atl-station" id="station-oplage" data-station="oplage">
+      <div class="atl-visual-wrap">
+        <div class="atl-visual" style="background:var(--vh-espresso);color:var(--vh-paper)">
+          <span class="atl-frame-tag">Station 04 · De oplage</span>
+          <div class="atl-edition">
+            <div class="atl-edition-num" id="atl-edition-num" data-edition={EDITION} style="color:var(--vh-paper)">{EDITION}</div>
+            <div class="atl-edition-bar" aria-hidden="true"><span></span></div>
+            <p class="atl-edition-note" style="color:rgba(244,238,227,0.7)">stuks in deze oplage · genummerd</p>
+          </div>
+        </div>
+      </div>
+      <div class="atl-copy">
+        <p class="atl-copy-num atl-reveal">Station 04</p>
+        <h2 class="atl-reveal">Een vast aantal, en op is op</h2>
+        <p class="atl-reveal">
+          We maken vooraf een vast aantal en daarna stopt het. Geen overproductie,
+          geen bijmaken. Elk exemplaar krijgt een eigen nummer en een certificaat
+          van echtheid. Als deze {EDITION} op zijn, komen ze niet terug.
+        </p>
+        <span class="atl-spec atl-reveal"><b>{EDITION}</b> stuks · genummerd 1 tot {EDITION}</span>
+      </div>
+    </section>
+
+    <!-- Finale: jouw nummer -->
+    <section class="atl-finale" id="atl-finale">
+      <div id="atl-claim-intro">
+        <h2>Claim <em>jouw nummer</em></h2>
+        <p>
+          Laat je e-mail achter en we reserveren jouw plek in de eerstvolgende
+          oplage. Je krijgt je genummerde certificaat meteen te zien, en je hoort
+          als eerste wanneer de drop live gaat.
+        </p>
+      </div>
+
+      <form class="atl-form" id="atl-form" novalidate>
+        <div class="atl-form-row">
+          <input type="text" id="atl-name" name="name" placeholder="Je naam (optioneel)" autocomplete="name" maxlength="40" style="flex:1;min-width:150px" />
+        </div>
+        <input type="email" id="atl-email" name="email" placeholder="jouw@email.nl" autocomplete="email" required aria-label="E-mailadres" />
+        <button type="submit" class="vh-btn vh-btn--accent" id="atl-submit"><span>Claim mijn nummer</span></button>
+        <p class="atl-form-msg" id="atl-msg" role="status" aria-live="polite"></p>
+        <p class="atl-form-note">We mailen je alleen over deze oplage. Geen spam, uitschrijven kan altijd.</p>
+      </form>
+
+      <!-- Certificaat (verschijnt na claim) -->
+      <div class="atl-cert" id="atl-cert" hidden>
+        <div class="atl-cert-head">
+          <div>
+            <p class="atl-cert-kicker">Villa Happ · Tilburg</p>
+            <p class="atl-cert-title">Certificaat van echtheid</p>
+          </div>
+          <span class="atl-cert-seal">VH</span>
+        </div>
+        <p class="atl-cert-number" id="atl-cert-number">—</p>
+        <p class="atl-cert-meta" id="atl-cert-meta">Genummerde oplage</p>
+        <p class="atl-cert-foot" id="atl-cert-foot">
+          Dit nummer is gereserveerd. Je hoort als eerste wanneer de oplage live gaat.
+        </p>
+      </div>
+
+      <div class="atl-finale-actions" id="atl-actions" hidden>
+        <button type="button" class="vh-btn vh-btn--light" id="atl-save"><span>Bewaar je certificaat</span></button>
+        <button type="button" class="vh-btn vh-btn--ghost" id="atl-share"><span>Deel</span></button>
+        <a href="/shop" class="vh-btn vh-btn--ghost" data-astro-reload><span>Naar de collectie</span></a>
+      </div>
+    </section>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} is:inline></script>
+</Base>
+
+<script>
+  import { initAtelier } from '../lib/atelier-motion';
+  import { formatEdition, EDITION } from '../lib/atelier';
+  import '../lib/cart';
+
+  initAtelier();
+
+  /* Kleurkeuze station 2: verf-kleur + onthouden voor het certificaat */
+  let chosenColour = 'olijfgroen';
+  const dye = document.getElementById('atl-dye');
+  const colourHex: Record<string, string> = { olijfgroen: '#6B7A4E', navy: '#2c3a52', antraciet: '#2f2d2b' };
+  document.querySelectorAll<HTMLButtonElement>('.atl-swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      chosenColour = btn.dataset.colour!;
+      document.querySelectorAll('.atl-swatch').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      if (dye) dye.style.background = colourHex[chosenColour];
+    });
+  });
+
+  /* Claim-finale */
+  const form = document.getElementById('atl-form') as HTMLFormElement;
+  const emailEl = document.getElementById('atl-email') as HTMLInputElement;
+  const nameEl = document.getElementById('atl-name') as HTMLInputElement;
+  const submitBtn = document.getElementById('atl-submit') as HTMLButtonElement;
+  const msg = document.getElementById('atl-msg')!;
+  const intro = document.getElementById('atl-claim-intro')!;
+  const cert = document.getElementById('atl-cert')!;
+  const certNumber = document.getElementById('atl-cert-number')!;
+  const certMeta = document.getElementById('atl-cert-meta')!;
+  const certFoot = document.getElementById('atl-cert-foot')!;
+  const actions = document.getElementById('atl-actions')!;
+
+  const KEY = 'vh_atelier_claim';
+  const fmtDate = () => new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Fallback-nummer zonder database: stabiel afgeleid uit het e-mailadres.
+  function localNumber(email: string): number {
+    let h = 0;
+    for (let i = 0; i < email.length; i++) h = (h * 31 + email.charCodeAt(i)) >>> 0;
+    return (h % EDITION) + 1;
+  }
+
+  interface Claim { number: number; edition: number; name: string; colour: string; date: string; }
+
+  function showCert(c: Claim) {
+    intro.setAttribute('hidden', '');
+    form.setAttribute('hidden', '');
+    certNumber.textContent = formatEdition(c.number, c.edition);
+    certMeta.textContent = `${c.name ? c.name + ' · ' : ''}${c.colour} · ${c.date}`;
+    certFoot.textContent = 'Dit nummer is voor jou gereserveerd. Je hoort als eerste wanneer de oplage live gaat.';
+    cert.removeAttribute('hidden');
+    actions.removeAttribute('hidden');
+  }
+
+  // Al eerder geclaimd in deze browser? Toon meteen het certificaat.
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && saved.number) showCert(saved);
+  } catch {}
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailEl.value.trim();
+    if (!/.+@.+\..+/.test(email)) { msg.textContent = 'Vul een geldig e-mailadres in.'; msg.classList.add('is-error'); emailEl.focus(); return; }
+    msg.classList.remove('is-error');
+    msg.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.querySelector('span')!.textContent = 'Een moment…';
+
+    const name = nameEl.value.trim();
+    let number = 0, edition = EDITION;
+    try {
+      const res = await fetch('/api/atelier/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: name || undefined, colour: chosenColour }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        number = data.number; edition = data.edition || EDITION;
+      } else if (res.status === 429) {
+        msg.textContent = 'Even rustig aan. Probeer het zo opnieuw.'; msg.classList.add('is-error');
+        submitBtn.disabled = false; submitBtn.querySelector('span')!.textContent = 'Claim mijn nummer'; return;
+      } else {
+        number = localNumber(email); // 503/demo: lokaal nummer
+      }
+    } catch {
+      number = localNumber(email);
+    }
+
+    const claim: Claim = { number, edition, name, colour: chosenColour, date: fmtDate() };
+    try { localStorage.setItem(KEY, JSON.stringify(claim)); } catch {}
+    showCert(claim);
+    window.dispatchEvent(new CustomEvent('vh:toast', { detail: `Nummer ${formatEdition(number, edition)} is van jou ✦` }));
+  });
+
+  /* Certificaat als afbeelding bewaren (canvas, self-contained) */
+  async function renderCanvas(c: Claim): Promise<HTMLCanvasElement> {
+    const S = 2; // retina
+    const w = 440, h = 300;
+    const cv = document.createElement('canvas');
+    cv.width = w * S; cv.height = h * S;
+    const ctx = cv.getContext('2d')!;
+    ctx.scale(S, S);
+    try { await (document as any).fonts.ready; } catch {}
+    // achtergrond
+    ctx.fillStyle = '#F4EEE3'; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(28,24,19,0.18)'; ctx.setLineDash([4, 4]); ctx.strokeRect(12, 12, w - 24, h - 24); ctx.setLineDash([]);
+    // zegel
+    ctx.strokeStyle = '#1C1813'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(w - 58, 52, 24, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#1C1813'; ctx.font = 'italic 18px "Fraunces Variable", Georgia, serif';
+    ctx.textAlign = 'center'; ctx.fillText('VH', w - 58, 58);
+    // koppen
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '10px "Space Mono", monospace';
+    ctx.fillText('VILLA HAPP · TILBURG', 34, 46);
+    ctx.fillStyle = '#1C1813'; ctx.font = '22px "Fraunces Variable", Georgia, serif';
+    ctx.fillText('Certificaat van echtheid', 34, 72);
+    // nummer
+    ctx.font = '64px "Fraunces Variable", Georgia, serif';
+    ctx.fillText(formatEdition(c.number, c.edition), 32, 150);
+    // meta
+    ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '11px "Space Mono", monospace';
+    ctx.fillText(`${(c.name ? c.name.toUpperCase() + ' · ' : '')}${c.colour.toUpperCase()} · ${c.date.toUpperCase()}`, 34, 176);
+    // voet
+    ctx.strokeStyle = 'rgba(28,24,19,0.12)'; ctx.beginPath(); ctx.moveTo(34, 224); ctx.lineTo(w - 34, 224); ctx.stroke();
+    ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '12px "Fraunces Variable", Georgia, serif';
+    ctx.fillText('Genummerd · gemaakt in Tilburg · komt niet terug', 34, 250);
+    return cv;
+  }
+
+  function currentClaim(): Claim | null {
+    try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; }
+  }
+
+  document.getElementById('atl-save')?.addEventListener('click', async () => {
+    const c = currentClaim(); if (!c) return;
+    const cv = await renderCanvas(c);
+    const a = document.createElement('a');
+    a.href = cv.toDataURL('image/png');
+    a.download = `villa-happ-nummer-${String(c.number).padStart(3, '0')}.png`;
+    a.click();
+  });
+
+  document.getElementById('atl-share')?.addEventListener('click', async () => {
+    const c = currentClaim(); if (!c) return;
+    const text = `Ik heb nummer ${formatEdition(c.number, c.edition)} geclaimd bij Villa Happ.`;
+    const url = `${location.origin}/het-atelier`;
+    if ((navigator as any).share) {
+      try { await (navigator as any).share({ title: 'Villa Happ · Het Atelier', text, url }); return; } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      window.dispatchEvent(new CustomEvent('vh:toast', { detail: 'Link gekopieerd ✦' }));
+    } catch {}
+  });
+</script>

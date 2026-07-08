@@ -214,6 +214,21 @@ CREATE TABLE IF NOT EXISTS back_in_stock (
 );
 
 -- ============================================================
+-- HET ATELIER — geclaimde nummers (claim-je-nummer-finale)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS atelier_claims (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email       TEXT UNIQUE NOT NULL,
+  name        TEXT,
+  colour      TEXT,
+  number      INTEGER NOT NULL,
+  edition     INTEGER NOT NULL DEFAULT 500,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_atelier_created ON atelier_claims(created_at);
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- ============================================================
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
@@ -227,6 +242,7 @@ ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE back_in_stock ENABLE ROW LEVEL SECURITY;
+ALTER TABLE atelier_claims ENABLE ROW LEVEL SECURITY;
 
 -- Public read: published products + drops
 CREATE POLICY "Public read published products" ON products

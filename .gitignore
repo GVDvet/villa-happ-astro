@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # vercel build output
 .vercel/
+
+# Lokale dev/preview-config (machine-specifiek)
+.claude/
