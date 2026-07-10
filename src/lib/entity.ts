@@ -56,7 +56,7 @@ export function organizationLd(origin: string = getSiteOrigin()) {
     name: BRAND.name,
     url: origin,
     logo: `${origin}/img/brand/villa-happ-logo.webp`,
-    image: `${origin}/img/products/hoodie-grey-lifestyle.webp`,
+    image: `${origin}/img/og/villa-happ-og.webp`,
     description: BRAND.definition,
     slogan: BRAND.slogan,
     foundingDate: BRAND.foundingYear,
