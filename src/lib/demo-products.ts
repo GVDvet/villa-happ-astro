@@ -88,7 +88,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     ],
     images: [
       '/img/products/hoodie-blue-front.webp',
-      '/img/products/hoodie-blue-lifestyle.webp',
+      '/img/products/hoodie-blue-back.webp',
     ],
     badge: 'Sale',
     meta: 'Navy · Unisex',

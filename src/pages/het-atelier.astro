@@ -75,7 +75,6 @@ const ld = {
           <div class="atl-swatches" role="group" aria-label="Kies een kleur">
             <button type="button" class="atl-swatch" data-colour="olijfgroen" style="background:#6B7A4E" aria-pressed="true" aria-label="Olijfgroen"></button>
             <button type="button" class="atl-swatch" data-colour="navy" style="background:#2c3a52" aria-pressed="false" aria-label="Navy"></button>
-            <button type="button" class="atl-swatch" data-colour="antraciet" style="background:#2f2d2b" aria-pressed="false" aria-label="Antraciet"></button>
           </div>
         </div>
       </div>
@@ -84,10 +83,10 @@ const ld = {
         <h2 class="atl-reveal">De kleur trekt in de vezel</h2>
         <p class="atl-reveal">
           Geen oppervlaktelaagje dat na een paar wasbeurten verschiet, maar kleur
-          die in de vezel trekt. Olijfgroen, navy of antraciet. Kies alvast de
-          jouwe, dan komt hij straks terug op je certificaat.
+          die in de vezel trekt. Olijfgroen of navy. Kies alvast de jouwe, dan
+          komt hij straks terug op je certificaat.
         </p>
-        <span class="atl-spec atl-reveal"><b>3</b> tinten · kleurecht gewassen op 30°</span>
+        <span class="atl-spec atl-reveal"><b>2</b> tinten · kleurecht gewassen op 30°</span>
       </div>
     </section>
 
@@ -178,7 +177,6 @@ const ld = {
             <div class="atl-studio-swatches" role="group" aria-label="Kies een kleur">
               <button type="button" class="atl-cswatch is-on" data-colour="olijfgroen" style="--sw:#6B7A4E" aria-pressed="true" aria-label="Olijfgroen"></button>
               <button type="button" class="atl-cswatch" data-colour="navy" style="--sw:#2c3a52" aria-pressed="false" aria-label="Navy"></button>
-              <button type="button" class="atl-cswatch" data-colour="antraciet" style="--sw:#2f2d2b" aria-pressed="false" aria-label="Antraciet"></button>
             </div>
           </div>
 
@@ -239,7 +237,7 @@ const ld = {
 
   initAtelier();
 
-  const colourHex: Record<string, string> = { olijfgroen: '#6B7A4E', navy: '#2c3a52', antraciet: '#2f2d2b' };
+  const colourHex: Record<string, string> = { olijfgroen: '#6B7A4E', navy: '#2c3a52' };
 
   /* Station 2 (tour): verf-teaser — verandert alvast de studiokleur mee */
   const dye = document.getElementById('atl-dye');
