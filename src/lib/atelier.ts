@@ -12,7 +12,7 @@ import { z } from 'zod';
 export const EDITION = 500;
 
 export const GARMENTS = ['hoodie', 'cap'] as const;
-export const COLOURS = ['olijfgroen', 'navy', 'antraciet'] as const;
+export const COLOURS = ['olijfgroen', 'navy'] as const;
 export type Garment = (typeof GARMENTS)[number];
 export type Colour = (typeof COLOURS)[number];
 
