@@ -285,60 +285,69 @@ CREATE POLICY "Customer reads own orders" ON orders
 -- HELPER FUNCTIONS
 -- ============================================================
 
+-- NB: alle functies pinnen `search_path = ''` en kwalificeren tabelnamen
+-- met public. (Supabase-advisor: function_search_path_mutable). Voorkomt
+-- search_path-injectie; built-ins (NOW, LPAD, ...) blijven via pg_catalog.
+
 -- Genereer order_number (VH-YYYY-XXXXX)
-CREATE OR REPLACE FUNCTION generate_order_number() RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION generate_order_number() RETURNS TEXT
+LANGUAGE plpgsql SET search_path = '' AS $$
 DECLARE
   yr INT := EXTRACT(YEAR FROM NOW());
   seq INT;
 BEGIN
   SELECT COALESCE(MAX(CAST(SUBSTRING(order_number FROM 9) AS INT)), 0) + 1
   INTO seq
-  FROM orders
+  FROM public.orders
   WHERE order_number LIKE 'VH-' || yr || '-%';
   RETURN 'VH-' || yr || '-' || LPAD(seq::TEXT, 5, '0');
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Voorraadmutaties (atomair; zie ook migrations/20260704_inventory_functions.sql)
-CREATE OR REPLACE FUNCTION reserve_inventory(v_id UUID, qty INT) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION reserve_inventory(v_id UUID, qty INT) RETURNS BOOLEAN
+LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   IF qty <= 0 THEN RETURN FALSE; END IF;
-  UPDATE inventory
+  UPDATE public.inventory
   SET reserved = reserved + qty,
       updated_at = NOW()
   WHERE variant_id = v_id
     AND quantity - reserved >= qty;
   RETURN FOUND;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE OR REPLACE FUNCTION finalize_inventory(v_id UUID, qty INT) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION finalize_inventory(v_id UUID, qty INT) RETURNS BOOLEAN
+LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   IF qty <= 0 THEN RETURN FALSE; END IF;
-  UPDATE inventory
+  UPDATE public.inventory
   SET quantity = GREATEST(0, quantity - qty),
       reserved = GREATEST(0, reserved - qty),
       updated_at = NOW()
   WHERE variant_id = v_id;
   RETURN FOUND;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE OR REPLACE FUNCTION release_inventory(v_id UUID, qty INT) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION release_inventory(v_id UUID, qty INT) RETURNS BOOLEAN
+LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   IF qty <= 0 THEN RETURN FALSE; END IF;
-  UPDATE inventory
+  UPDATE public.inventory
   SET reserved = GREATEST(0, reserved - qty),
       updated_at = NOW()
   WHERE variant_id = v_id;
   RETURN FOUND;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Updated_at triggers
-CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER
+LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trg_products_updated ON products;
 CREATE TRIGGER trg_products_updated BEFORE UPDATE ON products
