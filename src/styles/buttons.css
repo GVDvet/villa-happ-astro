@@ -44,7 +44,7 @@
 /* Accent — orange fill */
 .vh-btn--accent {
 	background: var(--vh-accent);
-	color: var(--vh-white);
+	color: var(--vh-ink);
 }
 .vh-btn--accent:hover {
 	background: var(--vh-accent-soft);
@@ -67,7 +67,7 @@
 }
 .vh-btn--light:hover::before { transform: translateY(0); }
 .vh-btn--light > * { position: relative; z-index: 1; }
-.vh-btn--light:hover { color: var(--vh-white); }
+.vh-btn--light:hover { color: var(--vh-ink); }
 
 /* Ghost — outline */
 .vh-btn--ghost {

@@ -492,7 +492,9 @@
 	margin: 0;
 }
 .vh-manifesto-text .vh-word {
-	color: var(--vh-ink-faint);
+	/* Ongelichte staat: warm grijs dat AA haalt voor grote tekst (3,8:1 op cream),
+	   nog duidelijk dimmer dan de volle inkt zodat het oplicht-effect blijft. */
+	color: #7d7871;
 	transition: color 0.3s ease;
 }
 .vh-manifesto-text .vh-word.is-lit { color: var(--vh-ink); }
@@ -555,7 +557,7 @@
 	margin: 0 0 24px;
 }
 .vh-heritage-text-col { display: flex; flex-direction: column; justify-content: center; }
-.vh-heritage-step-num { color: rgba(244,238,227,0.4); margin-bottom: 20px; }
+.vh-heritage-step-num { color: rgba(244,238,227,0.62); margin-bottom: 20px; }
 .vh-heritage-step-title {
 	font-family: var(--vh-font-serif);
 	font-size: clamp(28px, 3vw, 44px);
@@ -704,7 +706,7 @@
 	top: clamp(70px, 11vh, 120px);
 	left: 50%;
 	transform: translateX(-50%);
-	color: var(--vh-accent);
+	color: var(--vh-accent-ink);
 	margin: 0;
 	z-index: 3;
 }
@@ -1337,7 +1339,7 @@
 }
 .vh-finale-em { color: var(--vh-accent); }
 .vh-finale-stap {
-	color: rgba(244, 238, 227, 0.45);
+	color: rgba(244, 238, 227, 0.62);
 	margin: -18px 0 clamp(28px, 4vw, 44px);
 }
 

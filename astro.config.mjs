@@ -21,7 +21,7 @@ export default defineConfig({
     imageService: true,
     // Breedtes moeten matchen met IMG_WIDTHS in src/lib/img.ts
     imagesConfig: {
-      sizes: [160, 320, 480, 640, 768, 1080, 1440, 1920],
+      sizes: [96, 160, 320, 480, 640, 768, 1080, 1440, 1920],
       formats: ['image/avif', 'image/webp'],
       domains: [],
     },

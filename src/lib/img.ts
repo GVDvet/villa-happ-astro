@@ -10,7 +10,7 @@
  * in astro.config.mjs; Vercel weigert andere waarden.
  */
 
-export const IMG_WIDTHS = [160, 320, 480, 640, 768, 1080, 1440, 1920] as const;
+export const IMG_WIDTHS = [96, 160, 320, 480, 640, 768, 1080, 1440, 1920] as const;
 
 const isProd = import.meta.env.PROD;
 
