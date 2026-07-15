@@ -7,7 +7,7 @@
 	/* ---------- Brand kleuren ---------- */
 	--vh-ink: #1C1813;          /* warm espresso-zwart (heritage) */
 	--vh-ink-soft: rgba(28, 24, 19, 0.68);
-	--vh-ink-muted: rgba(28, 24, 19, 0.48);
+	--vh-ink-muted: rgba(28, 24, 19, 0.62);
 	--vh-ink-faint: rgba(28, 24, 19, 0.16);
 	--vh-ink-hairline: rgba(28, 24, 19, 0.1);
 
@@ -28,7 +28,7 @@
 	/* Gebrand oranje voor kleine accenttekst op licht: haalt WCAG AA
 	   (4,8:1 op --vh-paper) waar het felle #FE6B01 op ~2,5:1 blijft steken.
 	   Gebruik dit voor mono-labels/eyebrows; #FE6B01 blijft voor vlakken. */
-	--vh-accent-ink: #b34700;
+	--vh-accent-ink: #a34200;
 
 	/* Secundaire editorial gold */
 	--vh-gold: #c9b97a;

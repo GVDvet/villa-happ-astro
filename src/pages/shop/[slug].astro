@@ -256,7 +256,7 @@ const pdpData = {
                 <span class="vh-mono">Genummerde oplage</span>
                 <span class="vh-mono"><b>{totalStock}</b> van {edition} over</span>
               </div>
-              <div class="vh-pdp-scarcity-bar" role="progressbar" aria-valuenow={editionPct} aria-valuemin="0" aria-valuemax="100">
+              <div class="vh-pdp-scarcity-bar" role="progressbar" aria-label="Aandeel van de oplage dat al verkocht is" aria-valuenow={editionPct} aria-valuemin="0" aria-valuemax="100">
                 <span style={`width:${editionPct}%`}></span>
               </div>
               <p class="vh-pdp-scarcity-note">{soldOfEdition} al verkocht. Als deze {edition} op zijn, komen ze niet terug.</p>
