@@ -15,6 +15,7 @@ export const prerender = true;
  */
 export const GET: APIRoute = () => {
   const site = getSiteOrigin();
+  const brandAge = BRAND.age;
   const body = `# ${BRAND.name}
 
 > ${BRAND.definition}
@@ -29,10 +30,10 @@ ${BRAND.facts.map((f) => `- ${f}`).join('\n')}
 ## Belangrijkste pagina's
 
 - [Shop](${site}/shop): de volledige collectie, heritage hoodies en genummerde limited editions.
-- [Het verhaal](${site}/story): 65 jaar Villa Happ, van Toni's Babyparadijs (1960) tot The Comeback Kid en de heropstart in 2024.
+- [Het verhaal](${site}/story): ${brandAge} jaar Villa Happ, van Toni's Babyparadijs (1960) tot The Comeback Kid en de heropstart in 2024.
+- [Het Atelier](${site}/het-atelier): hoe een stuk ontstaat, van stof tot geborduurd embleem.
 - [Journal](${site}/journal): achtergronden over materiaal, herkomst en vakmanschap.
-- [Drops](${site}/drops): genummerde, gelimiteerde releases.
-- [Brands](${site}/brands): een gecureerde selectie merken.
+- [Pers](${site}/pers): kernfeiten en beeldmateriaal voor media.
 - [Veelgestelde vragen](${site}/faq): bestellen, verzending en retour.
 - [Verzending](${site}/verzending) en [Retourneren](${site}/retourneren): voorwaarden en levertijden.
 - [Contact](${site}/contact).

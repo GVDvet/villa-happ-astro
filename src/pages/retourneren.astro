@@ -2,25 +2,30 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
+import { BUSINESS, returnAddressLines } from '../lib/business';
+import { RETURN_SENTENCE } from '../lib/legal';
 import '../styles/shop.css';
 
+const returnLines = returnAddressLines();
+
 const steps = [
-  { n: '01', t: 'Meld je retour', d: 'Reageer op je bevestigingsmail met je bestelnummer en wat je wilt terugsturen.' },
+  { n: '01', t: 'Meld je retour', d: `Mail ons binnen ${BUSINESS.returnDays} dagen na ontvangst met je bestelnummer, of gebruik het herroepingsformulier.` },
   { n: '02', t: 'Pak het in', d: 'Stop het stuk ongedragen terug in de verpakking, met de labels er nog aan.' },
-  { n: '03', t: 'Stuur het terug', d: 'Plak het retourlabel op het pakket en lever het in bij een PostNL-punt.' },
-  { n: '04', t: 'Geld terug', d: 'Zodra we je retour hebben ontvangen en gecontroleerd, betalen we binnen 14 dagen terug.' },
+  { n: '03', t: 'Stuur het terug', d: 'Je hebt daarna nog 14 dagen om het pakket op de post te doen. Vanuit Nederland krijg je een gratis retourlabel.' },
+  { n: '04', t: 'Geld terug', d: `Binnen ${BUSINESS.refundDays} dagen na je melding krijg je het volledige bedrag terug via dezelfde betaalmethode.` },
 ];
 ---
-<Base title="Retourneren · Villa Happ" description="Niet goed? Retourneren bij Villa Happ kan kosteloos binnen 30 dagen. Zo werkt het, stap voor stap.">
+<Base title="Retourneren · Villa Happ" description={`Niet goed? Je hebt bij Villa Happ ${BUSINESS.returnDays} dagen bedenktijd en retourneren vanuit Nederland is gratis. Zo werkt het, stap voor stap.`}>
   <section class="vh-page">
     <div class="vh-page-inner">
       <header class="vh-page-head">
         <p class="vh-page-label vh-mono">Hulp & service</p>
         <h1 class="vh-page-title">Retour&shy;neren</h1>
-        <p class="vh-page-sub">Niet helemaal wat je hoopte? Geen zorgen. Je hebt 30 dagen bedenktijd en retourneren is gratis binnen Nederland.</p>
+        <p class="vh-page-sub">Niet helemaal wat je hoopte? Geen zorgen. {RETURN_SENTENCE}</p>
       </header>
 
       <div class="vh-trust">
+        <h2 class="vh-trust-group-title">Zo werkt het</h2>
         <ol class="vh-trust-steps">
           {steps.map((s) => (
             <li>
@@ -36,12 +41,27 @@ const steps = [
         <div class="vh-trust-group">
           <h2 class="vh-trust-group-title">Voorwaarden</h2>
           <ul class="vh-prose-list">
-            <li>Stukken zijn ongedragen, ongewassen en voorzien van de originele labels.</li>
-            <li>Je meldt je retour binnen 30 dagen na ontvangst.</li>
-            <li>Retourneren binnen Nederland is gratis. Vanuit België en Duitsland zijn de retourkosten voor eigen rekening.</li>
-            <li>Het aankoopbedrag wordt terugbetaald via dezelfde betaalmethode.</li>
+            <li>Je meldt je retour binnen {BUSINESS.returnDays} dagen na ontvangst; daarna heb je nog 14 dagen om terug te sturen.</li>
+            <li>Je mag het stuk passen zoals je in een winkel zou doen. Is de waarde daarna minder doordat je verder ging dan dat, dan mogen we die waardevermindering verrekenen.</li>
+            <li>Retourneren vanuit Nederland is gratis. Vanuit België en Duitsland zijn de retourkosten voor eigen rekening.</li>
+            <li>Je krijgt het volledige aankoopbedrag terug, inclusief de standaard verzendkosten die je betaalde.</li>
+            <li>Terugbetaling gaat via dezelfde betaalmethode, binnen {BUSINESS.refundDays} dagen na je melding.</li>
           </ul>
+          <p class="vh-prose" style="margin-top:14px;">
+            De volledige regeling staat in <a href="/algemene-voorwaarden">artikel 6 van onze voorwaarden</a>.
+            Liever het officiële formulier? Dat vind je op <a href="/herroeping">herroeping</a>.
+          </p>
         </div>
+
+        {returnLines && (
+          <div class="vh-trust-group">
+            <h2 class="vh-trust-group-title">Retouradres</h2>
+            <p class="vh-prose">{returnLines.map((l) => (<>{l}<br /></>))}</p>
+            <p class="vh-prose" style="margin-top:10px;font-size:14px;">
+              Stuur pas terug nadat je je retour hebt gemeld, dan kunnen we hem koppelen aan je bestelling.
+            </p>
+          </div>
+        )}
 
         <div class="vh-trust-group">
           <h2 class="vh-trust-group-title">Een andere maat nodig?</h2>

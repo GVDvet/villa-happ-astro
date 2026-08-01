@@ -1,0 +1,254 @@
+---
+/**
+ * /beheer/order/[id] — één bestelling: gegevens, tijdlijn en acties
+ *
+ * Welke knoppen hier staan komt uit `toegestaneActies()`, dezelfde functie
+ * die de API gebruikt om een actie te accepteren. Eén bron, dus de UI kan
+ * nooit iets aanbieden dat de server weigert, en omgekeerd kun je niets
+ * forceren door de knop over te slaan.
+ */
+export const prerender = false;
+
+import BeheerLayout from '../../../layouts/BeheerLayout.astro';
+import { BEHEER_COOKIE, leesBeheerSessie, beheerGeconfigureerd } from '../../../lib/beheer-sessie';
+import { getSupabaseAdmin } from '../../../lib/supabase';
+import { leesOrder, BEHEER_HEADERS } from '../../../lib/beheer';
+import { leesTijdlijn } from '../../../lib/order-events';
+import { maakOrderToken } from '../../../lib/order-token';
+import {
+  STATUS_LABEL, STATUS_TOON, GEBEURTENIS_LABEL, toegestaneActies, euro,
+  type OrderStatus, type GebeurtenisSoort,
+} from '../../../lib/order-status';
+import { vatFromGross } from '../../../lib/mail';
+
+for (const [k, v] of Object.entries(BEHEER_HEADERS)) Astro.response.headers.set(k, v);
+
+const ingelogd = leesBeheerSessie(Astro.cookies.get(BEHEER_COOKIE)?.value);
+const geconfigureerd = beheerGeconfigureerd();
+const sb = getSupabaseAdmin();
+const { id } = Astro.params;
+
+let order: any = null;
+let tijdlijn: any[] = [];
+
+if (ingelogd && sb && id) {
+  order = await leesOrder(sb, id);
+  // Onbekende bestelling: 404, niet een lege pagina met de kop erboven.
+  if (!order) return new Response('Niet gevonden', { status: 404, headers: BEHEER_HEADERS });
+  tijdlijn = await leesTijdlijn(sb, order.id);
+}
+
+const acties = order ? toegestaneActies(order.status, order.payment_status) : [];
+const adres = order?.shipping_address || {};
+const portaalUrl = order ? `/bestelling/${maakOrderToken(order.id, 'portaal')}` : '';
+
+const tijd = (iso: string) =>
+  new Date(iso).toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+---
+<BeheerLayout
+  title={order ? `${order.order_number} · Beheer` : 'Bestelling · Beheer'}
+  ingelogd={ingelogd}
+  geconfigureerd={geconfigureerd}
+  terug={{ href: '/beheer', label: '← Alle bestellingen' }}
+>
+  {order && (
+    <>
+      <div class="bh-top" style="border-bottom:0;margin-bottom:8px;padding-bottom:0;">
+        <div>
+          <h1 style="font-family:var(--vh-font-serif);font-size:30px;font-weight:400;margin:0 0 6px;">
+            {order.order_number}
+          </h1>
+          <span class="bh-badge" data-toon={STATUS_TOON[order.status as OrderStatus] || 'wacht'}>
+            {STATUS_LABEL[order.status as OrderStatus] || order.status}
+          </span>
+          <span style="color:var(--vh-ink-muted);font-size:13px;margin-left:10px;">
+            Geplaatst op {tijd(order.created_at)}
+          </span>
+        </div>
+      </div>
+
+      <p class="bh-melding is-fout" id="bh-fout" hidden></p>
+      <p class="bh-melding is-goed" id="bh-goed" hidden></p>
+
+      <div class="bh-detail">
+        <div>
+          <section class="bh-blok">
+            <h2>Bestelde stukken</h2>
+            <table class="bh-regels">
+              <tbody>
+                {(order.order_items || []).map((r: any) => (
+                  <tr>
+                    <td>
+                      {r.quantity}× {r.product_name}
+                      {r.variant_label && <span style="color:var(--vh-ink-muted)"> ({r.variant_label})</span>}
+                      <br /><small style="color:var(--vh-ink-muted)">{r.sku}</small>
+                    </td>
+                    <td>{euro(r.total_cents)}</td>
+                  </tr>
+                ))}
+                <tr><td>Subtotaal</td><td>{euro(order.subtotal_cents)}</td></tr>
+                <tr><td>Verzending</td><td>{order.shipping_cents === 0 ? 'Gratis' : euro(order.shipping_cents)}</td></tr>
+                <tr class="bh-totaal"><td>Totaal</td><td>{euro(order.total_cents)}</td></tr>
+                <tr><td style="color:var(--vh-ink-muted);font-size:12px;">Waarvan btw</td><td style="color:var(--vh-ink-muted);font-size:12px;">{euro(vatFromGross(order.total_cents))}</td></tr>
+                {order.refunded_cents > 0 && (
+                  <tr><td style="color:var(--vh-danger)">Terugbetaald</td><td style="color:var(--vh-danger)">−{euro(order.refunded_cents)}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <section class="bh-blok">
+            <h2>Tijdlijn</h2>
+            <ul class="bh-tijdlijn">
+              {tijdlijn.length === 0 && <li class="is-open"><b>Nog geen gebeurtenissen</b></li>}
+              {tijdlijn.map((e: any) => (
+                <li class="is-gehaald">
+                  <b>{GEBEURTENIS_LABEL[e.soort as GebeurtenisSoort] || e.soort}</b>
+                  <small>
+                    {tijd(e.created_at)} · via {e.bron}
+                    {e.toelichting && <><br />{e.toelichting}</>}
+                  </small>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <div>
+          <section class="bh-blok">
+            <h2>Klant en bezorging</h2>
+            <dl>
+              <div><dt>Naam</dt><dd>{order.customer_name}</dd></div>
+              <div><dt>E-mail</dt><dd><a href={`mailto:${order.customer_email}`}>{order.customer_email}</a></dd></div>
+              <div><dt>Adres</dt><dd>{[adres.street, adres.house_number].filter(Boolean).join(' ')}<br />{[adres.postal_code, adres.city].filter(Boolean).join(' ')}<br />{adres.country}</dd></div>
+              <div><dt>Betaalstatus</dt><dd>{order.payment_status}</dd></div>
+              {order.mollie_payment_id && <div><dt>Mollie</dt><dd style="font-size:12px;">{order.mollie_payment_id}</dd></div>}
+              {order.tracking_number && <div><dt>Track en trace</dt><dd>{order.tracking_carrier} {order.tracking_number}</dd></div>}
+              <div><dt>Klantlink</dt><dd><a href={portaalUrl} target="_blank" rel="noopener">Bekijk zoals de klant hem ziet</a></dd></div>
+            </dl>
+          </section>
+
+          <section class="bh-blok" data-order={order.id}>
+            <h2>Acties</h2>
+
+            {acties.length === 0 && (
+              <p style="color:var(--vh-ink-muted);font-size:13px;margin:0 0 4px;">
+                Bij deze status is er niets meer te doen.
+                {order.payment_status !== 'paid' && ' Een bestelling die niet betaald is kan niet verzonden worden.'}
+              </p>
+            )}
+
+            {acties.includes('verzenden') && (
+              <div class="bh-actie">
+                <label for="bh-tracking">Track en trace-code</label>
+                <input id="bh-tracking" placeholder="3SVHXX123456789" autocomplete="off" />
+                <label for="bh-carrier">Vervoerder</label>
+                <input id="bh-carrier" value="PostNL" autocomplete="off" />
+                <button type="button" class="bh-knop" data-actie="verzenden">Markeer als verzonden en mail de klant</button>
+              </div>
+            )}
+
+            {acties.includes('bezorgd') && (
+              <div class="bh-actie">
+                <button type="button" class="bh-knop" data-actie="bezorgd">Markeer als bezorgd</button>
+              </div>
+            )}
+
+            {acties.includes('terugbetalen') && (
+              <div class="bh-actie">
+                <label for="bh-bedrag">Terug te betalen bedrag in euro's</label>
+                <input id="bh-bedrag" inputmode="decimal" value={((order.total_cents - (order.refunded_cents || 0)) / 100).toFixed(2)} />
+                <button type="button" class="bh-knop bh-knop--zacht" data-actie="terugbetalen">Registreer terugbetaling</button>
+                <p style="font-size:12px;color:var(--vh-ink-muted);margin:10px 0 0;line-height:1.55;">
+                  Dit legt de terugbetaling vast en mailt de klant. Het geld stort je zelf terug in Mollie.
+                </p>
+              </div>
+            )}
+
+            <div class="bh-actie">
+              <label for="bh-notitie">Notitie op de tijdlijn</label>
+              <input id="bh-notitie" placeholder="Bijvoorbeeld: klant belde over de maat" />
+              <button type="button" class="bh-knop bh-knop--zacht" data-actie="notitie">Notitie toevoegen</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </>
+  )}
+</BeheerLayout>
+
+<script>
+  const blok = document.querySelector<HTMLElement>('[data-order]');
+  if (blok) {
+    const orderId = blok.dataset.order!;
+    const fout = document.getElementById('bh-fout')!;
+    const goed = document.getElementById('bh-goed')!;
+    const waarde = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value.trim() || '';
+
+    blok.querySelectorAll<HTMLButtonElement>('[data-actie]').forEach((knop) => {
+      knop.addEventListener('click', async () => {
+        const actie = knop.dataset.actie!;
+        fout.hidden = true;
+        goed.hidden = true;
+
+        const body: Record<string, unknown> = {
+          orderId,
+          actie,
+          csrf: document.body.dataset.csrf || '',
+        };
+        if (actie === 'verzenden') {
+          body.tracking = waarde('bh-tracking');
+          body.carrier = waarde('bh-carrier') || 'PostNL';
+          if (!body.tracking) {
+            fout.textContent = 'Vul eerst een track en trace-code in.';
+            fout.hidden = false;
+            document.getElementById('bh-tracking')?.focus();
+            return;
+          }
+        }
+        if (actie === 'terugbetalen') {
+          const euro = Number(waarde('bh-bedrag').replace(',', '.'));
+          if (!Number.isFinite(euro) || euro <= 0) {
+            fout.textContent = 'Vul een geldig bedrag in.';
+            fout.hidden = false;
+            return;
+          }
+          body.bedragCents = Math.round(euro * 100);
+        }
+        if (actie === 'notitie') {
+          body.tekst = waarde('bh-notitie');
+          if (!body.tekst) {
+            fout.textContent = 'De notitie is nog leeg.';
+            fout.hidden = false;
+            return;
+          }
+        }
+
+        const oud = knop.textContent;
+        knop.disabled = true;
+        knop.textContent = 'Bezig…';
+        try {
+          const res = await fetch('/api/beheer/actie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const j = await res.json().catch(() => null);
+          if (res.ok && j?.success) {
+            goed.textContent = 'Gelukt. De pagina wordt bijgewerkt.';
+            goed.hidden = false;
+            setTimeout(() => window.location.reload(), 700);
+            return;
+          }
+          fout.textContent = j?.error || 'Actie mislukte.';
+          fout.hidden = false;
+        } catch {
+          fout.textContent = 'Verbinding mislukt.';
+          fout.hidden = false;
+        }
+        knop.disabled = false;
+        knop.textContent = oud;
+      });
+    });
+  }
+</script>

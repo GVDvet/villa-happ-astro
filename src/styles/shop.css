@@ -130,6 +130,32 @@
 .vh-contact-form { max-width: 100%; }
 .vh-contact-form .vh-btn { margin-top: 6px; }
 .vh-contact-note { color: var(--vh-ink-muted); margin: 12px 0 0; }
+.vh-contact-note a { color: var(--vh-accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Foutmelding bij het contactformulier: alleen zichtbaar als er iets misging */
+.vh-contact-error {
+	display: none;
+	margin: 12px 0 0;
+	padding: 12px 16px;
+	font-size: 13px;
+	line-height: 1.6;
+	background: rgba(192, 57, 43, 0.08);
+	border: 1px solid rgba(192, 57, 43, 0.25);
+	color: var(--vh-danger);
+	border-radius: var(--vh-radius-sm);
+}
+.vh-contact-error.is-visible { display: block; }
+.vh-contact-error a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Honeypot: buiten beeld maar wel invulbaar voor bots (niet display:none,
+   dat slaan sommige bots juist over) */
+.vh-hp {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
 .vh-contact-aside { display: grid; gap: 30px; padding-top: 6px; }
 .vh-contact-done { padding: 20px 0; }
 .vh-contact-done-mark { color: var(--vh-accent-ink); font-size: 26px; margin: 0 0 12px; }
@@ -951,3 +977,47 @@
 .vh-result p { font-size: 15px; line-height: 1.65; color: var(--vh-ink-soft); margin: 0 0 32px; }
 .vh-result-ordernr { font-family: var(--vh-font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--vh-ink); }
 .vh-result-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* Btw-regel onder de trust-badges op de productpagina */
+.vh-pdp-vat {
+	font-size: 12px;
+	color: var(--vh-ink-muted);
+	margin: 10px 0 0;
+}
+
+/* Checkout: btw-regel en akkoordverklaring onder het overzicht */
+.vh-co-vat {
+	font-size: 12px;
+	color: var(--vh-ink-muted);
+	margin: 6px 0 0;
+	text-align: right;
+}
+.vh-co-terms {
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--vh-ink-muted);
+	margin: 14px 0 0;
+}
+.vh-co-terms a {
+	color: var(--vh-accent-ink);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+/* ============================================================
+   Raakvlakken — WCAG 2.2 (2.5.8) vraagt minimaal 24×24 CSS-px.
+   De knoppen hieronder waren visueel prima maar te klein om
+   betrouwbaar te raken op een telefoon.
+   ============================================================ */
+.vh-pdp-sizeguide-btn {
+	min-height: 24px;
+	padding: 4px 2px;
+}
+.vh-rev-star {
+	min-width: 28px;
+	min-height: 28px;
+}
+.vh-breadcrumb a {
+	display: inline-block;
+	padding: 6px 2px;
+}

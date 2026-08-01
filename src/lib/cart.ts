@@ -48,13 +48,28 @@ function setCart(items: CartItem[]) {
   }
 }
 
+/**
+ * Bovengrens per regel. Gelijk aan wat CheckoutSchema server-side accepteert:
+ * zonder deze cap kon je in het mandje eindeloos doorklikken en kreeg je bij
+ * het afrekenen een generieke "Invalid request" in plaats van een uitleg.
+ */
+export const MAX_QTY_PER_ITEM = 20;
+
+const clampQty = (n: number) => Math.max(1, Math.min(MAX_QTY_PER_ITEM, Math.floor(n)));
+
+/** Heeft deze regel de bovengrens bereikt? Voedt de +-knop in mandje en drawer. */
+export function atMaxQty(variantId: string): boolean {
+  const item = getCart().find(i => i.variant_id === variantId);
+  return !!item && item.quantity >= MAX_QTY_PER_ITEM;
+}
+
 export function addToCart(item: CartItem) {
   const items = getCart();
   const existing = items.find(i => i.variant_id === item.variant_id);
   if (existing) {
-    existing.quantity += item.quantity;
+    existing.quantity = clampQty(existing.quantity + item.quantity);
   } else {
-    items.push(item);
+    items.push({ ...item, quantity: clampQty(item.quantity) });
   }
   setCart(items);
 }
@@ -66,7 +81,7 @@ export function updateQuantity(variantId: string, qty: number) {
   if (qty <= 0) {
     setCart(items.filter(i => i.variant_id !== variantId));
   } else {
-    item.quantity = qty;
+    item.quantity = clampQty(qty);
     setCart(items);
   }
 }
@@ -92,15 +107,12 @@ export function onCartChange(listener: Listener) {
   return () => listeners.delete(listener);
 }
 
-/* ---------- Verzendkosten (zelfde regels als de checkout-API) ---------- */
-export function shippingCostCents(country: string, subtotalCents: number): number {
-  if (subtotalCents >= 7500) return 0;
-  if (country === 'BE') return 695;
-  if (country === 'DE') return 895;
-  return 495; // NL
-}
-
-export const FREE_SHIPPING_CENTS = 7500;
+/* ---------- Verzendkosten ----------
+   Eén bron: dezelfde functie die de checkout-API server-side gebruikt.
+   Stonden eerder los van elkaar met hardgecodeerde tarieven, waardoor een
+   tariefwijziging het mandje en de eindafrekening uit elkaar kon laten
+   lopen. */
+export { shippingCost as shippingCostCents, FREE_SHIPPING_CENTS } from './shipping';
 
 /* ---------- Demo-modus detectie ---------- */
 export function isDemoItem(item: CartItem): boolean {

@@ -2,7 +2,7 @@
   "name": "villa-happ-storefront",
   "type": "module",
   "version": "1.0.0",
-  "description": "Villa Happ Astro storefront — heritage lifestyle e-commerce",
+  "description": "Villa Happ Astro storefront \u2014 heritage lifestyle e-commerce",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "check": "astro check"
+    "check": "astro check",
+    "beheer:hash": "node scripts/beheer-hash.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^10.0.8",

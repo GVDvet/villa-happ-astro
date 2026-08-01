@@ -4,6 +4,7 @@ import {
   FREE_SHIPPING_CENTS,
   CheckoutSchema,
   mapMollieStatus,
+  paymentState,
 } from '../src/lib/checkout-logic';
 
 describe('shippingCost', () => {
@@ -100,5 +101,27 @@ describe('mapMollieStatus (idempotente statusmachine)', () => {
 
   it('onbekende status verandert niets', () => {
     expect(mapMollieStatus('chargeback?', open)).toMatchObject({ action: 'none', payment_status: 'open' });
+  });
+});
+
+describe('paymentState (bedanktpagina)', () => {
+  it('noemt alleen een echt betaalde betaling betaald', () => {
+    expect(paymentState('paid')).toBe('paid');
+  });
+  it('markeert afgebroken, mislukt en verlopen als mislukt', () => {
+    expect(paymentState('failed')).toBe('failed');
+    expect(paymentState('canceled')).toBe('failed');
+    expect(paymentState('expired')).toBe('failed');
+  });
+  it('houdt open, pending en authorized op in behandeling', () => {
+    expect(paymentState('open')).toBe('pending');
+    expect(paymentState('pending')).toBe('pending');
+    // geld gereserveerd maar niet geïncasseerd: nog geen "bedankt"
+    expect(paymentState('authorized')).toBe('pending');
+  });
+  it('valt bij een onbekende status terug op in behandeling', () => {
+    // veilige kant: mandje blijft staan, we beloven niets
+    expect(paymentState('iets-nieuws-van-mollie')).toBe('pending');
+    expect(paymentState('')).toBe('pending');
   });
 });

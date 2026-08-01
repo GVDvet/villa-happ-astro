@@ -44,8 +44,17 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const { count } = await sb.from('atelier_claims').select('*', { count: 'exact', head: true });
-  const number = nextNumber(count || 0);
+  // Nummer uit een Postgres-sequence: atomair, dus twee gelijktijdige claims
+  // kunnen nooit hetzelfde "unieke" nummer krijgen. Tellen-en-optellen deed
+  // dat wél. Ontbreekt de functie nog, dan valt hij terug op de telling.
+  let number: number;
+  const { data: seq, error: seqErr } = await sb.rpc('next_atelier_number', { p_edition: EDITION });
+  if (!seqErr && typeof seq === 'number') {
+    number = seq;
+  } else {
+    const { count } = await sb.from('atelier_claims').select('*', { count: 'exact', head: true });
+    number = nextNumber(count || 0);
+  }
 
   const { error } = await sb.from('atelier_claims').insert({
     email: body.email,
@@ -71,10 +80,14 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Claimen mislukte, probeer opnieuw.' }), { status: 500 });
   }
 
-  // Inschrijven voor de drop/nieuwsbrief (faalt nooit hard).
-  await sb.from('newsletter_subscribers')
-    .upsert({ email: body.email, source: 'atelier' }, { onConflict: 'email' })
-    .then(() => null, () => null);
+  // Alleen inschrijven als er expliciet toestemming is gegeven. Eerder
+  // gebeurde dit bij élke claim, terwijl het formulier alleen mail over
+  // "deze oplage" beloofde.
+  if (body.newsletter) {
+    await sb.from('newsletter_subscribers')
+      .upsert({ email: body.email, source: 'atelier' }, { onConflict: 'email' })
+      .then(() => null, () => null);
+  }
 
   return new Response(JSON.stringify({ number, edition: EDITION }), {
     status: 200,

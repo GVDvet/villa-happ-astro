@@ -58,7 +58,8 @@ Optioneel (mail + beheer):
 ```
 RESEND_API_KEY=re_...          # zonder key wordt bewust geen mail verstuurd
 CRON_SECRET=...                # beveiligt de back-in-stock-verzender
-ADMIN_API_SECRET=...           # beveiligt de verzendbevestiging
+AUTH_SECRET=...                # tekent beheersessie en klant-volglinks (min. 32 tekens)
+ADMIN_PASSWORD_HASH=...        # npm run beheer:hash -- 'wachtwoord'
 ```
 
 Redeploy zodat de env-vars actief worden.

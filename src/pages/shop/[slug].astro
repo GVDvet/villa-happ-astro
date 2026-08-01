@@ -6,6 +6,8 @@ import Pic from '../../components/Pic.astro';
 import { getCatalog, type CatalogProduct } from '../../lib/catalog';
 import { formatPrice } from '../../lib/commerce';
 import { optimizedSrc } from '../../lib/img';
+import { BUSINESS } from '../../lib/business';
+import { RETURN_SENTENCE, RETURN_SHORT, VAT_SENTENCE, DELIVERY_SENTENCE } from '../../lib/legal';
 import '../../styles/shop.css';
 
 export async function getStaticPaths() {
@@ -70,15 +72,49 @@ const shippingDetailsLd = (['NL', 'BE', 'DE'] as const).map((country) => ({
   },
 }));
 
-const priceValidUntil = `${new Date().getFullYear()}-12-31`;
+// Eén jaar vanaf de build, niet "31 december van dit jaar": bij een build in
+// december verliep het aanbod anders binnen enkele dagen.
+const priceValidUntil = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
+
+// Titel: de kleur alleen toevoegen als die het product écht onderscheidt.
+// Bij de sokken is `color` "Villa Happ", wat "Stap voor Stap sokken Villa
+// Happ · Villa Happ" opleverde; bij de cap staat er "Limited Edition".
+const colourIsDistinct =
+  !!product.color &&
+  !product.name.toLowerCase().includes(product.color.toLowerCase()) &&
+  !/^(villa happ|limited edition)$/i.test(product.color);
+const displayTitle = colourIsDistinct ? `${product.name} ${product.color}` : product.name;
+
+// Meerdere maten = een ProductGroup met varianten; één Product met de SKU
+// van de eerste maat verzweeg de rest voor Google.
+const hasVariants = product.variants.length > 1;
 
 const productLd = {
   '@context': 'https://schema.org',
-  '@type': 'Product',
-  name: `${product.name} ${product.color}`,
+  '@type': hasVariants ? 'ProductGroup' : 'Product',
+  name: displayTitle,
   image: absImages,
   description: product.short_desc,
   sku: product.variants[0]?.sku,
+  ...(hasVariants
+    ? {
+        productGroupID: product.slug,
+        variesBy: ['https://schema.org/size'],
+        hasVariant: product.variants.map((v) => ({
+          '@type': 'Product',
+          name: `${displayTitle} — maat ${v.size}`,
+          sku: v.sku,
+          size: v.size,
+          offers: {
+            '@type': 'Offer',
+            url: productUrl,
+            priceCurrency: 'EUR',
+            price: (product.price_cents / 100).toFixed(2),
+            availability: v.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          },
+        })),
+      }
+    : {}),
   brand: { '@type': 'Brand', name: 'Villa Happ' },
   offers: {
     '@type': 'Offer',
@@ -89,14 +125,27 @@ const productLd = {
     availability: soldOut ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',
     shippingDetails: shippingDetailsLd,
-    hasMerchantReturnPolicy: {
-      '@type': 'MerchantReturnPolicy',
-      applicableCountry: ['NL', 'BE', 'DE'],
-      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-      merchantReturnDays: 30,
-      returnMethod: 'https://schema.org/ReturnByMail',
-      returnFees: 'https://schema.org/FreeReturn',
-    },
+    // Twee beleidsregels, want retour is alléén vanuit Nederland gratis.
+    // Eén gecombineerde regel met FreeReturn zou België en Duitsland een
+    // gratis retour beloven die we niet waarmaken.
+    hasMerchantReturnPolicy: [
+      {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'NL',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: BUSINESS.returnDays,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+      },
+      {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: ['BE', 'DE'],
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: BUSINESS.returnDays,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+      },
+    ],
   },
 };
 
@@ -119,8 +168,8 @@ const sizingAnswer =
 
 const faqItems = [
   { q: 'Hoe vallen de maten?', a: sizingAnswer },
-  { q: 'Wat zijn de levertijd en verzendkosten?', a: 'Voor 16:00 besteld, dezelfde werkdag verzonden via PostNL en meestal de volgende werkdag in huis. Verzending binnen Nederland is gratis vanaf € 75, daaronder € 4,95.' },
-  { q: 'Kan ik retourneren?', a: 'Ja, je hebt 30 dagen bedenktijd. Past het niet of bevalt het niet, dan retourneer je kosteloos.' },
+  { q: 'Wat zijn de levertijd en verzendkosten?', a: `${DELIVERY_SENTENCE} Verzending binnen Nederland is gratis vanaf € 75, daaronder € 4,95.` },
+  { q: 'Kan ik retourneren?', a: RETURN_SENTENCE },
   { q: 'Is dit een origineel Villa Happ stuk?', a: edition
       ? `Ja. Dit komt uit een genummerde oplage van ${edition} stuks en wordt geleverd met een certificaat van echtheid.`
       : 'Ja. Elk stuk wordt in Tilburg ontworpen en met zorg gemaakt, in beperkte oplage.' },
@@ -148,7 +197,7 @@ const pdpData = {
   edition: product.edition || null,
 };
 ---
-<Base title={`${product.name} ${product.color} · Villa Happ`} description={product.short_desc} ogImage={product.images[0]}>
+<Base title={`${displayTitle} · Villa Happ`} description={product.short_desc} ogImage={product.images[0]}>
   <section class="vh-page">
     <div class="vh-page-inner">
 
@@ -237,9 +286,11 @@ const pdpData = {
 
         <!-- Info -->
         <div class="vh-pdp-info">
-          <p class="vh-pdp-kicker vh-mono">Heritage collectie · Genummerde oplage</p>
+          <p class="vh-pdp-kicker vh-mono">
+            {edition ? 'Heritage collectie · Genummerde oplage' : 'Heritage collectie'}
+          </p>
           <h1 class="vh-pdp-title">{product.name}</h1>
-          <p class="vh-pdp-color">{product.color}</p>
+          {product.color && <p class="vh-pdp-color">{product.color}</p>}
 
           <p class="vh-pdp-price">
             {product.compare_at_cents && <del>{formatPrice(product.compare_at_cents)}</del>}
@@ -320,10 +371,11 @@ const pdpData = {
 
           <div class="vh-pdp-trust">
             <span><i>✦</i> Gratis verzending in NL vanaf € 75</span>
-            <span><i>✦</i> 30 dagen bedenktijd, retour gratis</span>
-            <span><i>✦</i> Genummerd · geleverd met certificaat van echtheid</span>
+            <span><i>✦</i> {RETURN_SHORT}</span>
+            {edition && <span><i>✦</i> Genummerd · geleverd met certificaat van echtheid</span>}
             <span><i>✦</i> Veilig betalen via Mollie · iDEAL, Bancontact, creditcard</span>
           </div>
+          <p class="vh-pdp-vat">{VAT_SENTENCE}</p>
 
           <details class="vh-acc" open>
             <summary>Het verhaal</summary>
@@ -338,8 +390,8 @@ const pdpData = {
           <details class="vh-acc">
             <summary>Verzending &amp; retour</summary>
             <div class="vh-acc-body">
-              Voor 16:00 besteld, binnen 2 werkdagen in huis. Verzending via PostNL.
-              Niet goed? Retourneren kan kosteloos binnen 30 dagen.
+              <p>{DELIVERY_SENTENCE}</p>
+              <p>{RETURN_SENTENCE} <a href="/retourneren">Zo werkt retourneren.</a></p>
             </div>
           </details>
 
@@ -840,22 +892,22 @@ const pdpData = {
   }
   refreshLiveStock();
 
-  /* Bezorgdatum (onzekerheidsreductie): voor 16:00 = volgende werkdag verzonden */
-  (function deliveryEstimate() {
+  /* Bezorgindicatie, geen kalenderdatum.
+     Deze widget rekende een concrete dag uit ("donderdag 14 aug in huis").
+     Dat leest als een toezegging, terwijl er geen feestdagen in de
+     berekening zitten en de pagina niet bijwerkt als de rit verschuift.
+     Huisregel uit het Aqua Chain-portaal: alleen de planning stelt een dag
+     vast, en die hebben we hier niet. */
+  (function bezorgindicatie() {
     const box = document.getElementById('vh-pdp-delivery');
     const span = box?.querySelector('span');
     if (!box || !span) return;
-    const days = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
-    const months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
-    const nextBiz = (d: Date) => { do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6); return d; };
     const now = new Date();
-    let ship = new Date(now);
-    if (now.getHours() >= 16) ship = nextBiz(ship);
-    while (ship.getDay() === 0 || ship.getDay() === 6) ship = nextBiz(ship);
-    const deliver = nextBiz(ship);
-    const beforeCutoff = now.getHours() < 16 && now.getDay() !== 0 && now.getDay() !== 6;
-    const label = `${beforeCutoff ? 'Vandaag voor 16:00 besteld' : 'Nu besteld'} → ${days[deliver.getDay()]} ${deliver.getDate()} ${months[deliver.getMonth()]} in huis`;
-    span.textContent = label;
+    const werkdag = now.getDay() !== 0 && now.getDay() !== 6;
+    const voorCutoff = werkdag && now.getHours() < 16;
+    span.textContent = voorCutoff
+      ? 'Vandaag voor 16:00 besteld, vandaag nog verzonden. Doorgaans de volgende werkdag in huis'
+      : 'Op de eerstvolgende werkdag verzonden. Doorgaans de dag erna in huis';
     box.removeAttribute('hidden');
   })();
 
@@ -937,6 +989,9 @@ const pdpData = {
         const res = await fetch(`/api/reviews?slug=${encodeURIComponent(data.slug)}`);
         if (res.ok) {
           const json = await res.json();
+          // `demo: true` = endpoint bereikbaar maar zonder database; schrijven
+          // zou een 503 geven. Dan hetzelfde lokale gedrag als bij een fout.
+          if (json.demo) throw new Error('demo');
           serverMode = true;
           note.setAttribute('hidden', '');
           render((json.reviews || []).map((r: any) => ({

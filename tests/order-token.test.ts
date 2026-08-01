@@ -1,0 +1,119 @@
+import { describe, it, expect, beforeAll, vi } from 'vitest';
+import { maakOrderToken, leesOrderToken } from '../src/lib/order-token';
+import {
+  hashWachtwoord, controleerWachtwoord,
+  maakBeheerSessie, leesBeheerSessie,
+  maakCsrfToken, controleerCsrf,
+} from '../src/lib/beheer-sessie';
+
+const ORDER = '11111111-2222-3333-4444-555555555555';
+
+beforeAll(() => {
+  vi.stubEnv('AUTH_SECRET', 'x'.repeat(48));
+});
+
+describe('capability-token', () => {
+  it('leest terug wat het schreef', () => {
+    const t = maakOrderToken(ORDER, 'portaal');
+    expect(leesOrderToken(t, 'portaal')?.orderId).toBe(ORDER);
+  });
+
+  it('weigert een token van een ander publiek', () => {
+    // Dit is de kern: de bedanktpagina en het klantportaal tekenen met een
+    // eigen afgeleide sleutel, dus hergebruik is cryptografisch onmogelijk.
+    const status = maakOrderToken(ORDER, 'status');
+    expect(leesOrderToken(status, 'portaal')).toBeNull();
+    const portaal = maakOrderToken(ORDER, 'portaal');
+    expect(leesOrderToken(portaal, 'status')).toBeNull();
+  });
+
+  it('weigert een verlopen token', () => {
+    const lang = 24 * 60 * 60 * 1000;
+    const t = maakOrderToken(ORDER, 'status', Date.now() - lang - 1000);
+    expect(leesOrderToken(t, 'status')).toBeNull();
+  });
+
+  it('weigert een gewijzigde payload', () => {
+    const t = maakOrderToken(ORDER, 'portaal');
+    const [payload, sig] = t.split('.');
+    const anderId = payload.replace(ORDER, '99999999-2222-3333-4444-555555555555');
+    expect(leesOrderToken(`${anderId}.${sig}`, 'portaal')).toBeNull();
+  });
+
+  it('weigert onzin zonder te crashen', () => {
+    // Een vervalst token mag nooit een 500 opleveren, alleen een weigering.
+    for (const rommel of ['', '.', 'abc', 'a.b', `${ORDER}:1.zz`, 'x'.repeat(500)]) {
+      expect(() => leesOrderToken(rommel, 'portaal')).not.toThrow();
+      expect(leesOrderToken(rommel, 'portaal')).toBeNull();
+    }
+    expect(leesOrderToken(undefined, 'portaal')).toBeNull();
+    expect(leesOrderToken(null, 'portaal')).toBeNull();
+  });
+});
+
+describe('beheerwachtwoord', () => {
+  it('accepteert het juiste wachtwoord en weigert de rest', () => {
+    const hash = hashWachtwoord('een lang genoeg wachtwoord');
+    expect(controleerWachtwoord('een lang genoeg wachtwoord', hash)).toBe(true);
+    expect(controleerWachtwoord('een lang genoeg wachtwoor', hash)).toBe(false);
+    expect(controleerWachtwoord('', hash)).toBe(false);
+  });
+
+  it('gebruikt geen $ als scheidingsteken', () => {
+    // Een $ in een .env-waarde wordt door dotenv als variabele gelezen en
+    // sloopt de salt. Dat kostte een stille 401 bij het juiste wachtwoord.
+    const hash = hashWachtwoord('wachtwoord van voldoende lengte');
+    expect(hash).not.toContain('$');
+    expect(hash.split(':')).toHaveLength(3);
+  });
+
+  it('produceert per keer een andere hash (eigen salt)', () => {
+    expect(hashWachtwoord('zelfde wachtwoord')).not.toBe(hashWachtwoord('zelfde wachtwoord'));
+  });
+
+  it('weigert een kapotte hash zonder te crashen', () => {
+    for (const rommel of ['', 'scrypt:', 'scrypt:zz:zz', 'bcrypt:a:b', 'losse tekst', 'scrypt$a$b']) {
+      expect(() => controleerWachtwoord('wachtwoord', rommel)).not.toThrow();
+      expect(controleerWachtwoord('wachtwoord', rommel)).toBe(false);
+    }
+  });
+});
+
+describe('beheersessie', () => {
+  it('leest een geldige sessie', () => {
+    expect(leesBeheerSessie(maakBeheerSessie())).toBe(true);
+  });
+
+  it('weigert een verlopen sessie', () => {
+    const twaalfUur = 12 * 60 * 60 * 1000;
+    expect(leesBeheerSessie(maakBeheerSessie(Date.now() - twaalfUur - 1000))).toBe(false);
+  });
+
+  it('weigert een ordertoken als sessie', () => {
+    // Zelfde AUTH_SECRET, andere afgeleide sleutel: mag nooit passeren.
+    expect(leesBeheerSessie(maakOrderToken(ORDER, 'portaal'))).toBe(false);
+  });
+
+  it('weigert onzin', () => {
+    for (const rommel of ['', 'abc', 'beheer:1.zz', undefined]) {
+      expect(leesBeheerSessie(rommel as any)).toBe(false);
+    }
+  });
+});
+
+describe('csrf', () => {
+  it('hoort bij precies één sessie', () => {
+    const sessieA = maakBeheerSessie();
+    const sessieB = maakBeheerSessie(Date.now() + 1000);
+    const token = maakCsrfToken(sessieA);
+    expect(controleerCsrf(sessieA, token)).toBe(true);
+    expect(controleerCsrf(sessieB, token)).toBe(false);
+  });
+
+  it('weigert ontbrekende of onzinnige waarden', () => {
+    const sessie = maakBeheerSessie();
+    expect(controleerCsrf(sessie, undefined)).toBe(false);
+    expect(controleerCsrf(undefined, 'abc')).toBe(false);
+    expect(controleerCsrf(sessie, 'niet-hex')).toBe(false);
+  });
+});

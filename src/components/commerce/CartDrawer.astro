@@ -28,7 +28,7 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
 <div class="vh-drawer" id="vh-drawer" aria-hidden="true">
   <button type="button" class="vh-drawer-overlay" data-drawer-close aria-label="Sluit winkelmandje"></button>
 
-  <aside class="vh-drawer-panel" role="dialog" aria-label="Winkelmandje" tabindex="-1">
+  <aside class="vh-drawer-panel" role="dialog" aria-modal="true" aria-label="Winkelmandje" tabindex="-1">
     <header class="vh-drawer-head">
       <p class="vh-drawer-title">Winkelmandje <span class="vh-drawer-count vh-mono" data-drawer-count></span></p>
       <button type="button" class="vh-drawer-close" data-drawer-close aria-label="Sluiten">
@@ -355,7 +355,23 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
   window.addEventListener('vh:toast', ((e: CustomEvent) => showToast(e.detail)) as EventListener);
   drawer.querySelectorAll('[data-drawer-close]').forEach((b) => b.addEventListener('click', close));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && drawer.classList.contains('is-open')) close();
+    if (!drawer.classList.contains('is-open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    // Focus trap: Tab bleef eerder achter de drawer langs door de pagina
+    // lopen, terwijl de drawer wel als dialog wordt aangekondigd.
+    if (e.key !== 'Tab') return;
+    const focusables = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((el) => el.offsetParent !== null);
+    if (!focusables.length) { e.preventDefault(); panel.focus(); return; }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement;
+    if (!panel.contains(active)) { e.preventDefault(); first.focus(); return; }
+    if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
   });
   // De drawer persisteert over View Transitions heen; sluit hem vóór een swap
   document.addEventListener('astro:before-swap', () => {

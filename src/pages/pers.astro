@@ -1,0 +1,137 @@
+---
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import { BUSINESS } from '../lib/business';
+import { BRAND } from '../lib/entity';
+import '../styles/shop.css';
+
+/**
+ * Perspagina. Stond al in de footer maar bestond niet (404 op elke pagina).
+ * De feiten komen uit entity.ts, dezelfde bron als het schema en llms.txt,
+ * zodat een journalist en een AI-crawler exact hetzelfde lezen.
+ */
+
+const facts = [
+  { k: 'Opgericht', v: '1960, Tilburg' },
+  { k: 'Oorspronkelijke naam', v: 'Babyparadijs' },
+  { k: 'Oprichters', v: 'Toni Kuijpers en Noud van Happen' },
+  { k: 'Heropstart', v: '2024, door Rutger van Happen (derde generatie)' },
+  { k: 'Hoogtepunt', v: '80 winkels door Europa' },
+  { k: 'Nu', v: 'Heritage lifestylelabel, genummerde oplages' },
+];
+
+const assets = [
+  { src: '/img/brand/villa-happ-logo.webp', label: 'Beeldmerk', note: 'PNG/WebP, transparant' },
+  { src: '/img/products/hoodie-grey-lifestyle-v2.webp', label: 'Campagnebeeld', note: 'Organic Cotton Hoodie' },
+  { src: '/img/heritage/origin-babyparadijs.webp', label: 'Archief', note: 'Babyparadijs, Tilburg' },
+];
+---
+<Base
+  title="Pers · Villa Happ"
+  description="Persinformatie over Villa Happ: het verhaal in het kort, de kernfeiten, beeldmateriaal en contactgegevens voor media."
+>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Voor media</p>
+        <h1 class="vh-page-title">Pers &amp; <span class="vh-italic-accent">perskit</span></h1>
+        <p class="vh-page-sub">
+          Schrijf je over Villa Happ? Hieronder staan de feiten die kloppen, het
+          verhaal in één alinea en beeldmateriaal dat je mag gebruiken.
+        </p>
+      </header>
+
+      <div class="vh-trust">
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Het merk in één alinea</h2>
+          <p class="vh-prose">{BRAND.definition}</p>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Kernfeiten</h2>
+          <div class="vh-legal-tablewrap">
+            <table class="vh-legal-table">
+              <tbody>
+                {facts.map((f) => (
+                  <tr><td style="width:36%"><b>{f.k}</b></td><td>{f.v}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">De geschiedenis, kort</h2>
+          <ul class="vh-prose-list">
+            {BRAND.facts.map((f) => <li>{f}</li>)}
+          </ul>
+          <p class="vh-prose" style="margin-top:14px;">
+            Het volledige verhaal in zes hoofdstukken staat op
+            <a href="/story">de verhaalpagina</a>.
+          </p>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Beeldmateriaal</h2>
+          <p class="vh-prose" style="margin-bottom:18px;">
+            Vrij te gebruiken bij redactionele berichtgeving over Villa Happ,
+            met bronvermelding &ldquo;Villa Happ&rdquo;. Klik om het bestand op
+            volledig formaat te openen.
+          </p>
+          <div class="vh-press-grid">
+            {assets.map((a) => (
+              <figure class="vh-press-item">
+                <a href={a.src} target="_blank" rel="noopener">
+                  <Pic src={a.src} alt={a.label} width={480} height={480} widths={[320, 480]} sizes="(max-width: 700px) 45vw, 220px" loading="lazy" />
+                </a>
+                <figcaption>
+                  <b>{a.label}</b><br />
+                  <span class="vh-mono">{a.note}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Perscontact</h2>
+          <p class="vh-prose">
+            Vragen, interviewverzoeken of aanvullend beeld?<br />
+            <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a><br />
+            {BUSINESS.legalName} · KvK {BUSINESS.kvk}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .vh-press-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 22px;
+      max-width: 760px;
+    }
+    .vh-press-item { margin: 0; }
+    .vh-press-item img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--vh-paper-soft);
+      border: 1px solid var(--vh-ink-hairline);
+      border-radius: var(--vh-radius-sm, 4px);
+    }
+    .vh-press-item figcaption {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--vh-ink-soft);
+      margin-top: 10px;
+    }
+    .vh-press-item .vh-mono { font-size: 11px; color: var(--vh-ink-muted); }
+  </style>
+</Base>
+
+<script>import '../lib/cart';</script>

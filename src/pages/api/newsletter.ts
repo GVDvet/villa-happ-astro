@@ -30,12 +30,14 @@ export const POST: APIRoute = async ({ request }) => {
 
   const sb = getSupabaseAdmin();
   if (!sb) {
-    // Geen DB: fail silently maar log
-    console.warn('[newsletter] No DB, would have subscribed:', body.email);
+    // Geen database = niets opgeslagen. Eerder gaf deze tak success:true
+    // met "Bedankt! Wij houden je op de hoogte", terwijl het adres nergens
+    // terechtkwam. Nooit een inschrijving bevestigen die niet bestaat.
+    console.warn('[newsletter] Geen database; inschrijving NIET opgeslagen voor:', body.email);
     return new Response(JSON.stringify({
-      success: true,
-      message: 'Bedankt! Wij houden je op de hoogte.',
-    }));
+      success: false,
+      message: 'Inschrijven kan nog niet. Probeer het later opnieuw.',
+    }), { status: 503 });
   }
 
   const { error } = await sb.from('newsletter_subscribers').upsert({

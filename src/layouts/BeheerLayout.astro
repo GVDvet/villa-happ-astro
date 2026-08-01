@@ -1,0 +1,109 @@
+---
+/**
+ * Omslag voor het beheerportaal.
+ *
+ * Bewust los van Base.astro: geen winkelheader, geen mandje, geen
+ * View Transitions, geen analytics. Dit is een werkscherm.
+ *
+ * Is er geen geldige sessie, dan rendert deze layout het inlogscherm en
+ * NIET de inhoud. De pagina's die hem gebruiken hoeven dus niet zelf te
+ * onthouden dat ze moeten afschermen: de slot komt er simpelweg niet in.
+ */
+import { BEHEER_COOKIE, maakCsrfToken } from '../lib/beheer-sessie';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/beheer.css';
+
+export interface Props {
+  title: string;
+  ingelogd: boolean;
+  geconfigureerd: boolean;
+  /** Toont een terug-link in de kop. */
+  terug?: { href: string; label: string };
+}
+
+const { title, ingelogd, geconfigureerd, terug } = Astro.props;
+
+// CSRF hangt aan het sessiecookie: zonder sessie is er ook niets te tekenen.
+const sessieCookie = Astro.cookies.get(BEHEER_COOKIE)?.value;
+const csrf = ingelogd && sessieCookie ? maakCsrfToken(sessieCookie) : '';
+---
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>{title}</title>
+</head>
+<body class="bh" data-csrf={csrf}>
+  {!ingelogd ? (
+    <div class="bh-login">
+      <div class="bh-login-kaart">
+        <h1>Villa Happ</h1>
+        <p>Beheer van bestellingen. Alleen voor de winkelier.</p>
+
+        {!geconfigureerd ? (
+          <p class="bh-melding is-let">
+            Dit portaal is nog niet ingeschakeld. Zet <code>ADMIN_PASSWORD_HASH</code>
+            en <code>AUTH_SECRET</code> in de omgevingsvariabelen.
+          </p>
+        ) : (
+          <form id="bh-login-form" novalidate>
+            <label class="vh-sr-only" for="bh-ww">Wachtwoord</label>
+            <input type="password" id="bh-ww" autocomplete="current-password" placeholder="Wachtwoord" required />
+            <button type="submit" class="bh-knop" id="bh-login-knop">Inloggen</button>
+            <p class="bh-melding is-fout" id="bh-login-fout" hidden></p>
+          </form>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div class="bh-inner">
+      <header class="bh-top">
+        <p class="bh-merk">Villa Happ<span>Beheer</span></p>
+        <div class="bh-top-acties">
+          {terug && <a class="bh-chip" href={terug.href}>{terug.label}</a>}
+          <a class="bh-chip" href="/api/beheer/export">Exporteer CSV</a>
+          <form method="post" action="/api/beheer/logout" style="display:inline">
+            <button type="submit" class="bh-chip">Uitloggen</button>
+          </form>
+        </div>
+      </header>
+      <slot />
+    </div>
+  )}
+
+  <script>
+    const form = document.getElementById('bh-login-form') as HTMLFormElement | null;
+    if (form) {
+      const fout = document.getElementById('bh-login-fout')!;
+      const knop = document.getElementById('bh-login-knop') as HTMLButtonElement;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ww = (document.getElementById('bh-ww') as HTMLInputElement).value;
+        fout.hidden = true;
+        knop.disabled = true;
+        knop.textContent = 'Even kijken…';
+        try {
+          const res = await fetch('/api/beheer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wachtwoord: ww }),
+          });
+          if (res.ok) { window.location.reload(); return; }
+          const j = await res.json().catch(() => null);
+          fout.textContent = j?.error || 'Inloggen lukte niet.';
+          fout.hidden = false;
+        } catch {
+          fout.textContent = 'Verbinding mislukt.';
+          fout.hidden = false;
+        }
+        knop.disabled = false;
+        knop.textContent = 'Inloggen';
+      });
+    }
+  </script>
+</body>
+</html>

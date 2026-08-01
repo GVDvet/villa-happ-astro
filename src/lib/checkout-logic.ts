@@ -7,18 +7,9 @@
 
 import { z } from 'zod';
 
-export const FREE_SHIPPING_CENTS = 7500;
-
-export const SHIPPING_RATES_CENTS: Record<string, number> = {
-  NL: 495,
-  BE: 695,
-  DE: 895,
-};
-
-export function shippingCost(country: string, subtotalCents: number): number {
-  if (subtotalCents >= FREE_SHIPPING_CENTS) return 0;
-  return SHIPPING_RATES_CENTS[country] ?? SHIPPING_RATES_CENTS.DE;
-}
+// Tarieven staan in een eigen module zonder dependencies, zodat het mandje
+// in de browser dezelfde berekening gebruikt zonder zod mee te slepen.
+export { FREE_SHIPPING_CENTS, SHIPPING_RATES_CENTS, shippingCost } from './shipping';
 
 export const CheckoutSchema = z.object({
   items: z.array(z.object({
@@ -56,6 +47,32 @@ export interface StatusTransition {
   status: string;
   action: InventoryAction;
   markPaidAt: boolean;
+}
+
+/**
+ * Grove staat van een betaling voor de bedanktpagina. Mollie stuurt de
+ * klant naar `redirectUrl` bij élke afloop — betaald, mislukt, verlopen of
+ * afgebroken in de bankapp — dus die pagina moet zelf de status ophalen
+ * voordat ze "bedankt" zegt of het mandje leegt.
+ *
+ * `authorized` telt bewust als 'pending': het geld is gereserveerd maar nog
+ * niet geïncasseerd, en de webhook boekt de voorraad pas af bij 'paid'.
+ * Onbekende statussen zijn ook 'pending': dan blijft het mandje staan en
+ * beloven we niets.
+ */
+export type PaymentState = 'paid' | 'pending' | 'failed';
+
+export function paymentState(mollieStatus: string): PaymentState {
+  switch (mollieStatus) {
+    case 'paid':
+      return 'paid';
+    case 'failed':
+    case 'canceled':
+    case 'expired':
+      return 'failed';
+    default:
+      return 'pending';
+  }
 }
 
 export function mapMollieStatus(

@@ -2,9 +2,15 @@
 export const prerender = true;
 
 import Base from '../../layouts/Base.astro';
+import { RETURN_SENTENCE } from '../../lib/legal';
 import '../../styles/shop.css';
 ---
-<Base title="Afrekenen · Villa Happ" showFooter={false} noindex={true}>
+<Base
+  title="Afrekenen · Villa Happ"
+  description="Rond je bestelling af. Veilig betalen via Mollie."
+  showFooter={false}
+  noindex={true}
+>
   <section class="vh-page">
     <div class="vh-page-inner">
 
@@ -79,6 +85,7 @@ import '../../styles/shop.css';
           <div class="vh-summary-row"><span>Subtotaal</span><span id="vh-co-subtotal"></span></div>
           <div class="vh-summary-row"><span>Verzending</span><span id="vh-co-shipping"></span></div>
           <div class="vh-summary-row total"><span>Totaal</span><b id="vh-co-total"></b></div>
+          <p class="vh-co-vat" id="vh-co-vat"></p>
 
           <div class="vh-demo-note" id="vh-co-demo" hidden>
             <b>Demo-modus.</b> Dit zijn voorbeeldproducten. Koppel Supabase en
@@ -87,9 +94,17 @@ import '../../styles/shop.css';
           <div class="vh-error-note" id="vh-co-error" role="alert"></div>
 
           <button type="submit" form="vh-co-form" class="vh-btn vh-btn--accent" id="vh-co-pay">
-            <span id="vh-co-pay-label">Betaal veilig</span>
+            <!-- "Bestellen en betalen": art. 6:230v lid 3 BW wil dat de knop
+                 ondubbelzinnig een betalingsverplichting benoemt. -->
+            <span id="vh-co-pay-label">Bestellen en betalen</span>
             <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
+          <p class="vh-co-terms">
+            Door te bestellen ga je akkoord met onze
+            <a href="/algemene-voorwaarden">algemene voorwaarden</a> en
+            <a href="/privacy">privacyverklaring</a>. {RETURN_SENTENCE}
+            <a href="/herroeping">Modelformulier voor herroeping</a>.
+          </p>
           <div class="vh-pay-methods" aria-label="Betaalmethoden">
             <span class="vh-pay-chip">iDEAL</span>
             <span class="vh-pay-chip">Bancontact</span>
@@ -146,8 +161,12 @@ import '../../styles/shop.css';
     const shipping = shippingCostCents(countrySel.value, subtotal);
     document.getElementById('vh-co-subtotal')!.textContent = eur(subtotal);
     document.getElementById('vh-co-shipping')!.textContent = shipping === 0 ? 'Gratis' : eur(shipping);
-    document.getElementById('vh-co-total')!.textContent = eur(subtotal + shipping);
-    payLabel.textContent = `Betaal ${eur(subtotal + shipping)}`;
+    const total = subtotal + shipping;
+    document.getElementById('vh-co-total')!.textContent = eur(total);
+    // Prijzen zijn inclusief btw; het bedrag wordt teruggerekend, niet opgeteld
+    const vat = Math.round((total * 21) / 121);
+    document.getElementById('vh-co-vat')!.textContent = `Inclusief 21% btw (${eur(vat)})`;
+    payLabel.textContent = `Bestellen en betalen · ${eur(total)}`;
 
     if (cartHasDemo()) {
       demoNote.hidden = false;
@@ -241,11 +260,23 @@ import '../../styles/shop.css';
     if (key === lastLookup) return;
     lastLookup = key;
     try {
-      const q = `postcode:${pc} and huisnummer:${nr}`;
-      const res = await fetch(`https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(q)}&fq=type:adres&rows=1`);
+      // Exacte match via filterqueries. Een fielded zoekterm in `q`
+      // (`postcode:X and huisnummer:Y`) levert bij PDOK altijd 0 resultaten,
+      // en vrije tekst (`q=1234AB 1`) geeft bij een niet-bestaand huisnummer
+      // stilzwijgend het dichtstbijzijnde adres terug — precies wat je bij
+      // een bezorgadres niet wilt. Vandaar fq + een lege zoekterm.
+      const url =
+        'https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?rows=1&q=*' +
+        '&fl=straatnaam,woonplaatsnaam,huisnummer,postcode' +
+        '&fq=type:adres' +
+        `&fq=${encodeURIComponent(`postcode:${pc}`)}` +
+        `&fq=${encodeURIComponent(`huisnummer:${nr}`)}`;
+      const res = await fetch(url);
       if (!res.ok) return;
       const json = await res.json();
       const doc = json?.response?.docs?.[0];
+      // Geen exacte treffer: laat de velden met rust, handmatig invullen
+      // blijft gewoon werken.
       if (!doc?.straatnaam || !doc?.woonplaatsnaam) return;
       streetEl.value = doc.straatnaam;
       cityEl.value = doc.woonplaatsnaam;

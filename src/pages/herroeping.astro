@@ -1,0 +1,189 @@
+---
+export const prerender = true;
+
+import LegalLayout from '../components/legal/LegalLayout.astro';
+import { BUSINESS, returnAddressLines, addressLine } from '../lib/business';
+import { LEGAL_UPDATED } from '../lib/legal';
+
+/**
+ * Modelformulier voor herroeping (Bijlage I bij Richtlijn 2011/83/EU,
+ * in NL art. 6:230o BW). Wettelijk verplicht om aan te bieden; gebruiken
+ * is voor de klant niet verplicht.
+ *
+ * Naast de wettelijke tekst staat hier een invulhulp die het bericht voor
+ * je opstelt, zodat niemand het handmatig hoeft over te typen.
+ */
+const returnLines = returnAddressLines();
+---
+<LegalLayout
+  title="Modelformulier voor herroeping"
+  heading="Herroepings"
+  headingAccent="formulier"
+  intro="Wil je je bestelling terugsturen? Dit formulier hoef je niet te gebruiken, maar het mag. Een mailtje met dezelfde strekking is net zo geldig."
+  description="Modelformulier voor herroeping van Villa Happ. Vul het in of stuur ons een bericht met dezelfde strekking om je bestelling te herroepen."
+  updated={LEGAL_UPDATED}
+>
+  <section>
+    <div class="vh-legal-callout">
+      <p>
+        <b>Je hebt {BUSINESS.returnDays} dagen bedenktijd</b>, gerekend vanaf de
+        dag dat je het laatste stuk uit je bestelling ontving. Meld je
+        herroeping binnen die termijn; daarna heb je nog 14 dagen om het pakket
+        terug te sturen.
+      </p>
+    </div>
+    <p>
+      Het snelst gaat het via het formulier hieronder: je vult je gegevens in en
+      wij zetten het bericht voor je klaar in je mailprogramma. Liever zelf
+      mailen? Stuur dan een bericht naar
+      <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>
+      waarin staat dat je de overeenkomst herroept, met je bestelnummer erbij.
+    </p>
+  </section>
+
+  <section>
+    <h2>Invulhulp</h2>
+    <form class="vh-form vh-herroep-form" id="vh-herroep-form" novalidate data-to={BUSINESS.supportEmail}>
+      <div class="vh-form-row">
+        <div class="vh-field">
+          <label for="hr-order">Bestelnummer</label>
+          <input id="hr-order" name="order" placeholder="VH-2026-00001" required />
+        </div>
+        <div class="vh-field">
+          <label for="hr-name">Je naam</label>
+          <input id="hr-name" name="name" autocomplete="name" required />
+        </div>
+      </div>
+      <div class="vh-form-row">
+        <div class="vh-field">
+          <label for="hr-ordered">Besteld op</label>
+          <input id="hr-ordered" name="ordered" type="date" required />
+        </div>
+        <div class="vh-field">
+          <label for="hr-received">Ontvangen op</label>
+          <input id="hr-received" name="received" type="date" required />
+        </div>
+      </div>
+      <div class="vh-field">
+        <label for="hr-address">Je adres</label>
+        <input id="hr-address" name="address" autocomplete="street-address" placeholder="Straat 1, 1234 AB Plaats" required />
+      </div>
+      <div class="vh-field">
+        <label for="hr-items">Welke stukken stuur je terug?</label>
+        <textarea id="hr-items" name="items" rows="3" placeholder="Bijvoorbeeld: 1× Organic Cotton Hoodie, olijfgroen, maat L" required></textarea>
+      </div>
+      <button type="submit" class="vh-btn vh-btn--accent">
+        <span>Zet mijn herroeping klaar in de mail</span>
+      </button>
+      <p class="vh-field-msg" id="vh-herroep-msg" role="status" aria-live="polite"></p>
+      <p class="vh-prose" style="margin-top:10px;font-size:13px;">
+        Je gegevens worden niet naar ons verstuurd door dit formulier zelf: het
+        opent je eigen mailprogramma met de tekst er al in. Zo houd je zelf een
+        kopie van je herroeping.
+      </p>
+    </form>
+  </section>
+
+  <section>
+    <h2>De wettelijke modeltekst</h2>
+    <p>
+      Dit is het formulier zoals het in de wet staat. Je mag het overnemen,
+      afdrukken of in een eigen bericht verwerken.
+    </p>
+    <div class="vh-legal-callout">
+      <p>
+        <b>Aan:</b><br />
+        {BUSINESS.legalName}<br />
+        {returnLines ? returnLines.map((l) => (<>{l}<br /></>)) : (<>{addressLine()}<br /></>)}
+        {BUSINESS.supportEmail}
+      </p>
+      <p>
+        Ik/Wij (*) deel/delen (*) u hierbij mede dat ik/wij (*) onze
+        overeenkomst betreffende de verkoop van de volgende goederen herroep/
+        herroepen (*):
+      </p>
+      <p>
+        — Besteld op (*) / ontvangen op (*):<br />
+        — Naam consument(en):<br />
+        — Adres consument(en):<br />
+        — Handtekening consument(en) (alleen wanneer dit formulier op papier
+        wordt ingediend):<br />
+        — Datum:
+      </p>
+      <p><i>(*) Doorhalen wat niet van toepassing is.</i></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Wat er daarna gebeurt</h2>
+    <ol>
+      <li>Je krijgt van ons een bevestiging en, bij een Nederlandse retour, een retourlabel.</li>
+      <li>Je stuurt het pakket binnen 14 dagen na je melding terug.</li>
+      <li>Wij betalen binnen 14 dagen na je melding terug via dezelfde betaalmethode. We mogen daarmee wachten tot we het pakket terug hebben of jij hebt aangetoond dat je het verstuurd hebt.</li>
+    </ol>
+    <p>
+      De volledige regeling staat in artikel 6 van onze
+      <a href="/algemene-voorwaarden">algemene voorwaarden</a>. Praktische
+      stappen vind je op <a href="/retourneren">retourneren</a>.
+    </p>
+  </section>
+</LegalLayout>
+
+<script>
+  import { onPageReady } from '../lib/page';
+
+  onPageReady(() => {
+  const form = document.getElementById('vh-herroep-form') as HTMLFormElement | null;
+  if (!form) return;
+  const msg = document.getElementById('vh-herroep-msg')!;
+
+  const nlDate = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return isNaN(d.valueOf())
+      ? iso
+      : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim();
+
+    const required = ['hr-order', 'hr-name', 'hr-ordered', 'hr-received', 'hr-address', 'hr-items'];
+    const missing = required.filter((id) => !val(id));
+    if (missing.length) {
+      msg.textContent = 'Vul alle velden in, dan zetten we het bericht voor je klaar.';
+      msg.classList.add('is-error');
+      (document.getElementById(missing[0]) as HTMLElement).focus();
+      return;
+    }
+    msg.classList.remove('is-error');
+
+    const body = [
+      'Geachte Villa Happ,',
+      '',
+      'Hierbij deel ik u mede dat ik onze overeenkomst betreffende de verkoop',
+      'van de volgende goederen herroep:',
+      '',
+      val('hr-items'),
+      '',
+      `Bestelnummer: ${val('hr-order')}`,
+      `Besteld op: ${nlDate(val('hr-ordered'))}`,
+      `Ontvangen op: ${nlDate(val('hr-received'))}`,
+      `Naam: ${val('hr-name')}`,
+      `Adres: ${val('hr-address')}`,
+      `Datum: ${new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      '',
+      'Met vriendelijke groet,',
+      val('hr-name'),
+    ].join('\n');
+
+    const to = form.dataset.to || '';
+    const href =
+      `mailto:${to}?subject=${encodeURIComponent(`Herroeping bestelling ${val('hr-order')}`)}` +
+      `&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+    msg.textContent = 'We openen je mailprogramma. Kwam er niets? Kopieer de modeltekst hieronder.';
+  });
+  }); // einde onPageReady
+</script>

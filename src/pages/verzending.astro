@@ -2,13 +2,20 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
+import { SHIPPING_TABLE, DELIVERY_SENTENCE, VAT_SENTENCE } from '../lib/legal';
+import { FREE_SHIPPING_CENTS } from '../lib/checkout-logic';
 import '../styles/shop.css';
 
-const rates = [
-  { land: 'Nederland', kosten: '€ 4,95', gratis: 'Gratis vanaf € 75', tijd: 'Meestal volgende werkdag' },
-  { land: 'België', kosten: '€ 6,95', gratis: 'Gratis vanaf € 75', tijd: '2 tot 3 werkdagen' },
-  { land: 'Duitsland', kosten: '€ 8,95', gratis: 'Gratis vanaf € 75', tijd: '2 tot 4 werkdagen' },
-];
+// Tarieven komen uit dezelfde bron als de checkout-berekening, zodat de
+// pagina niet stilletjes uit de pas kan gaan lopen met wat er wordt gerekend.
+const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+const freeFrom = `Gratis vanaf ${eur(FREE_SHIPPING_CENTS)}`;
+const rates = SHIPPING_TABLE.map((s) => ({
+  land: s.country,
+  kosten: eur(s.costCents),
+  gratis: freeFrom,
+  tijd: s.delivery,
+}));
 ---
 <Base title="Verzending · Villa Happ" description="Alles over de verzending van Villa Happ: kosten per land, levertijden, en track en trace via PostNL.">
   <section class="vh-page">
@@ -29,9 +36,11 @@ const rates = [
           </tbody>
         </table>
 
+        <p class="vh-prose" style="margin: -24px 0 clamp(36px, 5vw, 56px);">{VAT_SENTENCE}</p>
+
         <div class="vh-trust-group">
           <h2 class="vh-trust-group-title">Levertijd</h2>
-          <p class="vh-prose">Bestel je voor 16:00 op een werkdag, dan gaat je pakket dezelfde dag nog op de bus via PostNL. Binnen Nederland is het meestal de volgende werkdag in huis. Je ontvangt altijd een track en trace zodra je bestelling is verzonden, zodat je precies weet wanneer je 'm kunt verwachten.</p>
+          <p class="vh-prose">{DELIVERY_SENTENCE} Je ontvangt altijd een track en trace zodra je bestelling is verzonden, zodat je precies weet wanneer je 'm kunt verwachten. Genoemde levertijden zijn een indicatie, geen garantie.</p>
         </div>
 
         <div class="vh-trust-group">

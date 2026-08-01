@@ -1,0 +1,171 @@
+---
+/**
+ * Villa Happ — omslag voor de juridische pagina's
+ *
+ * Eén vorm voor privacy, voorwaarden, cookies en herroeping: zelfde kop,
+ * zelfde leesbreedte, zelfde "laatst bijgewerkt". De inhoud komt uit de
+ * slot; de bedrijfsgegevens onderaan komen altijd uit business.ts.
+ */
+import Base from '../../layouts/Base.astro';
+import { BUSINESS, isPending, addressLine } from '../../lib/business';
+import '../../styles/shop.css';
+
+export interface Props {
+  title: string;
+  heading: string;
+  headingAccent?: string;
+  intro: string;
+  description: string;
+  updated: string;
+}
+
+const { title, heading, headingAccent, intro, description, updated } = Astro.props;
+---
+<Base title={`${title} · Villa Happ`} description={description}>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Juridisch</p>
+        <h1 class="vh-page-title">
+          {heading}{headingAccent && <> <span class="vh-italic-accent">{headingAccent}</span></>}
+        </h1>
+        <p class="vh-page-sub">{intro}</p>
+        <p class="vh-legal-updated vh-mono">Laatst bijgewerkt: {updated}</p>
+      </header>
+
+      <div class="vh-legal">
+        <slot />
+
+        <section class="vh-legal-identity">
+          <h2>Wie wij zijn</h2>
+          <dl class="vh-legal-dl">
+            <div><dt>Handelsnaam</dt><dd>{BUSINESS.legalName}</dd></div>
+            <div><dt>Rechtsvorm</dt><dd>{BUSINESS.legalForm}</dd></div>
+            <div><dt>KvK-nummer</dt><dd>{BUSINESS.kvk}</dd></div>
+            <div><dt>Vestigingsnummer</dt><dd>{BUSINESS.establishmentNumber}</dd></div>
+            <div>
+              <dt>Btw-identificatienummer</dt>
+              <dd>{isPending(BUSINESS.vatId) ? <em>volgt</em> : BUSINESS.vatId}</dd>
+            </div>
+            <div>
+              <dt>{isPending(BUSINESS.visitingAddress.street) ? 'Postadres' : 'Vestigingsadres'}</dt>
+              <dd>{addressLine()}</dd>
+            </div>
+            <div><dt>E-mail</dt><dd><a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a></dd></div>
+            {!isPending(BUSINESS.phone) && (
+              <div><dt>Telefoon</dt><dd><a href={`tel:${BUSINESS.phone.replace(/\s/g, '')}`}>{BUSINESS.phone}</a></dd></div>
+            )}
+          </dl>
+        </section>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .vh-legal-updated {
+    font-size: 11px;
+    color: var(--vh-ink-muted);
+    margin: 18px 0 0;
+  }
+
+  .vh-legal {
+    max-width: 68ch;
+  }
+
+  .vh-legal section { margin-bottom: clamp(34px, 5vw, 52px); }
+
+  .vh-legal h2 {
+    font-family: var(--vh-font-serif);
+    font-size: clamp(21px, 2.4vw, 27px);
+    font-weight: 400;
+    line-height: 1.25;
+    margin: 0 0 14px;
+    color: var(--vh-ink);
+  }
+
+  .vh-legal h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 24px 0 8px;
+    color: var(--vh-ink);
+  }
+
+  .vh-legal p,
+  .vh-legal li {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--vh-ink-soft);
+  }
+
+  .vh-legal p { margin: 0 0 14px; }
+  .vh-legal ul, .vh-legal ol { margin: 0 0 16px; padding-left: 20px; }
+  .vh-legal li { margin-bottom: 7px; }
+
+  .vh-legal a {
+    color: var(--vh-accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Definitielijst voor bedrijfsgegevens en verwerkers */
+  .vh-legal-dl { margin: 0; }
+  .vh-legal-dl > div {
+    display: grid;
+    grid-template-columns: minmax(180px, 34%) 1fr;
+    gap: 8px 20px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--vh-ink-hairline);
+  }
+  .vh-legal-dl dt {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--vh-ink-muted);
+    margin: 0;
+  }
+  .vh-legal-dl dd {
+    font-size: 15px;
+    color: var(--vh-ink);
+    margin: 0;
+  }
+  .vh-legal-dl em { color: var(--vh-ink-muted); font-style: italic; }
+
+  @media (max-width: 620px) {
+    .vh-legal-dl > div { grid-template-columns: 1fr; gap: 2px; }
+  }
+
+  /* Tabel voor verwerkers en bewaartermijnen */
+  .vh-legal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 0 0 18px;
+  }
+  .vh-legal-table th,
+  .vh-legal-table td {
+    text-align: left;
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--vh-ink-hairline);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .vh-legal-table th {
+    font-size: 11px;
+    letter-spacing: var(--vh-tracking-wide);
+    text-transform: uppercase;
+    color: var(--vh-ink-muted);
+    font-weight: 500;
+  }
+  .vh-legal-table td { color: var(--vh-ink-soft); }
+
+  .vh-legal-tablewrap { overflow-x: auto; }
+
+  /* Losstaand aandachtsblok (bv. herroepingstermijn) */
+  .vh-legal-callout {
+    border-left: 2px solid var(--vh-accent);
+    background: var(--vh-paper-soft);
+    padding: 16px 20px;
+    margin: 0 0 18px;
+  }
+  .vh-legal-callout p:last-child { margin-bottom: 0; }
+</style>

@@ -4,8 +4,10 @@
  * GET  ?slug=<product>  → goedgekeurde reviews + gemiddelde
  * POST { slug, name, rating, text } → review in de moderatiewachtrij
  *
- * Zonder database geeft GET/POST 503; de PDP valt dan terug op
- * localStorage (demo-gedrag).
+ * Zonder database geeft GET een 200 met `demo: true` (geen 503, dat gaf een
+ * console-fout die de Lighthouse best-practices-score drukte). Die vlag is
+ * het signaal voor de PDP om terug te vallen op localStorage: POST kán dan
+ * namelijk niet slagen. Laat de vlag dus staan zolang GET 200 teruggeeft.
  */
 
 import type { APIRoute } from 'astro';
@@ -25,8 +27,10 @@ const PostSchema = z.object({
 export const GET: APIRoute = async ({ url }) => {
   const sb = getSupabaseAdmin();
   // Zonder database (demo/preview): 200 met lege lijst i.p.v. 503, zodat de
-  // PDP geen 503-console-fout logt (Lighthouse best-practices).
-  if (!sb) return new Response(JSON.stringify({ reviews: [] }), {
+  // PDP geen 503-console-fout logt (Lighthouse best-practices). `demo: true`
+  // vertelt de PDP dat schrijven hier niet gaat — zonder die vlag denkt hij
+  // dat de server meedoet en loopt elke ingestuurde review op een 503 stuk.
+  if (!sb) return new Response(JSON.stringify({ reviews: [], demo: true }), {
     status: 200, headers: { 'Content-Type': 'application/json' },
   });
 

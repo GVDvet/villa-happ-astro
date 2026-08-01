@@ -1,0 +1,175 @@
+---
+/**
+ * /bestelling/[token] — volg je bestelling
+ *
+ * Geen account, geen wachtwoord: de klant rekent af als gast en krijgt deze
+ * link in zijn bevestigingsmail. Het token is een ondertekend,
+ * verlopend capability-token (src/lib/order-token.ts) met publiek 'portaal';
+ * een token van de bedanktpagina past er niet op, want dat is met een
+ * andere afgeleide sleutel getekend.
+ *
+ * De pagina toont PII, dus: no-store, noindex, en niets in een CDN-cache.
+ * Een ongeldig of verlopen token geeft geen foutmelding met details maar
+ * een nette pagina die uitlegt wat je kunt doen.
+ */
+export const prerender = false;
+
+import Base from '../../layouts/Base.astro';
+import { leesOrderToken } from '../../lib/order-token';
+import { getSupabaseAdmin } from '../../lib/supabase';
+import { leesTijdlijn } from '../../lib/order-events';
+import { bouwTijdlijn, levertijdIndicatie, euro, STATUS_TOON, STATUS_LABEL, type OrderStatus } from '../../lib/order-status';
+import { BUSINESS } from '../../lib/business';
+import { RETURN_SENTENCE } from '../../lib/legal';
+import '../../styles/beheer.css';
+import '../../styles/shop.css';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+const inhoud = leesOrderToken(Astro.params.token, 'portaal');
+const sb = getSupabaseAdmin();
+
+let order: any = null;
+let stappen: ReturnType<typeof bouwTijdlijn> = [];
+
+if (inhoud && sb) {
+  const { data } = await sb
+    .from('orders')
+    .select('id, order_number, created_at, status, payment_status, customer_name, shipping_address, subtotal_cents, shipping_cents, total_cents, refunded_cents, tracking_number, tracking_carrier, order_items(product_name, variant_label, quantity, total_cents)')
+    .eq('id', inhoud.orderId)
+    .maybeSingle();
+  order = data;
+  if (order) stappen = bouwTijdlijn(await leesTijdlijn(sb, order.id));
+}
+
+const adres = order?.shipping_address || {};
+const land = adres.country || 'NL';
+
+// Track en trace-link alleen bouwen als we hem betrouwbaar kunnen maken.
+const postcode = (adres.postal_code || '').replace(/\s+/g, '').toUpperCase();
+const trackUrl =
+  order?.tracking_number && order?.tracking_carrier === 'PostNL' && postcode
+    ? `https://jouw.postnl.nl/track-and-trace/${encodeURIComponent(order.tracking_number)}-${land}-${postcode}`
+    : null;
+
+const datum = (iso: string) =>
+  new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+const voornaam = (order?.customer_name || '').split(' ')[0];
+---
+<Base
+  title={order ? `Bestelling ${order.order_number} · Villa Happ` : 'Bestelling · Villa Happ'}
+  description="Volg de voortgang van je Villa Happ bestelling."
+  noindex={true}
+>
+  <section class="vh-page">
+    <div class="vh-page-inner kp">
+
+      {!order ? (
+        <>
+          <header class="kp-kop">
+            <p class="vh-mono">Bestelling volgen</p>
+            <h1>Deze link werkt <span class="vh-italic-accent">niet meer</span>.</h1>
+            <p class="kp-sub">
+              Volglinks verlopen na verloop van tijd, en soms raakt er onderweg een
+              stukje van de link zoek. Zoek de bevestigingsmail van je bestelling op
+              en gebruik de knop daarin. Kom je er niet uit, mail ons dan met je
+              bestelnummer, dan zoeken we het voor je op.
+            </p>
+          </header>
+          <div class="vh-result-actions">
+            <a href="/contact" class="vh-btn vh-btn--accent"><span>Neem contact op</span></a>
+            <a href="/shop" class="vh-btn vh-btn--ghost"><span>Naar de collectie</span></a>
+          </div>
+        </>
+      ) : (
+        <>
+          <header class="kp-kop">
+            <p class="vh-mono">Bestelling {order.order_number}</p>
+            <h1>{voornaam ? `Dag ${voornaam},` : 'Je bestelling'} <span class="vh-italic-accent">dit is de stand</span>.</h1>
+            <p class="kp-sub">
+              Geplaatst op {datum(order.created_at)}.
+              <span class="bh-badge" data-toon={STATUS_TOON[order.status as OrderStatus] || 'wacht'} style="margin-left:8px;">
+                {STATUS_LABEL[order.status as OrderStatus] || order.status}
+              </span>
+            </p>
+          </header>
+
+          <section class="kp-blok">
+            <h2>Voortgang</h2>
+            <ul class="bh-tijdlijn">
+              {stappen.map((s) => (
+                <li class={s.gehaald ? 'is-gehaald' : 'is-open'}>
+                  <b>{s.label}</b>
+                  <small>
+                    {s.op ? datum(s.op) : 'Nog niet'}
+                    {s.toelichting && <><br />{s.toelichting}</>}
+                  </small>
+                </li>
+              ))}
+            </ul>
+
+            {order.status === 'shipped' && (
+              <p class="kp-hulp" style="margin-top:6px;">
+                {levertijdIndicatie(land)}.
+                {trackUrl && <> <a class="kp-track" href={trackUrl} rel="noopener" target="_blank">Volg je pakket bij PostNL</a></>}
+                {!trackUrl && order.tracking_number && <> Je track en trace-code is <b>{order.tracking_number}</b>.</>}
+              </p>
+            )}
+          </section>
+
+          <section class="kp-blok">
+            <h2>Wat je bestelde</h2>
+            <table class="kp-regels">
+              <tbody>
+                {(order.order_items || []).map((r: any) => (
+                  <tr>
+                    <td>
+                      {r.quantity}× {r.product_name}
+                      {r.variant_label && <span class="kp-variant">{r.variant_label}</span>}
+                    </td>
+                    <td>{euro(r.total_cents)}</td>
+                  </tr>
+                ))}
+                <tr><td>Verzending</td><td>{order.shipping_cents === 0 ? 'Gratis' : euro(order.shipping_cents)}</td></tr>
+                <tr><td><b>Totaal</b></td><td><b>{euro(order.total_cents)}</b></td></tr>
+                {order.refunded_cents > 0 && (
+                  <tr><td>Terugbetaald</td><td>−{euro(order.refunded_cents)}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <section class="kp-blok">
+            <h2>Bezorgadres</h2>
+            <p class="kp-hulp" style="margin:0;">
+              {order.customer_name}<br />
+              {[adres.street, adres.house_number].filter(Boolean).join(' ')}<br />
+              {[adres.postal_code, adres.city].filter(Boolean).join(' ')}<br />
+              {adres.country}
+            </p>
+            <p class="kp-hulp" style="margin:12px 0 0;font-size:12.5px;color:var(--vh-ink-muted);">
+              Klopt er iets niet? Mail ons zo snel mogelijk, dan passen we het aan zolang
+              het pakket nog niet weg is.
+            </p>
+          </section>
+
+          <section class="kp-blok">
+            <h2>Retour of vragen</h2>
+            <p class="kp-hulp">
+              {RETURN_SENTENCE} Gebruik het <a href="/herroeping">modelformulier voor herroeping</a>
+              of mail ons met je bestelnummer. Hoe het precies werkt staat op
+              <a href="/retourneren">retourneren</a>.
+            </p>
+            <p class="kp-hulp" style="margin-top:12px;">
+              Vragen over deze bestelling? Mail
+              <a href={`mailto:${BUSINESS.supportEmail}?subject=${encodeURIComponent('Bestelling ' + order.order_number)}`}>{BUSINESS.supportEmail}</a>,
+              dan hoef je het bestelnummer niet over te typen.
+            </p>
+          </section>
+        </>
+      )}
+
+    </div>
+  </section>
+</Base>

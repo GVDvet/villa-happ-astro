@@ -123,6 +123,10 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       '/img/products/back-cap-angle-v2.webp',
     ],
     // model: '/models/back-cap.glb',  // weer aanzetten zodra er een scan-kwaliteit model is
+    // LET OP bij aanzetten: @google/model-viewer laadt decoders van
+    // www.gstatic.com en cdn.jsdelivr.net. Die staan niet in de CSP in
+    // vercel.json, dus de viewer blijft dan zwart zonder zichtbare fout.
+    // Voeg ze toe aan script-src/connect-src, of host de decoders zelf.
     badge: 'Limited · 500',
     meta: 'Drop 001 · One size',
     edition: 500,
