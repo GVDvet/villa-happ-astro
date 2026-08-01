@@ -1,0 +1,205 @@
+---
+export const prerender = true;
+
+import LegalLayout from '../components/legal/LegalLayout.astro';
+import { BUSINESS, returnAddressLines } from '../lib/business';
+import { LEGAL_UPDATED, SHIPPING_TABLE, VAT_SENTENCE, DELIVERY_SENTENCE } from '../lib/legal';
+
+const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+const returnLines = returnAddressLines();
+---
+<LegalLayout
+  title="Algemene voorwaarden"
+  heading="Algemene"
+  headingAccent="voorwaarden"
+  intro="De afspraken tussen jou en ons wanneer je bij Villa Happ bestelt. Geschreven om te begrijpen, niet om te verbergen."
+  description="Algemene voorwaarden van Villa Happ: bestellen, betalen, leveren, herroepingsrecht, garantie en klachten."
+  updated={LEGAL_UPDATED}
+>
+  <section>
+    <h2>Artikel 1 — Toepasselijkheid</h2>
+    <p>
+      Deze voorwaarden gelden voor elk aanbod op deze website en voor elke
+      overeenkomst die daaruit voortkomt tussen {BUSINESS.legalName} en jou als
+      consument. Voordat je bestelt kun je deze voorwaarden lezen, opslaan en
+      afdrukken.
+    </p>
+    <p>
+      Wijkt een bepaling af van de wet in jouw nadeel, dan geldt die bepaling
+      niet en houden we ons aan de wet. Aan de rest van deze voorwaarden
+      verandert dat niets.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 2 — Het aanbod</h2>
+    <p>
+      Elk aanbod bevat een omschrijving van het stuk, de prijs en de
+      beschikbaarheid. Foto's zijn een zo waarheidsgetrouw mogelijke weergave;
+      kleuren kunnen op je scherm licht afwijken van het werkelijke stuk.
+      Kennelijke vergissingen en schrijffouten binden ons niet.
+    </p>
+    <p>
+      Een aanbod geldt zolang de voorraad strekt. Bij genummerde oplages is het
+      aantal beperkt tot wat op de productpagina staat.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 3 — De overeenkomst</h2>
+    <p>
+      De overeenkomst komt tot stand op het moment dat je de bestelling
+      afrondt en de betaling is bevestigd. Je ontvangt daarna zo snel mogelijk
+      een bevestiging per e-mail. Daarin staan je bestelling, het totaalbedrag,
+      het bezorgadres en informatie over je herroepingsrecht.
+    </p>
+    <p>
+      Is een stuk na je bestelling onverhoopt toch niet leverbaar, dan laten we
+      dat direct weten en betalen we het volledige bedrag binnen 14 dagen
+      terug.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 4 — Prijzen en betaling</h2>
+    <p>{VAT_SENTENCE} Verzendkosten worden apart getoond voordat je afrekent.</p>
+    <p>
+      Betalen doe je via Mollie, met iDEAL, Bancontact of creditcard. Wij
+      ontvangen en bewaren zelf geen betaalgegevens. Prijzen kunnen wijzigen,
+      maar nooit nadat je bestelling tot stand is gekomen.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 5 — Levering</h2>
+    <p>{DELIVERY_SENTENCE}</p>
+    <div class="vh-legal-tablewrap">
+      <table class="vh-legal-table">
+        <thead><tr><th>Land</th><th>Verzendkosten</th><th>Levertijd</th></tr></thead>
+        <tbody>
+          {SHIPPING_TABLE.map((s) => (
+            <tr><td>{s.country}</td><td>{eur(s.costCents)}</td><td>{s.delivery}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Verzending binnen deze landen is gratis vanaf € 75. Wij bezorgen op dit
+      moment alleen in Nederland, België en Duitsland.
+    </p>
+    <p>
+      Genoemde levertijden zijn indicatief en nooit fataal. Duurt levering
+      langer dan 30 dagen, dan mag je de overeenkomst kosteloos ontbinden en
+      krijg je je geld binnen 14 dagen terug. Het risico van beschadiging of
+      verlies tijdens transport ligt bij ons tot het moment dat jij (of iemand
+      die jij aanwijst) het pakket ontvangt.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 6 — Herroepingsrecht</h2>
+    <div class="vh-legal-callout">
+      <p>
+        <b>Je mag je bestelling {BUSINESS.returnDays} dagen bekijken en zonder
+        opgaaf van reden terugsturen.</b> De wet geeft je 14 dagen; wij geven
+        er {BUSINESS.returnDays}. De termijn begint op de dag dat jij of
+        iemand namens jou het laatste stuk uit de bestelling ontvangt.
+      </p>
+    </div>
+    <p>
+      Wil je herroepen, laat dat dan binnen die termijn ondubbelzinnig weten:
+      per e-mail aan <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>,
+      of met het <a href="/herroeping">modelformulier voor herroeping</a>. Het
+      formulier gebruiken is niet verplicht.
+    </p>
+    <p>
+      Na je melding heb je nog 14 dagen om het stuk terug te sturen. Tijdens de
+      bedenktijd ga je zorgvuldig met het stuk om: je mag het passen zoals je
+      dat in een winkel zou doen. Gaat de waarde achteruit doordat je verder
+      bent gegaan dan dat, dan mogen we die waardevermindering in rekening
+      brengen.
+    </p>
+
+    <h3>Kosten van retourneren</h3>
+    <p>
+      Retourneren vanuit Nederland is gratis; je ontvangt van ons een
+      retourlabel. Stuur je terug vanuit België of Duitsland, dan zijn de
+      verzendkosten van de retour voor jouw rekening.
+    </p>
+
+    <h3>Terugbetaling</h3>
+    <p>
+      We betalen het volledige aankoopbedrag terug, inclusief de standaard
+      verzendkosten die je bij de bestelling betaalde. Koos je bij het bestellen
+      voor een duurdere verzendmethode, dan vergoeden we het standaardtarief.
+      Terugbetalen gebeurt binnen 14 dagen nadat je je herroeping hebt gemeld,
+      via dezelfde betaalmethode. We mogen daarmee wachten tot we het stuk
+      terug hebben of jij hebt aangetoond dat je het verstuurd hebt.
+    </p>
+
+    <h3>Uitzonderingen</h3>
+    <p>
+      Het herroepingsrecht geldt niet voor stukken die op jouw specificatie zijn
+      gemaakt of duidelijk persoonlijk zijn, en niet voor verzegelde artikelen
+      die om hygiënische redenen niet retour kunnen als het zegel verbroken is.
+      Staat er op een productpagina geen uitzondering vermeld, dan geldt het
+      herroepingsrecht gewoon.
+    </p>
+
+    {returnLines && (
+      <>
+        <h3>Retouradres</h3>
+        <p>{returnLines.map((l) => (<>{l}<br /></>))}</p>
+      </>
+    )}
+  </section>
+
+  <section>
+    <h2>Artikel 7 — Garantie en conformiteit</h2>
+    <p>
+      Wat je krijgt moet zijn wat je op grond van de overeenkomst mocht
+      verwachten. Is dat niet zo, dan heb je recht op kosteloos herstel of
+      vervanging, en als dat niet kan op ontbinding of een prijsvermindering.
+      Dit wettelijke recht heb je altijd, ongeacht wat elders staat, en het is
+      niet in tijd beperkt tot een vaste garantieperiode.
+    </p>
+    <p>
+      Slijtage door normaal gebruik, schade door onjuist onderhoud of door
+      wassen tegen het wasvoorschrift in vallen hier niet onder.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 8 — Klachten</h2>
+    <p>
+      Klachten meld je binnen bekwame tijd nadat je het gebrek hebt ontdekt,
+      via <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>.
+      Je krijgt binnen 14 dagen een inhoudelijke reactie. Hebben we meer tijd
+      nodig, dan laten we dat binnen die termijn weten.
+    </p>
+    <p>
+      Komen we er samen niet uit, dan kun je je klacht voorleggen via het
+      Europese ODR-platform:
+      <a href="https://ec.europa.eu/consumers/odr" rel="noopener">ec.europa.eu/consumers/odr</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 9 — Aansprakelijkheid</h2>
+    <p>
+      Onze aansprakelijkheid is beperkt tot wat in deze voorwaarden en in de wet
+      is geregeld. Deze beperking geldt niet bij opzet of bewuste roekeloosheid
+      van onze kant, en evenmin waar de wet aansprakelijkheid dwingend
+      voorschrijft, zoals bij productaansprakelijkheid.
+    </p>
+  </section>
+
+  <section>
+    <h2>Artikel 10 — Toepasselijk recht</h2>
+    <p>
+      Op deze voorwaarden is Nederlands recht van toepassing. Woon je in een
+      ander EU-land, dan behoud je de bescherming van het dwingende recht van
+      jouw woonland.
+    </p>
+  </section>
+</LegalLayout>

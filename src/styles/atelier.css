@@ -362,8 +362,10 @@
 .atl-cert .atl-cert-meta,
 .atl-cert .atl-cert-foot { color: var(--vh-ink-soft); }
 
-/* Hoek-switcher voor de cap (front/zijkant/achter) */
-.atl-angles { display: flex; gap: 10px; }
+/* Hoek-switcher (voor/zij/achter). Welke knoppen zichtbaar zijn hangt af
+   van het gekozen stuk: de hoodie heeft geen zijaanzicht. */
+.atl-angles { display: flex; flex-wrap: wrap; gap: 10px; }
+.atl-angle-btn[hidden] { display: none; }
 .atl-angle-btn {
   font-family: var(--vh-font-mono); font-size: 12px; letter-spacing: 0.04em;
   padding: 9px 16px; border-radius: 999px;
@@ -373,6 +375,7 @@
 }
 .atl-angle-btn.is-on { background: var(--vh-paper); color: var(--vh-ink); border-color: var(--vh-paper); }
 .atl-onesize { font-family: var(--vh-font-mono); font-size: 11px; color: rgba(244, 238, 227, 0.5); margin: 0; }
+.atl-onesize[hidden] { display: none; }
 
 @media (max-width: 820px) {
   .atl-studio { grid-template-columns: 1fr; }
@@ -398,3 +401,24 @@
 .vh-no-motion .atl-dye-fill { height: 62%; }
 .vh-no-motion .atl-stitch .atl-stitch-draw { stroke-dashoffset: 0; }
 .vh-no-motion .atl-edition-bar span { width: 90%; }
+
+/* Toestemmingsvinkje in de claim-form (nieuwsbrief is optioneel) */
+.atl-form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(244, 238, 227, 0.65);
+  margin: 4px 0 0;
+  cursor: pointer;
+}
+.atl-form-check input {
+  width: 15px;
+  height: 15px;
+  margin: 1px 0 0;
+  flex: none;
+  accent-color: var(--vh-accent);
+  cursor: pointer;
+}
+.atl-form-note a { color: rgba(244, 238, 227, 0.85); text-decoration: underline; text-underline-offset: 2px; }

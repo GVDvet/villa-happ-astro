@@ -19,12 +19,15 @@ import { getSupabaseAdmin } from '../../../lib/supabase';
 import { getMollie } from '../../../lib/mollie';
 import { CheckoutSchema, shippingCost } from '../../../lib/checkout-logic';
 import { reserveInventory, releaseInventory } from '../../../lib/inventory';
-import { rateLimit, clientKey, tooManyRequests } from '../../../lib/rate-limit';
+import { begrens, clientSleutel, teVeelVerzoeken } from '../../../lib/rate-limit-db';
+import { maakOrderToken } from '../../../lib/order-token';
+import { logGebeurtenis } from '../../../lib/order-events';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!rateLimit(clientKey(request, 'checkout'), 10)) return tooManyRequests();
+  const limiet = await begrens('checkout', clientSleutel(request), 10);
+  if (!limiet.toegestaan) return teVeelVerzoeken(limiet);
 
   const sb = getSupabaseAdmin();
   if (!sb) {
@@ -136,6 +139,10 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Kon bestelling niet aanmaken.' }), { status: 500 });
   }
 
+  await logGebeurtenis(sb, order.id, 'aangemaakt', {
+    toelichting: `${lineItems.length} regel(s), ${(total / 100).toFixed(2)} EUR`,
+  });
+
   // 5. Mollie payment; bij falen niets gereserveerd of open laten hangen
   const siteUrl = import.meta.env.PUBLIC_SITE_URL || new URL(request.url).origin;
   let payment: Payment | undefined;
@@ -144,7 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
     payment = await mollie.payments.create({
       amount: { currency: 'EUR', value: (total / 100).toFixed(2) },
       description: `Villa Happ ${orderNumber}`,
-      redirectUrl: `${siteUrl}/checkout/success?order=${order.order_number}`,
+      redirectUrl: `${siteUrl}/checkout/success?t=${maakOrderToken(order.id, 'status')}`,
       cancelUrl: `${siteUrl}/checkout/cancelled?order=${order.order_number}`,
       webhookUrl: `${siteUrl}/api/checkout/webhook`,
       metadata: { order_id: order.id, order_number: order.order_number },

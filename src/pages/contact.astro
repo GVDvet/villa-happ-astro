@@ -38,11 +38,22 @@ import '../styles/shop.css';
             <label for="ct-message">Je bericht</label>
             <textarea id="ct-message" name="message" rows="5" required></textarea>
           </div>
+
+          <!-- Honeypot: onzichtbaar voor mensen, ingevuld door bots -->
+          <div class="vh-hp" aria-hidden="true">
+            <label for="ct-company">Bedrijf (niet invullen)</label>
+            <input id="ct-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
           <button type="submit" class="vh-btn vh-btn--accent" id="vh-contact-send">
             <span id="vh-contact-send-label">Verstuur bericht</span>
             <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <p class="vh-contact-note vh-mono">Demo: berichten worden nog niet verzonden tot de mailbox gekoppeld is.</p>
+          <p class="vh-contact-error" id="vh-contact-error" role="alert"></p>
+          <p class="vh-contact-note vh-mono">
+            We gebruiken je gegevens alleen om je vraag te beantwoorden.
+            Zie de <a href="/privacy">privacyverklaring</a>.
+          </p>
         </form>
 
         <div class="vh-contact-done" id="vh-contact-done" hidden>
@@ -99,15 +110,56 @@ import '../styles/shop.css';
     input.addEventListener('input', () => { if (input.classList.contains('is-invalid')) validate(input); });
   });
 
-  form.addEventListener('submit', (e) => {
+  const sendBtn = document.getElementById('vh-contact-send') as HTMLButtonElement;
+  const sendLabel = document.getElementById('vh-contact-send-label')!;
+  const errEl = document.getElementById('vh-contact-error')!;
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    errEl.textContent = '';
+    errEl.classList.remove('is-visible');
+
     let valid = true;
     reqInputs.forEach((input) => { if (!validate(input)) valid = false; });
     if (!valid) { form.querySelector<HTMLElement>('.is-invalid')?.focus(); return; }
-    // Demo: geen backend; toon de bevestiging.
-    form.hidden = true;
-    done.removeAttribute('hidden');
-    done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const fd = new FormData(form);
+    sendBtn.disabled = true;
+    sendLabel.textContent = 'Versturen…';
+
+    // Alleen bevestigen wat écht verstuurd is. Lukt het niet, dan zegt de
+    // pagina dat eerlijk en biedt ze een mailadres als alternatief.
+    let data: any = null;
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: String(fd.get('name') || ''),
+          email: String(fd.get('email') || ''),
+          subject: String(fd.get('subject') || 'Overig'),
+          message: String(fd.get('message') || ''),
+          company: String(fd.get('company') || ''),
+        }),
+      });
+      data = await res.json().catch(() => null);
+    } catch { /* netwerkfout: hieronder afgehandeld */ }
+
+    sendBtn.disabled = false;
+    sendLabel.textContent = 'Verstuur bericht';
+
+    if (data?.success) {
+      form.hidden = true;
+      done.removeAttribute('hidden');
+      done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const mailto = data?.mailto;
+    errEl.innerHTML = mailto
+      ? `${data?.error || 'Versturen lukte niet.'} Mail ons rechtstreeks op <a href="mailto:${mailto}">${mailto}</a>, dan pakken we het alsnog op.`
+      : (data?.error || 'Versturen lukte niet. Controleer je verbinding en probeer het opnieuw.');
+    errEl.classList.add('is-visible');
   });
   }); // einde onPageReady
 </script>

@@ -4,46 +4,78 @@ export const prerender = true;
 import Base from '../../layouts/Base.astro';
 import '../../styles/shop.css';
 ---
-<Base title="Bedankt · Villa Happ" noindex={true}>
+<Base
+  title="Bedankt · Villa Happ"
+  description="Bevestiging van je Villa Happ bestelling."
+  noindex={true}
+>
   <section class="vh-success">
     <div class="vh-success-inner">
 
-      <div class="vh-success-seal" aria-hidden="true">
-        <svg viewBox="0 0 120 120">
-          <defs>
-            <path id="vh-success-path" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
-          </defs>
-          <text>
-            <textPath href="#vh-success-path" startOffset="0">
-              VILLA HAPP · BESTELLING BEVESTIGD · EST. 1960 ·&nbsp;
-            </textPath>
-          </text>
-        </svg>
-        <span class="vh-success-check">✓</span>
+      <!-- Kop en lead horen bij de staat, maar blijven één h1: vier h1's in
+           de DOM (één per paneel) is rommelig voor validators en screenreaders. -->
+      <div id="vh-success-head" aria-live="polite">
+        <p class="vh-success-eyebrow vh-mono" id="vh-success-eyebrow">Even geduld</p>
+        <h1 class="vh-success-title" id="vh-success-title">We controleren je <span class="vh-italic-accent">betaling</span>.</h1>
+        <p class="vh-success-lead" id="vh-success-lead">Dit duurt meestal een paar seconden. Sluit dit venster nog niet.</p>
       </div>
 
-      <p class="vh-success-eyebrow vh-mono">Frame vastgelegd · Est. 1960 · Tilburg</p>
-      <h1 class="vh-success-title">Welkom in het <span class="vh-italic-accent">archief</span>.</h1>
-      <p class="vh-success-lead">
-        Bedankt voor je bestelling. Je hoort nu bij de mensen die dit merk weer
-        tot leven brengen. Je ontvangt een bevestiging per e-mail zodra de
-        betaling is verwerkt.
-      </p>
+      <!-- 1. Bezig met controleren (startstaat, geen extra inhoud) -->
+      <div id="vh-state-checking"></div>
 
-      <div class="vh-success-card">
-        <div class="vh-success-row"><span>Bestelnummer</span><b id="vh-ordernr">…</b></div>
-        <div class="vh-success-row"><span>Verwachte bezorging</span><b id="vh-deliv">…</b></div>
-        <div class="vh-success-row"><span>Verzending</span><b>PostNL · met track &amp; trace</b></div>
+      <!-- 2. Betaald -->
+      <div id="vh-state-paid" hidden>
+        <div class="vh-success-seal" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <path id="vh-success-path" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+            </defs>
+            <text>
+              <textPath href="#vh-success-path" startOffset="0">
+                VILLA HAPP · BESTELLING BEVESTIGD · EST. 1960 ·&nbsp;
+              </textPath>
+            </text>
+          </svg>
+          <span class="vh-success-check">✓</span>
+        </div>
+
+        <div class="vh-success-card">
+          <div class="vh-success-row"><span>Bestelnummer</span><b id="vh-ordernr">…</b></div>
+          <div class="vh-success-row"><span>Verwachte bezorging</span><b id="vh-deliv">…</b></div>
+          <div class="vh-success-row"><span>Verzending</span><b>PostNL · met track &amp; trace</b></div>
+        </div>
+
+        <div class="vh-result-actions">
+          <a href="/shop" class="vh-btn vh-btn--accent"><span>Verder shoppen</span>
+            <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="/" class="vh-btn vh-btn--ghost"><span>Naar home</span></a>
+        </div>
+
+        <p class="vh-success-foot vh-mono">Vragen over je bestelling? Reageer op de bevestigingsmail, we helpen je graag.</p>
       </div>
 
-      <div class="vh-result-actions">
-        <a href="/shop" class="vh-btn vh-btn--accent"><span>Verder shoppen</span>
-          <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="/" class="vh-btn vh-btn--ghost"><span>Naar home</span></a>
+      <!-- 3. Betaling niet gelukt: mandje blijft bewust staan -->
+      <div id="vh-state-failed" hidden>
+        <div class="vh-result-actions">
+          <a href="/checkout" class="vh-btn vh-btn--accent"><span>Opnieuw afrekenen</span></a>
+          <a href="/cart" class="vh-btn vh-btn--ghost"><span>Naar je mandje</span></a>
+        </div>
+        <p class="vh-success-foot vh-mono">Blijft het misgaan? Mail ons, dan lossen we het samen op.</p>
       </div>
 
-      <p class="vh-success-foot vh-mono">Vragen over je bestelling? Reageer op de bevestigingsmail, we helpen je graag.</p>
+      <!-- 4. Nog in behandeling, of niet te controleren -->
+      <div id="vh-state-pending" hidden>
+        <div class="vh-success-card">
+          <div class="vh-success-row"><span>Bestelnummer</span><b id="vh-ordernr-pending">…</b></div>
+        </div>
+        <div class="vh-result-actions">
+          <button type="button" class="vh-btn vh-btn--ghost" id="vh-recheck"><span>Opnieuw controleren</span></button>
+          <a href="/contact" class="vh-btn vh-btn--ghost"><span>Neem contact op</span></a>
+        </div>
+        <p class="vh-success-foot vh-mono">Reken niet nog een keer af: dat maakt een tweede bestelling aan.</p>
+      </div>
+
     </div>
   </section>
 </Base>
@@ -53,28 +85,140 @@ import '../../styles/shop.css';
   import { onPageReady } from '../../lib/page';
 
   onPageReady(() => {
-  const nrEl = document.getElementById('vh-ordernr');
-  if (!nrEl) return;
+  const checking = document.getElementById('vh-state-checking');
+  if (!checking) return;
 
-  // Mandje leegmaken: de bestelling is geplaatst.
-  clearCart();
+  const panels = {
+    checking,
+    paid: document.getElementById('vh-state-paid')!,
+    failed: document.getElementById('vh-state-failed')!,
+    pending: document.getElementById('vh-state-pending')!,
+  };
+  type PanelName = keyof typeof panels;
 
-  const nr = new URLSearchParams(window.location.search).get('order');
-  nrEl.textContent = nr ? `#${nr}` : 'Volgt per e-mail';
+  // Kop en lead horen bij de staat; ze staan één keer in de DOM en worden
+  // hier meegeschreven. aria-live meldt de wissel aan een screenreader.
+  const HEAD: Record<PanelName, { eyebrow: string; title: string; lead: string }> = {
+    checking: {
+      eyebrow: 'Even geduld',
+      title: 'We controleren je <span class="vh-italic-accent">betaling</span>.',
+      lead: 'Dit duurt meestal een paar seconden. Sluit dit venster nog niet.',
+    },
+    paid: {
+      eyebrow: 'Frame vastgelegd · Est. 1960 · Tilburg',
+      title: 'Welkom in het <span class="vh-italic-accent">archief</span>.',
+      lead: 'Bedankt voor je bestelling. Je hoort nu bij de mensen die dit merk weer tot leven brengen. De bevestiging ligt onderweg naar je mailbox.',
+    },
+    failed: {
+      eyebrow: 'Betaling niet afgerond',
+      title: 'Er is <span class="vh-italic-accent">niets afgeschreven</span>.',
+      lead: 'De betaling is afgebroken of niet gelukt, dus je bestelling is niet geplaatst. Je mandje staat er nog precies zoals je het achterliet.',
+    },
+    pending: {
+      eyebrow: 'In behandeling',
+      title: 'Je betaling wordt <span class="vh-italic-accent">verwerkt</span>.',
+      lead: 'Sommige betaalmethoden hebben even nodig. Zodra je bank het bevestigt, krijg je van ons een bevestigingsmail. Je hoeft niets te doen.',
+    },
+  };
 
-  // Verwachte bezorging (zelfde logica als de PDP)
-  (function deliv() {
+  const eyebrowEl = document.getElementById('vh-success-eyebrow')!;
+  const titleEl = document.getElementById('vh-success-title')!;
+  const leadEl = document.getElementById('vh-success-lead')!;
+
+  const show = (name: PanelName, leadOverride?: string) => {
+    (Object.keys(panels) as PanelName[]).forEach((k) => {
+      panels[k].toggleAttribute('hidden', k !== name);
+    });
+    const copy = HEAD[name];
+    eyebrowEl.textContent = copy.eyebrow;
+    titleEl.innerHTML = copy.title; // vaste opmaak, geen invoer van buiten
+    leadEl.textContent = leadOverride || copy.lead;
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  // Alleen het token: het bestelnummer komt uit het antwoord van de API, zodat
+  // er geen oplopend nummer in de URL staat dat je kunt aftellen.
+  const token = params.get('t') || '';
+  const zetNummer = (nr: string) => {
+    const label = nr ? `#${nr}` : 'Volgt per e-mail';
+    document.getElementById('vh-ordernr')!.textContent = label;
+    document.getElementById('vh-ordernr-pending')!.textContent = label;
+  };
+  zetNummer('');
+
+  /* Bezorging als INDICATIE, nooit als kalenderdatum.
+     Huisregel uit het Aqua Chain-portaal: een pagina of mail die niet live
+     kan bijwerken belooft geen exacte dag. Deze pagina noemde er wel een,
+     berekend uit werkdagen, zonder feestdagen en zonder weet van een
+     vertraagde rit. Die datum werd daarmee een afspraak. */
+  (function bezorging() {
     const el = document.getElementById('vh-deliv');
-    if (!el) return;
-    const days = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
-    const months = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
-    const nextBiz = (d: Date) => { do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6); return d; };
-    const now = new Date();
-    let ship = new Date(now);
-    if (now.getHours() >= 16) ship = nextBiz(ship);
-    while (ship.getDay() === 0 || ship.getDay() === 6) ship = nextBiz(ship);
-    const d = nextBiz(ship);
-    el.textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+    if (el) el.textContent = 'Doorgaans de volgende werkdag na verzending';
   })();
+
+  /**
+   * Mollie stuurt de klant hierheen bij élke afloop — betaald, mislukt,
+   * verlopen of afgebroken in de bankapp. Alleen bij een bevestigde
+   * betaling zeggen we "bedankt" en legen we het mandje; in elk ander
+   * geval blijft het mandje staan.
+   *
+   * De webhook en deze redirect zijn een race: vlak na het betalen staat
+   * de order soms nog op 'open'. Daarom pollen we een halve minuut.
+   */
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let tries = 0;
+  const MAX_TRIES = 15; // 15 × 2s ≈ 30 seconden
+
+  async function check() {
+    if (!token) {
+      // Zonder redirect-parameters valt er niets te verifiëren.
+      // Dan niets beloven en niets weggooien.
+      show('pending');
+      return;
+    }
+
+    let state = 'unknown';
+    try {
+      const res = await fetch(`/api/checkout/status?t=${encodeURIComponent(token)}`);
+      if (res.ok) {
+        const json = await res.json();
+        state = json.state || 'unknown';
+        if (json.order_number) zetNummer(json.order_number);
+      }
+    } catch { /* netwerkfout: hieronder afgehandeld als 'unknown' */ }
+
+    if (state === 'paid') {
+      clearCart(); // pas nu: de bestelling staat vast
+      show('paid');
+      return;
+    }
+    if (state === 'failed') {
+      show('failed'); // mandje bewust intact
+      return;
+    }
+
+    // pending of unknown: nog even blijven proberen
+    tries += 1;
+    if (tries < MAX_TRIES) {
+      timer = setTimeout(check, 2000);
+      if (tries > 2) show('pending'); // na ~6s niet langer "even geduld"
+      return;
+    }
+    show(
+      'pending',
+      'Je bank heeft de betaling nog niet bevestigd. Dat kan bij sommige methoden even duren. ' +
+        'Je krijgt een mail zodra het rond is; is er niets afgeschreven, dan is de bestelling niet doorgegaan.',
+    );
+  }
+
+  document.getElementById('vh-recheck')?.addEventListener('click', () => {
+    tries = 0;
+    show('checking');
+    check();
+  });
+
+  check();
+
+  return () => { if (timer) clearTimeout(timer); };
   }); // einde onPageReady
 </script>

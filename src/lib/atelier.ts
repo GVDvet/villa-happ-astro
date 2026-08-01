@@ -21,6 +21,8 @@ export const ClaimSchema = z.object({
   name: z.string().min(1).max(40).optional(),
   garment: z.enum(GARMENTS).optional(),
   colour: z.enum(COLOURS).optional(),
+  /** Expliciete toestemming voor de nieuwsbrief; standaard uit. */
+  newsletter: z.boolean().optional().default(false),
 });
 
 export type ClaimPayload = z.infer<typeof ClaimSchema>;
@@ -47,4 +49,43 @@ export function describePiece(garment?: string, colour?: string): string {
   if (garment === 'cap') return 'Cap · Grijs melange';
   const c = colour ? colour.charAt(0).toUpperCase() + colour.slice(1) : 'Olijfgroen';
   return `Hoodie · ${c}`;
+}
+
+/* ---------- Kijkhoeken in de ontwerpstudio ---------- */
+
+export const ANGLES = ['front', 'side', 'back'] as const;
+export type Angle = (typeof ANGLES)[number];
+
+export const ANGLE_LABELS: Record<Angle, string> = {
+  front: 'Voorkant',
+  side: 'Zijkant',
+  back: 'Achterkant',
+};
+
+/**
+ * Welke hoeken bestaan er per stuk? Puur bepaald door het beeldmateriaal
+ * in public/img/atelier: van de hoodie is er voor- en achterkant, van de
+ * cap ook een zijkant. Voeg je een beeld toe, zet de hoek er dan hier bij.
+ */
+export const ANGLES_BY_GARMENT: Record<Garment, Angle[]> = {
+  hoodie: ['front', 'back'],
+  cap: ['front', 'side', 'back'],
+};
+
+export function anglesFor(garment?: string): Angle[] {
+  return ANGLES_BY_GARMENT[garment as Garment] ?? ANGLES_BY_GARMENT.hoodie;
+}
+
+/** Val terug op de voorkant zodra het gekozen stuk die hoek niet heeft. */
+export function resolveAngle(garment?: string, angle?: string): Angle {
+  const available = anglesFor(garment);
+  return available.includes(angle as Angle) ? (angle as Angle) : 'front';
+}
+
+/** Bestandsnaam (zonder pad en extensie) van het studiobeeld. */
+export function assetName(garment?: string, colour?: string, angle?: string): string {
+  const a = resolveAngle(garment, angle);
+  if (garment === 'cap') return `cap-${a}`;
+  const c = colour === 'navy' ? 'navy' : 'olijfgroen';
+  return a === 'back' ? `hoodie-${c}-back-v2` : `hoodie-${c}-v2`;
 }

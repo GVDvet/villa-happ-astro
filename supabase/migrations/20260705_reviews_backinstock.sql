@@ -30,6 +30,7 @@ ALTER TABLE product_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE back_in_stock ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public read approved reviews" ON product_reviews;
+DROP POLICY IF EXISTS "Public read approved reviews" ON product_reviews;
 CREATE POLICY "Public read approved reviews" ON product_reviews
   FOR SELECT USING (approved = TRUE);
 

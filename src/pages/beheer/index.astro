@@ -1,0 +1,180 @@
+---
+/**
+ * /beheer — orderlijst
+ *
+ * Server-gerenderd: de lijst bevat klantnamen, adressen en bedragen, dus
+ * daar mag geen versie van in een CDN-cache belanden.
+ *
+ * Zonder geldige sessie krijg je het inlogscherm, niet een 403: van buiten
+ * is niet te zien of dit portaal aanstaat of hoeveel er te halen valt.
+ */
+export const prerender = false;
+
+import BeheerLayout from '../../layouts/BeheerLayout.astro';
+import { BEHEER_COOKIE, leesBeheerSessie, beheerGeconfigureerd } from '../../lib/beheer-sessie';
+import { getSupabaseAdmin } from '../../lib/supabase';
+import { leesOrders, leesKerncijfers, BEHEER_HEADERS } from '../../lib/beheer';
+import { wachtrijStatus } from '../../lib/outbox';
+import { STATUS_KORT, STATUS_TOON, euro, type OrderStatus } from '../../lib/order-status';
+
+for (const [k, v] of Object.entries(BEHEER_HEADERS)) Astro.response.headers.set(k, v);
+
+const ingelogd = leesBeheerSessie(Astro.cookies.get(BEHEER_COOKIE)?.value);
+const geconfigureerd = beheerGeconfigureerd();
+const sb = getSupabaseAdmin();
+
+const filterStatus = Astro.url.searchParams.get('status') || '';
+const zoek = Astro.url.searchParams.get('zoek') || '';
+const pagina = Number(Astro.url.searchParams.get('p') || '1');
+
+let lijst = { rijen: [] as any[], totaal: 0, pagina: 1, paginas: 1 };
+let cijfers = { teVerzenden: 0, onderweg: 0, wachtOpBetaling: 0, omzet30: 0 };
+let outbox = { wachtendVooraf: 0, oudsteSecondenVooraf: 0, opgegeven: 0 };
+
+if (ingelogd && sb) {
+  [lijst, cijfers, outbox] = await Promise.all([
+    leesOrders(sb, { status: filterStatus || undefined, zoek: zoek || undefined, pagina }),
+    leesKerncijfers(sb),
+    wachtrijStatus(),
+  ]);
+}
+
+const statusFilters: { waarde: string; label: string }[] = [
+  { waarde: '', label: 'Alles' },
+  { waarde: 'paid', label: 'Te verzenden' },
+  { waarde: 'shipped', label: 'Onderweg' },
+  { waarde: 'delivered', label: 'Bezorgd' },
+  { waarde: 'pending', label: 'Wacht op betaling' },
+  { waarde: 'cancelled', label: 'Geannuleerd' },
+  { waarde: 'refunded', label: 'Terugbetaald' },
+];
+
+const link = (over: Record<string, string>) => {
+  const p = new URLSearchParams({ ...(filterStatus ? { status: filterStatus } : {}), ...(zoek ? { zoek } : {}), ...over });
+  const q = p.toString();
+  return q ? `/beheer?${q}` : '/beheer';
+};
+
+const datum = (iso: string) =>
+  new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: '2-digit' });
+---
+<BeheerLayout title="Bestellingen · Beheer" ingelogd={ingelogd} geconfigureerd={geconfigureerd}>
+  {!sb && (
+    <p class="bh-melding is-let">
+      Er is nog geen database gekoppeld, dus er zijn geen bestellingen om te tonen.
+      Zet de Supabase-sleutels in Vercel om dit portaal te vullen.
+    </p>
+  )}
+
+  {sb && (
+    <>
+      <div class="bh-cijfers">
+        <a class={`bh-cijfer${cijfers.teVerzenden ? ' is-actie' : ''}`} href="/beheer?status=paid">
+          <b>{cijfers.teVerzenden}</b><span>Te verzenden</span>
+        </a>
+        <a class="bh-cijfer" href="/beheer?status=shipped">
+          <b>{cijfers.onderweg}</b><span>Onderweg</span>
+        </a>
+        <a class="bh-cijfer" href="/beheer?status=pending">
+          <b>{cijfers.wachtOpBetaling}</b><span>Wacht op betaling</span>
+        </a>
+        <div class="bh-cijfer">
+          <b>{euro(cijfers.omzet30)}</b><span>Omzet 30 dagen</span>
+        </div>
+      </div>
+
+      {(outbox.wachtendVooraf > 0 || outbox.opgegeven > 0) && (
+        <p class={`bh-melding ${outbox.opgegeven ? 'is-fout' : 'is-let'}`} id="bh-outbox-melding">
+          {outbox.wachtendVooraf > 0 && `${outbox.wachtendVooraf} mail wacht op verzending`}
+          {outbox.wachtendVooraf > 0 && outbox.oudsteSecondenVooraf > 900 &&
+            ` (oudste ${Math.round(outbox.oudsteSecondenVooraf / 60)} minuten)`}
+          {outbox.wachtendVooraf > 0 && outbox.opgegeven > 0 && '. '}
+          {outbox.opgegeven > 0 && `${outbox.opgegeven} mail is definitief opgegeven, die moet je handmatig oppakken`}
+          {'. '}
+          <button type="button" class="bh-knop bh-knop--zacht" id="bh-outbox-nu" style="margin-left:6px;">Nu verwerken</button>
+        </p>
+      )}
+
+      <form class="bh-filters" method="get" action="/beheer" role="search">
+        <label class="vh-sr-only" for="bh-zoek">Zoek op bestelnummer, naam of e-mail</label>
+        <input type="search" id="bh-zoek" name="zoek" value={zoek} placeholder="Bestelnummer, naam of e-mail" />
+        {filterStatus && <input type="hidden" name="status" value={filterStatus} />}
+        <button type="submit" class="bh-chip">Zoeken</button>
+      </form>
+
+      <div class="bh-filters">
+        {statusFilters.map((f) => (
+          <a
+            class={`bh-chip${filterStatus === f.waarde ? ' is-on' : ''}`}
+            href={f.waarde ? `/beheer?status=${f.waarde}${zoek ? `&zoek=${encodeURIComponent(zoek)}` : ''}` : (zoek ? `/beheer?zoek=${encodeURIComponent(zoek)}` : '/beheer')}
+          >{f.label}</a>
+        ))}
+      </div>
+
+      <div class="bh-tabelwrap">
+        <table class="bh-tabel">
+          <thead>
+            <tr>
+              <th>Bestelling</th><th>Datum</th><th>Klant</th>
+              <th>Status</th><th>Track en trace</th><th style="text-align:right">Bedrag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lijst.rijen.map((o) => (
+              <tr>
+                <td><a href={`/beheer/order/${o.id}`}>{o.order_number}</a></td>
+                <td>{datum(o.created_at)}</td>
+                <td class="klant">{o.customer_name}<br /><small style="color:var(--vh-ink-muted)">{o.customer_email}</small></td>
+                <td>
+                  <span class="bh-badge" data-toon={STATUS_TOON[o.status as OrderStatus] || 'wacht'}>
+                    {STATUS_KORT[o.status as OrderStatus] || o.status}
+                  </span>
+                </td>
+                <td>{o.tracking_number || '—'}</td>
+                <td class="bedrag">
+                  {euro(o.total_cents)}
+                  {o.refunded_cents > 0 && <><br /><small style="color:var(--vh-danger)">−{euro(o.refunded_cents)}</small></>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {lijst.rijen.length === 0 && (
+          <p class="bh-leeg">
+            {zoek || filterStatus ? 'Geen bestellingen die hierbij passen.' : 'Nog geen bestellingen.'}
+          </p>
+        )}
+      </div>
+
+      {lijst.paginas > 1 && (
+        <nav class="bh-pagina" aria-label="Paginering">
+          {lijst.pagina > 1 && <a class="bh-chip" href={link({ p: String(lijst.pagina - 1) })}>Vorige</a>}
+          <span>Pagina {lijst.pagina} van {lijst.paginas} · {lijst.totaal} bestellingen</span>
+          {lijst.pagina < lijst.paginas && <a class="bh-chip" href={link({ p: String(lijst.pagina + 1) })}>Volgende</a>}
+        </nav>
+      )}
+    </>
+  )}
+</BeheerLayout>
+
+<script>
+  // De outbox-knop hangt aan de sessie via een CSRF-token dat de layout
+  // in een data-attribuut zet.
+  const knop = document.getElementById('bh-outbox-nu');
+  knop?.addEventListener('click', async () => {
+    const csrf = document.body.dataset.csrf || '';
+    knop.setAttribute('disabled', '');
+    knop.textContent = 'Bezig…';
+    try {
+      const res = await fetch(`/api/beheer/outbox?csrf=${encodeURIComponent(csrf)}`, { method: 'POST' });
+      const j = await res.json();
+      const melding = document.getElementById('bh-outbox-melding')!;
+      melding.textContent = res.ok
+        ? `${j.verzonden} verzonden, ${j.mislukt} mislukt. Ververs de pagina voor de nieuwe stand.`
+        : (j.error || 'Verwerken lukte niet.');
+    } catch {
+      knop.removeAttribute('disabled');
+      knop.textContent = 'Nu verwerken';
+    }
+  });
+</script>

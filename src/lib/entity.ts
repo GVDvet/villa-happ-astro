@@ -12,12 +12,20 @@
  */
 
 import { getSiteOrigin } from './site';
+import { BUSINESS, isPending } from './business';
 
 export const BRAND = {
   name: 'Villa Happ',
   domain: 'villa-happ.nl',
-  email: 'bestellingen@villa-happ.nl',
+  email: BUSINESS.orderEmail,
   foundingYear: '1960',
+  /**
+   * Waar het verhaal begon en waar nog steeds ontworpen wordt. Dit is
+   * NIET het vestigingsadres van het bedrijf: dat staat in business.ts
+   * (Waalwijk) en voedt het `address`-veld van het schema. Een schema
+   * dat een andere plaats claimt dan de KvK-inschrijving is een
+   * controleerbaar onjuist feit.
+   */
   locality: 'Tilburg',
   country: 'NL',
   founder: 'Toni Kuijpers',
@@ -41,6 +49,10 @@ export const BRAND = {
   ],
   /** Onderwerpen waar het merk geloofwaardig over is (knowsAbout in schema) */
   knowsAbout: ['heritage mode', 'biologisch katoen', 'genummerde oplages', 'Tilburgs vakmanschap', 'lifestyle apparel'],
+  /** Leeftijd van het merk, berekend i.p.v. hardgecodeerd ("65 jaar" liep achter). */
+  get age(): number {
+    return new Date().getFullYear() - Number(this.foundingYear);
+  },
   /** Echte profiel-URL's die de merkentiteit aan de kennisgraaf koppelen */
   sameAs: ['https://www.linkedin.com/company/villahapp'] as string[],
   /** Profiel-URL('s) van de merkverteller Rutger van Happen (Person-entiteit) */
@@ -62,18 +74,36 @@ export function organizationLd(origin: string = getSiteOrigin()) {
     foundingDate: BRAND.foundingYear,
     foundingLocation: { '@type': 'Place', name: `${BRAND.locality}, Nederland` },
     founder: { '@type': 'Person', name: BRAND.founder },
+    legalName: BUSINESS.legalName,
+    // Vestigingsplaats volgens de KvK, niet de plaats uit het verhaal
     address: {
       '@type': 'PostalAddress',
-      addressLocality: BRAND.locality,
-      addressCountry: BRAND.country,
+      ...(isPending(BUSINESS.visitingAddress.street)
+        ? {}
+        : {
+            streetAddress: BUSINESS.visitingAddress.street,
+            postalCode: BUSINESS.visitingAddress.postalCode,
+          }),
+      addressLocality: isPending(BUSINESS.visitingAddress.city)
+        ? BUSINESS.locality
+        : BUSINESS.visitingAddress.city,
+      addressRegion: BUSINESS.region,
+      addressCountry: BUSINESS.country,
     },
     contactPoint: {
       '@type': 'ContactPoint',
       email: BRAND.email,
+      ...(isPending(BUSINESS.phone) ? {} : { telephone: BUSINESS.phone }),
       contactType: 'customer service',
       availableLanguage: ['Dutch', 'nl'],
     },
     knowsAbout: BRAND.knowsAbout,
+    identifier: [
+      { '@type': 'PropertyValue', name: 'KvK', value: BUSINESS.kvk },
+      ...(isPending(BUSINESS.vatId)
+        ? []
+        : [{ '@type': 'PropertyValue', name: 'BTW', value: BUSINESS.vatId }]),
+    ],
   };
   if (BRAND.sameAs.length) org.sameAs = BRAND.sameAs;
   return org;

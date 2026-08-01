@@ -2,6 +2,8 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
+import { BUSINESS } from '../lib/business';
+import { RETURN_SENTENCE, DELIVERY_SENTENCE, VAT_SENTENCE } from '../lib/legal';
 import '../styles/shop.css';
 
 const groups = [
@@ -11,21 +13,22 @@ const groups = [
       { q: 'Welke betaalmethoden kan ik gebruiken?', a: 'Je betaalt veilig via Mollie met iDEAL, Bancontact of creditcard (Mastercard en Visa).' },
       { q: 'Is online betalen veilig?', a: 'Ja. Alle betalingen lopen versleuteld via Mollie. Wij slaan zelf geen betaalgegevens op.' },
       { q: 'Kan ik mijn bestelling nog wijzigen?', a: 'Zolang je bestelling nog niet is verzonden, passen we hem graag aan. Reageer zo snel mogelijk op je bevestigingsmail.' },
+      { q: 'Zijn de prijzen inclusief btw?', a: `${VAT_SENTENCE} Verzendkosten zie je apart voordat je afrekent.` },
     ],
   },
   {
     title: 'Verzending',
     items: [
       { q: 'Wat kost verzending?', a: 'Binnen Nederland € 4,95, en gratis vanaf € 75. Naar België € 6,95 en naar Duitsland € 8,95.' },
-      { q: 'Hoe snel is mijn bestelling in huis?', a: 'Voor 16:00 besteld, dezelfde werkdag verzonden via PostNL. Binnen Nederland is je pakket meestal de volgende werkdag in huis, inclusief track en trace.' },
+      { q: 'Hoe snel is mijn bestelling in huis?', a: `${DELIVERY_SENTENCE} Je krijgt altijd een track en trace. Genoemde levertijden zijn een indicatie, geen garantie.` },
       { q: 'Naar welke landen versturen jullie?', a: 'Op dit moment bezorgen we in Nederland, België en Duitsland.' },
     ],
   },
   {
     title: 'Retour & ruilen',
     items: [
-      { q: 'Kan ik mijn bestelling retourneren?', a: 'Ja, je hebt 30 dagen bedenktijd. Retourneren is gratis binnen Nederland.' },
-      { q: 'Hoe retourneer ik?', a: 'Meld je retour via een reactie op je bevestigingsmail. Je ontvangt een retourlabel en stuurt het pakket terug. Na ontvangst betalen we binnen 14 dagen terug.' },
+      { q: 'Kan ik mijn bestelling retourneren?', a: RETURN_SENTENCE },
+      { q: 'Hoe retourneer ik?', a: `Meld je retour per e-mail of via het herroepingsformulier op de site. Vanuit Nederland krijg je een gratis retourlabel. Binnen ${BUSINESS.refundDays} dagen na je melding krijg je het volledige bedrag terug via dezelfde betaalmethode.` },
       { q: 'Kan ik een andere maat ruilen?', a: 'Retourneer het stuk en plaats een nieuwe bestelling in de juiste maat. Zo is de gewenste maat het snelst bij je.' },
     ],
   },

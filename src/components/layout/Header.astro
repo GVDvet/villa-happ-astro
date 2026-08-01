@@ -1,5 +1,21 @@
 ---
 import { optimizedSrc } from '../../lib/img';
+import { getCatalog } from '../../lib/catalog';
+
+// Zoekindex: klein genoeg (een handvol producten) om mee te sturen, zodat
+// zoeken instant is zonder API-call. De knop in de header deed hiervoor
+// helemaal niets.
+const catalog = await getCatalog();
+const searchIndex = catalog.map((p) => ({
+  slug: p.slug,
+  name: p.name,
+  color: p.color,
+  meta: p.meta,
+  price_cents: p.price_cents,
+  image: optimizedSrc(p.images[0], 160),
+  terms: [p.name, p.color, p.meta, p.short_desc].filter(Boolean).join(' ').toLowerCase(),
+}));
+
 const navLinks = [
   { label: 'Home', href: '/', preview: '/img/products/hoodie-grey-lifestyle-v2.webp' },
   { label: 'Shop', href: '/shop', preview: '/img/products/hoodie-grey-front-v2.webp' },
@@ -33,7 +49,7 @@ const navLinks = [
   </div>
 
   <div class="vh-header-actions">
-    <button type="button" class="vh-header-icon" aria-label="Zoeken">
+    <button type="button" class="vh-header-icon" id="vh-search-open" aria-label="Zoeken" aria-haspopup="dialog" aria-expanded="false">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -65,6 +81,23 @@ const navLinks = [
     </button>
   </div>
 </header>
+
+<!-- Zoeken -->
+<div class="vh-search" id="vh-search" hidden>
+  <button type="button" class="vh-search-backdrop" data-search-close tabindex="-1" aria-label="Sluit zoeken"></button>
+  <div class="vh-search-panel" role="dialog" aria-modal="true" aria-label="Zoeken in de collectie">
+    <div class="vh-search-bar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <label for="vh-search-input" class="vh-sr-only">Zoek in de collectie</label>
+      <input type="search" id="vh-search-input" placeholder="Zoek een stuk, kleur of maat…" autocomplete="off" />
+      <button type="button" class="vh-search-esc vh-mono" data-search-close>Esc</button>
+    </div>
+    <div class="vh-search-results" id="vh-search-results" role="listbox" aria-label="Zoekresultaten"></div>
+  </div>
+</div>
+<script type="application/json" id="vh-search-data" set:html={JSON.stringify(searchIndex)} is:inline></script>
 
 <!-- Mobile menu -->
 <div class="vh-mobile-menu" id="vh-mobile-menu" aria-hidden="true">
@@ -232,6 +265,17 @@ const navLinks = [
 
   .vh-header-hamburger {
     display: none;
+    /* WCAG 2.2 (2.5.8) wil minimaal 24×24 CSS-px; het icoon zelf is 22px,
+       dus het raakvlak wordt hier expliciet vergroot. */
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--vh-radius-pill);
   }
 
   /* ---------- Mobile ---------- */
@@ -239,6 +283,99 @@ const navLinks = [
     .vh-header-nav { display: none; }
     .vh-header-hamburger { display: inline-flex; }
   }
+
+  /* ---------- Zoekoverlay ---------- */
+  .vh-search {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--vh-z-nav) + 2);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(70px, 12vh, 140px) 20px 20px;
+  }
+  .vh-search[hidden] { display: none; }
+  .vh-search-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(28, 24, 19, 0.55);
+    backdrop-filter: blur(3px);
+    cursor: pointer;
+  }
+  .vh-search-panel {
+    position: relative;
+    width: min(560px, 100%);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--vh-paper);
+    color: var(--vh-ink);
+    border-radius: var(--vh-radius-md, 10px);
+    box-shadow: 0 30px 80px -30px rgba(28, 24, 19, 0.5);
+    overflow: hidden;
+  }
+  .vh-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--vh-ink-hairline);
+    color: var(--vh-ink-muted);
+  }
+  .vh-search-bar input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--vh-ink);
+    min-width: 0;
+  }
+  .vh-search-bar input::-webkit-search-cancel-button { display: none; }
+  .vh-search-esc {
+    border: 1px solid var(--vh-ink-hairline);
+    background: transparent;
+    color: var(--vh-ink-muted);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    min-height: 24px;
+  }
+  .vh-search-results { overflow-y: auto; }
+  .vh-search-hit {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 18px;
+    color: inherit;
+    border-bottom: 1px solid var(--vh-ink-hairline);
+  }
+  .vh-search-hit:hover,
+  .vh-search-hit:focus-visible { background: var(--vh-paper-soft); outline: none; }
+  .vh-search-hit img {
+    width: 48px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 3px;
+    background: var(--vh-paper-soft);
+  }
+  .vh-search-hit-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .vh-search-hit-text b { font-size: 14px; font-weight: 500; }
+  .vh-search-hit-text small { font-size: 12px; color: var(--vh-ink-muted); }
+  .vh-search-hit-price { font-family: var(--vh-font-serif); font-size: 15px; }
+  .vh-search-empty {
+    padding: 28px 18px;
+    font-size: 14px;
+    color: var(--vh-ink-muted);
+    margin: 0;
+    text-align: center;
+  }
+  .vh-search-empty a { color: var(--vh-accent-ink); text-decoration: underline; }
 
   .vh-mobile-menu {
     position: fixed;
@@ -385,6 +522,96 @@ const navLinks = [
       window.dispatchEvent(new CustomEvent('vh:open-cart'));
     });
   });
+
+  /* Zoeken: overlay met directe filtering op de meegestuurde index.
+     De knop deed hiervoor niets; een dode knop in de header is een
+     vertrouwensbreuk in een webshop. */
+  (function search() {
+    const box = document.getElementById('vh-search');
+    const openBtn = document.getElementById('vh-search-open');
+    const input = document.getElementById('vh-search-input') as HTMLInputElement | null;
+    const results = document.getElementById('vh-search-results');
+    const dataEl = document.getElementById('vh-search-data');
+    if (!box || !openBtn || !input || !results || !dataEl) return;
+
+    type Item = { slug: string; name: string; color: string; meta: string; price_cents: number; image: string; terms: string };
+    let index: Item[] = [];
+    try { index = JSON.parse(dataEl.textContent || '[]'); } catch { return; }
+
+    let lastFocus: HTMLElement | null = null;
+    const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
+    const esc = (s: string) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+
+    function render(q: string) {
+      const term = q.trim().toLowerCase();
+      const hits = term
+        ? index.filter((i) => term.split(/\s+/).every((w) => i.terms.includes(w)))
+        : index;
+
+      if (!hits.length) {
+        results!.innerHTML =
+          `<p class="vh-search-empty">Niets gevonden voor &ldquo;${esc(q)}&rdquo;. ` +
+          `<a href="/shop">Bekijk de hele collectie</a>.</p>`;
+        return;
+      }
+      results!.innerHTML = hits.map((i) => `
+        <a href="/shop/${i.slug}" class="vh-search-hit" role="option">
+          <img src="${i.image}" alt="" width="48" height="60" loading="lazy" />
+          <span class="vh-search-hit-text">
+            <b>${esc(i.name)}</b>
+            <small>${esc(i.color || i.meta || '')}</small>
+          </span>
+          <span class="vh-search-hit-price">${eur(i.price_cents)}</span>
+        </a>`).join('');
+    }
+
+    const open = () => {
+      lastFocus = document.activeElement as HTMLElement;
+      box.removeAttribute('hidden');
+      openBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      render(input.value);
+      input.focus();
+      input.select();
+    };
+    const close = () => {
+      box.setAttribute('hidden', '');
+      openBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      lastFocus?.focus();
+    };
+
+    openBtn.addEventListener('click', open);
+    box.querySelectorAll('[data-search-close]').forEach((el) => el.addEventListener('click', close));
+    input.addEventListener('input', () => render(input.value));
+
+    document.addEventListener('keydown', (e) => {
+      const open_ = !box.hasAttribute('hidden');
+      if (e.key === 'Escape' && open_) { close(); return; }
+      // "/" opent zoeken, tenzij je al in een invoerveld staat
+      const t = e.target as HTMLElement;
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(t?.tagName || '') || t?.isContentEditable;
+      if (e.key === '/' && !open_ && !typing) { e.preventDefault(); open(); return; }
+      if (!open_) return;
+      // Pijltjes lopen door de resultaten
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const hits = Array.from(box.querySelectorAll<HTMLElement>('.vh-search-hit'));
+        if (!hits.length) return;
+        e.preventDefault();
+        const i = hits.indexOf(document.activeElement as HTMLElement);
+        const next = e.key === 'ArrowDown'
+          ? hits[i < 0 ? 0 : Math.min(i + 1, hits.length - 1)]
+          : (i <= 0 ? (input as HTMLElement) : hits[i - 1]);
+        next.focus();
+      }
+    });
+
+    // Overlay sluiten vóór een View Transitions-swap, anders blijft
+    // body.overflow op hidden staan na navigeren naar een resultaat.
+    document.addEventListener('astro:before-swap', () => {
+      if (!box.hasAttribute('hidden')) close();
+    });
+  })();
 
   // Nav hover-reveal preview (desktop)
   const preview = document.getElementById('vh-nav-preview');

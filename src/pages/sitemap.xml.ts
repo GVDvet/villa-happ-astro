@@ -5,8 +5,18 @@ import { getSiteOrigin } from '../lib/site';
 
 export const prerender = true;
 
-// Indexeerbare routes (transactiepagina's bewust weggelaten)
-const staticRoutes = ['', 'shop', 'story', 'het-atelier', 'drops', 'brands', 'journal', 'faq', 'verzending', 'retourneren', 'contact'];
+/**
+ * Indexeerbare routes. Transactiepagina's (cart, checkout, wishlist) staan
+ * er bewust niet in, en `drops` en `brands` evenmin: dat zijn nog lege
+ * placeholders. Een sitemap die naar dunne pagina's wijst kost
+ * crawlbudget en levert alleen maar "thin content"-signalen op. Vul je ze,
+ * zet ze dan hier terug én haal de noindex uit die pagina's.
+ */
+const staticRoutes = [
+  '', 'shop', 'story', 'het-atelier', 'journal', 'pers',
+  'faq', 'verzending', 'retourneren', 'contact',
+  'privacy', 'algemene-voorwaarden', 'herroeping', 'cookies',
+];
 
 export const GET: APIRoute = async () => {
   const site = getSiteOrigin();

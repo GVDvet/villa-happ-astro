@@ -91,7 +91,7 @@ const chapters = [
   },
 ];
 ---
-<Base title="Het verhaal · Villa Happ" description="65 jaar Villa Happ: van Toni's Babyparadijs in Tilburg tot The Comeback Kid. Twee keer gevallen, drie keer opgestaan.">
+<Base title="Het verhaal · Villa Happ" description="Ruim 65 jaar Villa Happ: van Toni's Babyparadijs in Tilburg tot The Comeback Kid. Twee keer gevallen, drie keer opgestaan.">
 
   <script type="application/ld+json" set:html={JSON.stringify(aboutLd)} is:inline></script>
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} is:inline></script>
@@ -122,7 +122,7 @@ const chapters = [
         </div>
         <div class={`st-chapter-media${ch.img ? '' : ' is-placeholder'}`}>
           {ch.img
-            ? <img src={ch.img} alt={ch.title} loading="lazy" />
+            ? <img src={ch.img} alt={ch.title} width="900" height="1125" loading="lazy" decoding="async" />
             : <span>{ch.year}</span>}
         </div>
       </article>

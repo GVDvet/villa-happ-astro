@@ -9,7 +9,11 @@ const catalog = await getCatalog();
 const noteBySlug: Record<string, string> = {};
 catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
 ---
-<Base title="Winkelmandje · Villa Happ" noindex={true}>
+<Base
+  title="Winkelmandje · Villa Happ"
+  description="Je winkelmandje bij Villa Happ."
+  noindex={true}
+>
   <section class="vh-page">
     <div class="vh-page-inner">
 
@@ -45,7 +49,7 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
 </Base>
 
 <script>
-  import { getCart, updateQuantity, removeFromCart, cartSubtotal, shippingCostCents, onCartChange } from '../lib/cart';
+  import { getCart, updateQuantity, removeFromCart, cartSubtotal, shippingCostCents, onCartChange, MAX_QTY_PER_ITEM } from '../lib/cart';
   import { onPageReady } from '../lib/page';
 
   onPageReady(() => {
@@ -74,7 +78,7 @@ catalog.forEach((p) => { if (p.note) noteBySlug[p.slug] = p.note; });
           <span class="vh-drawer-qty">
             <button type="button" data-dec aria-label="Minder">−</button>
             <b>${i.quantity}</b>
-            <button type="button" data-inc aria-label="Meer">+</button>
+            <button type="button" data-inc aria-label="Meer"${i.quantity >= MAX_QTY_PER_ITEM ? ' disabled title="Maximaal ' + MAX_QTY_PER_ITEM + ' per stuk"' : ''}>+</button>
           </span>
           <br />
           <button type="button" class="vh-line-remove" data-remove>Verwijder</button>

@@ -8,6 +8,12 @@ export default defineConfig({
   // robots en de noindex-guard volgen automatisch, zie src/lib/site.ts)
   site: process.env.PUBLIC_SITE_URL || 'https://villa-happ-astro.vercel.app',
   output: 'server',
+  // Eén vorm van elke URL. Zonder dit wees de canonical naar /shop/ terwijl
+  // de sitemap en alle interne links /shop gebruikten: elke pagina werd
+  // daarmee een "alternatieve pagina met correcte canonical" in Search
+  // Console. Dit stuurt Astro.url; de 308-redirect van /shop/ naar /shop
+  // staat in vercel.json ("trailingSlash": false).
+  trailingSlash: 'never',
   build: {
     // Kleine CSS-bundels (~7-9 KiB) inline zetten haalt de render-
     // blokkerende <link>-verzoeken van het kritieke pad (Lighthouse: ~1,3s

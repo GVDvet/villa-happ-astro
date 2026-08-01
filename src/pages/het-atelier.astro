@@ -73,8 +73,8 @@ const ld = {
           <div class="atl-dye-base" aria-hidden="true"></div>
           <div class="atl-dye-fill" id="atl-dye" aria-hidden="true"></div>
           <div class="atl-swatches" role="group" aria-label="Kies een kleur">
-            <button type="button" class="atl-swatch" data-colour="olijfgroen" style="background:#6B7A4E" aria-pressed="true" aria-label="Olijfgroen"></button>
-            <button type="button" class="atl-swatch" data-colour="navy" style="background:#2c3a52" aria-pressed="false" aria-label="Navy"></button>
+            <button type="button" class="atl-swatch" data-colour="olijfgroen" style="background:#828875" aria-pressed="true" aria-label="Olijfgroen"></button>
+            <button type="button" class="atl-swatch" data-colour="navy" style="background:#252C3D" aria-pressed="false" aria-label="Navy"></button>
           </div>
         </div>
       </div>
@@ -153,12 +153,12 @@ const ld = {
       <div class="atl-studio">
         <!-- Mockup -->
         <div class="atl-studio-stage">
-          <span class="atl-frame-tag" id="atl-mockup-tag">Hoodie · Olijfgroen</span>
+          <span class="atl-frame-tag" id="atl-mockup-tag">Hoodie · Olijfgroen · Voorkant</span>
           <img
             id="atl-mockup"
             src="/img/atelier/hoodie-olijfgroen-v2.webp"
-            alt="Ontwerp: hoodie in olijfgroen"
-            width="928" height="1152" loading="lazy"
+            alt="Ontwerp: hoodie · olijfgroen, voorkant"
+            width="896" height="1200" loading="lazy"
           />
         </div>
 
@@ -175,27 +175,34 @@ const ld = {
           <div class="atl-control" id="atl-colour-control">
             <span class="atl-control-label vh-mono">De kleur</span>
             <div class="atl-studio-swatches" role="group" aria-label="Kies een kleur">
-              <button type="button" class="atl-cswatch is-on" data-colour="olijfgroen" style="--sw:#6B7A4E" aria-pressed="true" aria-label="Olijfgroen"></button>
-              <button type="button" class="atl-cswatch" data-colour="navy" style="--sw:#2c3a52" aria-pressed="false" aria-label="Navy"></button>
+              <button type="button" class="atl-cswatch is-on" data-colour="olijfgroen" style="--sw:#828875" aria-pressed="true" aria-label="Olijfgroen"></button>
+              <button type="button" class="atl-cswatch" data-colour="navy" style="--sw:#252C3D" aria-pressed="false" aria-label="Navy"></button>
             </div>
           </div>
 
-          <div class="atl-control" id="atl-angle-control" hidden>
+          <div class="atl-control" id="atl-angle-control">
             <span class="atl-control-label vh-mono">Bekijk van</span>
             <div class="atl-angles" role="group" aria-label="Kies een hoek">
               <button type="button" class="atl-angle-btn is-on" data-angle="front" aria-pressed="true">Voorkant</button>
-              <button type="button" class="atl-angle-btn" data-angle="side" aria-pressed="false">Zijkant</button>
-              <button type="button" class="atl-angle-btn" data-angle="back" aria-pressed="false">Achter</button>
+              <button type="button" class="atl-angle-btn" data-angle="side" aria-pressed="false" hidden>Zijkant</button>
+              <button type="button" class="atl-angle-btn" data-angle="back" aria-pressed="false">Achterkant</button>
             </div>
-            <p class="atl-onesize">Onze cap komt in één klassieke uitvoering: grijs met zwart mesh.</p>
+            <p class="atl-onesize" id="atl-onesize" hidden>Onze cap komt in één klassieke uitvoering: grijs met zwart mesh.</p>
           </div>
 
           <form class="atl-form" id="atl-form" novalidate>
-            <input type="text" id="atl-name" name="name" placeholder="Je naam (optioneel)" autocomplete="name" maxlength="40" />
+            <input type="text" id="atl-name" name="name" placeholder="Je naam (optioneel)" autocomplete="name" maxlength="40" aria-label="Je naam (optioneel)" />
             <input type="email" id="atl-email" name="email" placeholder="jouw@email.nl" autocomplete="email" required aria-label="E-mailadres" />
             <button type="submit" class="vh-btn vh-btn--accent" id="atl-submit"><span>Claim mijn nummer</span></button>
             <p class="atl-form-msg" id="atl-msg" role="status" aria-live="polite"></p>
-            <p class="atl-form-note">We mailen je alleen over deze oplage. Geen spam, uitschrijven kan altijd.</p>
+            <label class="atl-form-check">
+              <input type="checkbox" id="atl-newsletter" name="newsletter" />
+              <span>Houd me ook op de hoogte van nieuwe drops (optioneel)</span>
+            </label>
+            <p class="atl-form-note">
+              We mailen je over deze oplage. Uitschrijven kan altijd.
+              Zie de <a href="/privacy">privacyverklaring</a>.
+            </p>
           </form>
         </div>
       </div>
@@ -221,6 +228,7 @@ const ld = {
         <div class="atl-finale-actions">
           <button type="button" class="vh-btn vh-btn--light" id="atl-save"><span>Bewaar je certificaat</span></button>
           <button type="button" class="vh-btn vh-btn--ghost" id="atl-share"><span>Deel</span></button>
+          <button type="button" class="vh-btn vh-btn--ghost" id="atl-again"><span>Ontwerp opnieuw</span></button>
           <a href="/shop" class="vh-btn vh-btn--ghost" data-astro-reload><span>Naar de collectie</span></a>
         </div>
       </div>
@@ -232,12 +240,18 @@ const ld = {
 
 <script>
   import { initAtelier } from '../lib/atelier-motion';
-  import { formatEdition, EDITION, describePiece } from '../lib/atelier';
+  import {
+    formatEdition, EDITION, describePiece,
+    assetName, anglesFor, resolveAngle, ANGLE_LABELS, type Angle,
+  } from '../lib/atelier';
   import '../lib/cart';
 
   initAtelier();
 
-  const colourHex: Record<string, string> = { olijfgroen: '#6B7A4E', navy: '#2c3a52' };
+  // Gemeten uit de productfoto's (gemiddelde stofkleur op borsthoogte), zodat
+  // het staal belooft wat de klant krijgt. Stond eerder op een duidelijk
+  // groenere olijftint dan de hoodie werkelijk heeft.
+  const colourHex: Record<string, string> = { olijfgroen: '#828875', navy: '#252C3D' };
 
   /* Station 2 (tour): verf-teaser — verandert alvast de studiokleur mee */
   const dye = document.getElementById('atl-dye');
@@ -245,24 +259,42 @@ const ld = {
   /* ---------- De ontwerpstudio ---------- */
   let garment = 'hoodie';
   let colour = 'olijfgroen';
-  let angle = 'front'; // alleen voor de cap (front/side/back)
+  let angle: Angle = 'front'; // welke hoeken bestaan verschilt per stuk
 
   const mockup = document.getElementById('atl-mockup') as HTMLImageElement;
   const mockupTag = document.getElementById('atl-mockup-tag')!;
   const colourControl = document.getElementById('atl-colour-control')!;
-  const angleControl = document.getElementById('atl-angle-control')!;
+  const oneSizeNote = document.getElementById('atl-onesize')!;
 
-  // Hoodie is per kleur; de cap komt in één uitvoering en heeft hoeken.
-  function assetName(g: string, c: string, a: string): string {
-    return g === 'cap' ? `cap-${a}` : `hoodie-${c}-v2`;
-  }
+  /**
+   * Eén plek die het beeld en alle bedieningen op de huidige keuze zet.
+   * De hoodie heeft voor- en achterkant, de cap ook een zijkant: hoeken
+   * zonder beeld verbergen we, en een niet-bestaande hoek valt terug op
+   * de voorkant (bv. cap-zijkant → hoodie).
+   */
   function syncMockup() {
-    const src = `/img/atelier/${assetName(garment, colour, angle)}.webp`;
-    if (mockup) { mockup.src = src; mockup.alt = `Ontwerp: ${describePiece(garment, colour).toLowerCase()}`; }
-    mockupTag.textContent = describePiece(garment, colour);
-    // Juiste bediening tonen: kleur voor de hoodie, hoek voor de cap
+    angle = resolveAngle(garment, angle);
+    const piece = describePiece(garment, colour);
+    const view = ANGLE_LABELS[angle];
+
+    if (mockup) {
+      mockup.src = `/img/atelier/${assetName(garment, colour, angle)}.webp`;
+      mockup.alt = `Ontwerp: ${piece.toLowerCase()}, ${view.toLowerCase()}`;
+    }
+    mockupTag.textContent = `${piece} · ${view}`;
+
+    // Kleur alleen bij de hoodie; de cap komt in één uitvoering
     colourControl.toggleAttribute('hidden', garment === 'cap');
-    angleControl.toggleAttribute('hidden', garment !== 'cap');
+    oneSizeNote.toggleAttribute('hidden', garment !== 'cap');
+
+    const available = anglesFor(garment);
+    document.querySelectorAll<HTMLButtonElement>('.atl-angle-btn').forEach((b) => {
+      const a = b.dataset.angle as Angle;
+      b.toggleAttribute('hidden', !available.includes(a));
+      const on = a === angle;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
   }
 
   document.querySelectorAll<HTMLButtonElement>('.atl-seg-btn').forEach((btn) => {
@@ -293,13 +325,13 @@ const ld = {
 
   document.querySelectorAll<HTMLButtonElement>('.atl-angle-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      angle = btn.dataset.angle!;
-      document.querySelectorAll('.atl-angle-btn').forEach((b) => {
-        b.classList.toggle('is-on', b === btn); b.setAttribute('aria-pressed', String(b === btn));
-      });
-      syncMockup();
+      angle = resolveAngle(garment, btn.dataset.angle);
+      syncMockup(); // zet zelf de is-on/aria-pressed-status
     });
   });
+
+  // De HTML rendert de startstaat al; dit houdt hem gegarandeerd in sync
+  syncMockup();
 
   /* ---------- Claim + certificaat ---------- */
   const form = document.getElementById('atl-form') as HTMLFormElement;
@@ -326,23 +358,41 @@ const ld = {
 
   interface Claim { number: number; edition: number; name: string; garment: string; colour: string; angle: string; date: string; }
 
-  const claimAsset = (c: Claim) => `/img/atelier/${assetName(c.garment, c.colour, c.angle || 'front')}.webp`;
+  const claimAsset = (c: Claim) => `/img/atelier/${assetName(c.garment, c.colour, c.angle)}.webp`;
 
   function showResult(c: Claim) {
     config.setAttribute('hidden', '');
     result.removeAttribute('hidden');
     certNumber.textContent = formatEdition(c.number, c.edition);
     certMeta.textContent = `${c.name ? c.name + ' · ' : ''}${describePiece(c.garment, c.colour)} · ${c.date}`;
-    certFoot.textContent = 'Dit stuk is voor jou gereserveerd. Je hoort als eerste wanneer de oplage live gaat.';
+    // Geen "gereserveerd": er wordt geen voorraad vastgehouden. Wat we wel
+    // waarmaken is dat dit nummer aan dit e-mailadres verbonden blijft.
+    certFoot.textContent = 'Dit nummer staat op jouw naam. Je hoort als eerste wanneer de oplage live gaat.';
     certMockup.src = claimAsset(c);
     certMockup.alt = describePiece(c.garment, c.colour);
   }
 
-  // Al eerder geclaimd in deze browser? Toon meteen het resultaat.
+  /** Terug naar de configurator zonder de claim weg te gooien. */
+  function showConfigurator() {
+    result.setAttribute('hidden', '');
+    config.removeAttribute('hidden');
+    syncMockup();
+    config.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Al eerder geclaimd in deze browser? Toon meteen het resultaat, maar laat
+  // wel de weg terug open: eerder verdween de studio hier voorgoed.
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (saved && saved.number) showResult(saved);
+    if (saved && saved.number) {
+      garment = saved.garment || garment;
+      colour = saved.colour || colour;
+      angle = resolveAngle(garment, saved.angle);
+      showResult(saved);
+    }
   } catch {}
+
+  document.getElementById('atl-again')?.addEventListener('click', showConfigurator);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -359,7 +409,15 @@ const ld = {
       const res = await fetch('/api/atelier/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name: name || undefined, garment, colour: garment === 'cap' ? undefined : colour }),
+        body: JSON.stringify({
+          email,
+          name: name || undefined,
+          garment,
+          colour: garment === 'cap' ? undefined : colour,
+          // Inschrijven op de nieuwsbrief alleen als er expliciet is
+          // aangevinkt; eerder gebeurde dat stilzwijgend bij elke claim.
+          newsletter: (document.getElementById('atl-newsletter') as HTMLInputElement)?.checked === true,
+        }),
       });
       if (res.ok) {
         const data = await res.json();

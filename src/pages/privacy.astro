@@ -1,0 +1,239 @@
+---
+export const prerender = true;
+
+import LegalLayout from '../components/legal/LegalLayout.astro';
+import { BUSINESS } from '../lib/business';
+import { LEGAL_UPDATED } from '../lib/legal';
+
+/**
+ * Privacyverklaring — beschrijft uitsluitend wat de site feitelijk doet.
+ * Elke verwerker hieronder komt terug in de code: Supabase (database),
+ * Mollie (betalingen), Resend (transactiemail), Vercel (hosting en
+ * cookieloze statistiek) en PDOK (postcodecheck vanuit de browser).
+ * Verandert de stack, dan verandert deze lijst mee.
+ */
+
+const processors = [
+  {
+    name: 'Vercel',
+    role: 'Hosting en cookieloze bezoekstatistiek',
+    data: 'IP-adres, browsertype, opgevraagde pagina',
+    where: 'EU (Frankfurt), moederbedrijf VS',
+  },
+  {
+    name: 'Supabase',
+    role: 'Database: bestellingen, klantgegevens, inschrijvingen',
+    data: 'Naam, e-mailadres, adres, bestelgegevens',
+    where: 'EU (Frankfurt)',
+  },
+  {
+    name: 'Mollie',
+    role: 'Betalingen afhandelen',
+    data: 'Betaalgegevens, bedrag, bestelnummer',
+    where: 'Nederland',
+  },
+  {
+    name: 'Resend',
+    role: 'Verzenden van bevestigings- en servicemails',
+    data: 'E-mailadres, naam, bestelgegevens',
+    where: 'VS, op basis van EU-modelcontractbepalingen',
+  },
+  {
+    name: 'PostNL',
+    role: 'Bezorging van je bestelling',
+    data: 'Naam, bezorgadres',
+    where: 'Nederland',
+  },
+  {
+    name: 'PDOK (Kadaster)',
+    role: 'Postcodecheck bij het afrekenen',
+    data: 'Postcode en huisnummer die je intypt, plus je IP-adres',
+    where: 'Nederland',
+  },
+];
+
+const retention = [
+  { what: 'Bestellingen en facturen', how: '7 jaar', why: 'Wettelijke fiscale bewaarplicht (art. 52 AWR)' },
+  { what: 'Klantgegevens bij een bestelling', how: '7 jaar', why: 'Onlosmakelijk verbonden met de administratie' },
+  { what: 'Nieuwsbriefinschrijving', how: 'Tot je je uitschrijft', why: 'Toestemming' },
+  { what: 'Voorraadmelding (mail-me-als-terug)', how: 'Tot de melding verstuurd is, daarna 6 maanden', why: 'Uitvoeren van je verzoek' },
+  { what: 'Claim in Het Atelier', how: 'Tot de betreffende oplage is uitgeleverd', why: 'Uitvoeren van je verzoek' },
+  { what: 'Contactberichten', how: '2 jaar', why: 'Afhandeling en eventuele vervolgvragen' },
+  { what: 'Bezoekstatistiek', how: 'Geaggregeerd, niet herleidbaar', why: 'Gerechtvaardigd belang' },
+];
+---
+<LegalLayout
+  title="Privacyverklaring"
+  heading="Privacy"
+  headingAccent="verklaring"
+  intro="Welke gegevens we van je verwerken, waarom, hoe lang, en wat jij daarover te zeggen hebt. In gewoon Nederlands."
+  description="Privacyverklaring van Villa Happ: welke persoonsgegevens we verwerken, waarvoor, hoe lang we ze bewaren en welke rechten je hebt."
+  updated={LEGAL_UPDATED}
+>
+  <section>
+    <h2>Kort samengevat</h2>
+    <ul>
+      <li>We verzamelen alleen wat nodig is om je bestelling uit te voeren.</li>
+      <li>We verkopen je gegevens niet, aan niemand.</li>
+      <li>We gebruiken geen trackingcookies en geen advertentienetwerken.</li>
+      <li>Je kunt je gegevens altijd opvragen of laten verwijderen.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Wie verwerkt je gegevens</h2>
+    <p>
+      {BUSINESS.legalName} is verwerkingsverantwoordelijke voor de gegevens die
+      via deze website worden verwerkt. Onze gegevens staan onderaan deze
+      pagina. Vragen over privacy stel je via
+      <a href={`mailto:${BUSINESS.privacyEmail}`}>{BUSINESS.privacyEmail}</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Welke gegevens en waarom</h2>
+
+    <h3>Als je een bestelling plaatst</h3>
+    <p>
+      We verwerken je naam, e-mailadres, bezorgadres en de inhoud van je
+      bestelling. Dat doen we om de overeenkomst met je uit te voeren
+      (art. 6 lid 1 sub b AVG) en om aan onze fiscale bewaarplicht te voldoen
+      (art. 6 lid 1 sub c AVG). Zonder deze gegevens kunnen we niet leveren.
+    </p>
+    <p>
+      Je betaalgegevens komen nooit bij ons binnen. Die vul je in bij Mollie,
+      onze betaaldienstverlener. Wij zien alleen of een betaling is gelukt.
+    </p>
+
+    <h3>Als je je inschrijft voor de nieuwsbrief of een drop</h3>
+    <p>
+      Dan verwerken we je e-mailadres op basis van je toestemming
+      (art. 6 lid 1 sub a AVG). Onder elke mail staat een uitschrijflink, en
+      uitschrijven werkt direct.
+    </p>
+
+    <h3>Als je een voorraadmelding aanvraagt</h3>
+    <p>
+      We bewaren je e-mailadres, het product en de maat, uitsluitend om je die
+      ene melding te sturen zodra het stuk terug is.
+    </p>
+
+    <h3>Als je meedoet in Het Atelier</h3>
+    <p>
+      Bij het claimen van een nummer bewaren we je e-mailadres, je naam als je
+      die invult, en het stuk dat je koos. Je krijgt bericht wanneer de
+      betreffende oplage live gaat. Wil je daarnaast onze nieuwsbrief, dan vink
+      je dat apart aan.
+    </p>
+
+    <h3>Als je ons een bericht stuurt</h3>
+    <p>
+      Dan verwerken we je naam, e-mailadres en je bericht om je vraag te
+      beantwoorden.
+    </p>
+
+    <h3>Als je alleen rondkijkt</h3>
+    <p>
+      Onze bezoekstatistiek (Vercel Web Analytics) werkt zonder cookies en
+      zonder profielen. Er wordt geen herleidbaar bezoekersprofiel opgebouwd
+      en je wordt niet over websites heen gevolgd.
+    </p>
+  </section>
+
+  <section>
+    <h2>Wie we inschakelen</h2>
+    <p>
+      Voor sommige onderdelen werken we met andere partijen. Met elk van hen is
+      een verwerkersovereenkomst gesloten. Zij mogen je gegevens alleen
+      gebruiken voor wat wij hun opdragen.
+    </p>
+    <div class="vh-legal-tablewrap">
+      <table class="vh-legal-table">
+        <thead>
+          <tr><th>Partij</th><th>Waarvoor</th><th>Welke gegevens</th><th>Waar</th></tr>
+        </thead>
+        <tbody>
+          {processors.map((p) => (
+            <tr>
+              <td><b>{p.name}</b></td>
+              <td>{p.role}</td>
+              <td>{p.data}</td>
+              <td>{p.where}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      De postcodecheck bij het afrekenen gebeurt rechtstreeks vanuit je
+      browser bij PDOK, de open adressendienst van het Kadaster. Daarbij ziet
+      PDOK de postcode en het huisnummer die je intypt, plus je IP-adres. Vul
+      je adres handmatig in, dan wordt die check niet uitgevoerd.
+    </p>
+  </section>
+
+  <section>
+    <h2>Hoe lang we bewaren</h2>
+    <div class="vh-legal-tablewrap">
+      <table class="vh-legal-table">
+        <thead>
+          <tr><th>Gegevens</th><th>Bewaartermijn</th><th>Grondslag</th></tr>
+        </thead>
+        <tbody>
+          {retention.map((r) => (
+            <tr><td>{r.what}</td><td>{r.how}</td><td>{r.why}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Jouw rechten</h2>
+    <p>Je hebt het recht om:</p>
+    <ul>
+      <li>je gegevens in te zien;</li>
+      <li>onjuiste gegevens te laten corrigeren;</li>
+      <li>je gegevens te laten verwijderen, voor zover wij ze niet wettelijk moeten bewaren;</li>
+      <li>de verwerking te laten beperken of daartegen bezwaar te maken;</li>
+      <li>je gegevens in een gangbaar bestandsformaat te ontvangen;</li>
+      <li>een gegeven toestemming op elk moment in te trekken.</li>
+    </ul>
+    <p>
+      Stuur je verzoek naar <a href={`mailto:${BUSINESS.privacyEmail}`}>{BUSINESS.privacyEmail}</a>.
+      We reageren binnen een maand. Om te voorkomen dat we gegevens aan de
+      verkeerde persoon geven, kunnen we om aanvullende identificatie vragen.
+    </p>
+    <p>
+      Kom je er met ons niet uit, dan kun je een klacht indienen bij de
+      Autoriteit Persoonsgegevens via
+      <a href="https://autoriteitpersoonsgegevens.nl" rel="noopener">autoriteitpersoonsgegevens.nl</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Beveiliging</h2>
+    <p>
+      De site draait volledig over een versleutelde verbinding (HTTPS).
+      Bestel- en klantgegevens staan in een database binnen de EU, afgeschermd
+      op rijniveau, en zijn alleen benaderbaar door onze servercode. Betalingen
+      lopen via Mollie; wij slaan zelf geen betaalgegevens op.
+    </p>
+  </section>
+
+  <section>
+    <h2>Geautomatiseerde besluitvorming</h2>
+    <p>
+      We nemen geen besluiten over je op basis van geautomatiseerde verwerking
+      of profilering.
+    </p>
+  </section>
+
+  <section>
+    <h2>Wijzigingen</h2>
+    <p>
+      Verandert er iets aan onze werkwijze, dan passen we deze verklaring aan.
+      De datum bovenaan laat zien wanneer dat voor het laatst gebeurde.
+    </p>
+  </section>
+</LegalLayout>
