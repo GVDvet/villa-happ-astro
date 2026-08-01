@@ -30,3 +30,6 @@ pnpm-debug.log*
 
 # Lokale dev/preview-config (machine-specifiek)
 .claude/
+
+# Werkmap voor buildvergelijkingen (scripts/tekst-uit-build.py)
+.tmp/
