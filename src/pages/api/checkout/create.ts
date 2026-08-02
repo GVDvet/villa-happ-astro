@@ -20,7 +20,7 @@ import { getMollie } from '../../../lib/mollie';
 import { CheckoutSchema, shippingCost } from '../../../lib/checkout-logic';
 import { reserveInventory, releaseInventory } from '../../../lib/inventory';
 import { begrens, clientSleutel, teVeelVerzoeken } from '../../../lib/rate-limit-db';
-import { maakOrderToken } from '../../../lib/order-token';
+import { maakOrderToken, authSecretOntbreekt } from '../../../lib/order-token';
 import { logGebeurtenis } from '../../../lib/order-events';
 
 export const prerender = false;
@@ -32,6 +32,18 @@ export const POST: APIRoute = async ({ request }) => {
   const sb = getSupabaseAdmin();
   if (!sb) {
     return new Response(JSON.stringify({ error: 'Supabase niet geconfigureerd' }), { status: 503 });
+  }
+
+  // Vroeg stoppen, vóór er voorraad gereserveerd is. De redirect naar de
+  // bedanktpagina draagt een ondertekend token, dus zonder AUTH_SECRET kan
+  // deze bestelling nooit afgerond worden. Zonder deze check klapte hij pas
+  // bij het aanmaken van de Mollie-betaling, met een melding die naar Mollie
+  // wees terwijl daar niets mis was.
+  if (authSecretOntbreekt()) {
+    console.error('[checkout] AUTH_SECRET ontbreekt of is korter dan 32 tekens; afrekenen is uitgeschakeld.');
+    return new Response(JSON.stringify({
+      error: 'Afrekenen is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
+    }), { status: 503 });
   }
 
   let body;
