@@ -77,17 +77,39 @@ transactiemails lezen allemaal uit dat bestand.
    hoort, en een willekeurige `AUTH_SECRET`.
 2. **Zet `ADMIN_PASSWORD_HASH`** uit datzelfde commando. Zonder deze blijft
    `/beheer` op het inlogscherm staan.
-3. **Draai de migraties** (zie C1). Zonder de tabel `uitgaande_mail` wordt
-   er geen orderbevestiging verstuurd: de bestelling lukt, de klant hoort
-   niets.
-4. Pas daarna de Mollie-testronde uit C2 doorlopen.
+3. ~~Draai de migraties~~ **Gedaan op 2 augustus 2026.** Zie C1.
+4. **Trigger een redeploy op Vercel.** De shoppagina's zijn geprerenderd en
+   halen de catalogus op bij het bouwen. De huidige deploy is gemaakt toen
+   de database nog leeg was, dus die toont nog demoproducten. Elke nieuwe
+   commit op `main` doet dit vanzelf.
+5. Pas daarna de Mollie-testronde uit C2 doorlopen.
 
-### C1. Supabase 🔴
+### C1. Supabase ✅ gedaan op 2 augustus 2026
 
-De sleutels staan sinds 9 juni in Vercel. Wat nog ontbreekt is het schema:
-zolang `seed.sql` niet gedraaid is, valt de shop terug op de
-demo-catalogus, en zolang de nieuwe migraties niet gedraaid zijn, mist het
-orderbeheer zijn tabellen.
+Project `Villa-Happ` (`xnlsuindjegvbcpmusnp`), regio eu-central-1,
+PostgreSQL 17. De sleutels stonden al sinds 9 juni in Vercel.
+
+Uitgevoerd:
+
+- Migratie `atelier_number_sequence`: sequence, `next_atelier_number()` en
+  de unieke index op (edition, number).
+- Migratie `orderbeheer_tijdlijn_outbox_ratelimit`: de kolommen
+  `delivered_at`, `refunded_at` en `refunded_cents` op `orders`, de tabellen
+  `order_events`, `uitgaande_mail` en `rate_limit`, plus de drie functies.
+- `seed.sql`: de echte catalogus.
+
+Stand nu: 16 tabellen, allemaal met RLS aan, 10 functies, 5 gepubliceerde
+producten met 15 varianten en voorraad. Een build tegen deze database levert
+echte variant-id's op in plaats van `demo-`, dus de demo-modus in de
+checkout is voorbij.
+
+De Supabase-adviseur meldt tien keer `rls_enabled_no_policy` op INFO-niveau.
+Dat is geen probleem maar het ontwerp: RLS aan zonder policies betekent dicht
+voor de publieke sleutel, en alleen de servercode komt erbij met de
+service-role key.
+
+**Nog te doen op deze database:** niets, tenzij prijzen of voorraad wijzigen.
+Pas die dan aan in `seed.sql` en draai hem opnieuw; hij is idempotent.
 
 - [ ] Project aanmaken in **regio EU (Frankfurt)**
 - [ ] `supabase/schema.sql` draaien (bevat alles, inclusief de nieuwe migraties)
