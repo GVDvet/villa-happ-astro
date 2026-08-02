@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, vi } from 'vitest';
-import { maakOrderToken, leesOrderToken } from '../src/lib/order-token';
+import { maakOrderToken, leesOrderToken, authSecretOntbreekt } from '../src/lib/order-token';
 import {
   hashWachtwoord, controleerWachtwoord,
   maakBeheerSessie, leesBeheerSessie,
@@ -115,5 +115,25 @@ describe('csrf', () => {
     expect(controleerCsrf(sessie, undefined)).toBe(false);
     expect(controleerCsrf(undefined, 'abc')).toBe(false);
     expect(controleerCsrf(sessie, 'niet-hex')).toBe(false);
+  });
+});
+
+describe('authSecretOntbreekt', () => {
+  it('herkent een bruikbaar secret', () => {
+    vi.stubEnv('AUTH_SECRET', 'y'.repeat(32));
+    expect(authSecretOntbreekt()).toBe(false);
+  });
+
+  it('herkent een ontbrekend of te kort secret', () => {
+    // Een te kort secret is net zo onbruikbaar als geen secret: het token
+    // zou raadbaar worden. Beide moeten de route vroeg laten stoppen.
+    vi.stubEnv('AUTH_SECRET', '');
+    expect(authSecretOntbreekt()).toBe(true);
+    vi.stubEnv('AUTH_SECRET', 'te-kort');
+    expect(authSecretOntbreekt()).toBe(true);
+    vi.stubEnv('AUTH_SECRET', 'y'.repeat(31));
+    expect(authSecretOntbreekt()).toBe(true);
+    // en weer terugzetten voor de overige tests
+    vi.stubEnv('AUTH_SECRET', 'x'.repeat(48));
   });
 });

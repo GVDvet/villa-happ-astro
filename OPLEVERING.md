@@ -56,9 +56,38 @@ transactiemails lezen allemaal uit dat bestand.
 
 ## C. Accounts, keys en installaties
 
+### C0. Volgorde van de uitrol 🔴
+
+**Doe dit in deze volgorde.** De sleutels staan al in Vercel, de code op
+`main` verwacht tabellen en variabelen die er nog niet allemaal zijn.
+
+1. **Zet `AUTH_SECRET` in Vercel** (minimaal 32 tekens). Zonder deze is
+   afrekenen uitgeschakeld: `/api/checkout/create` geeft een 503 en er komt
+   geen bestelling doorheen.
+
+   Genereer hem samen met je beheerwachtwoord. **Draai dit vanuit de
+   projectmap**, niet vanuit `Documents`:
+
+   ```powershell
+   cd "$HOME\Documents\Websites_en_tools\Villa Happ\Astro_Website"
+   npm run beheer:hash -- 'kies-hier-een-wachtwoord'
+   ```
+
+   Dat print twee waarden: de `ADMIN_PASSWORD_HASH` die bij jouw wachtwoord
+   hoort, en een willekeurige `AUTH_SECRET`.
+2. **Zet `ADMIN_PASSWORD_HASH`** uit datzelfde commando. Zonder deze blijft
+   `/beheer` op het inlogscherm staan.
+3. **Draai de migraties** (zie C1). Zonder de tabel `uitgaande_mail` wordt
+   er geen orderbevestiging verstuurd: de bestelling lukt, de klant hoort
+   niets.
+4. Pas daarna de Mollie-testronde uit C2 doorlopen.
+
 ### C1. Supabase 🔴
 
-De database is nog niet gekoppeld; de site draait op de demo-catalogus.
+De sleutels staan sinds 9 juni in Vercel. Wat nog ontbreekt is het schema:
+zolang `seed.sql` niet gedraaid is, valt de shop terug op de
+demo-catalogus, en zolang de nieuwe migraties niet gedraaid zijn, mist het
+orderbeheer zijn tabellen.
 
 - [ ] Project aanmaken in **regio EU (Frankfurt)**
 - [ ] `supabase/schema.sql` draaien (bevat alles, inclusief de nieuwe migraties)
@@ -112,7 +141,7 @@ geen voorraadmelding, en werkt het contactformulier niet.
 
 - [ ] Domein `villa-happ.nl` koppelen (plus `www` → redirect naar apex)
 - [ ] `PUBLIC_SITE_URL=https://villa-happ.nl` zetten — **belangrijk**: zonder dit staan er verkeerde URL's in de sitemap, robots.txt, llms.txt en in de links in je mails
-- [ ] `AUTH_SECRET` zetten (minimaal 32 tekens) — tekent de volglinks in je mails en je beheersessie. Zonder dit werken het beheerportaal en het klantportaal niet.
+- [ ] `AUTH_SECRET` zetten (minimaal 32 tekens) — **hier hangt afrekenen aan**. De redirect naar de bedanktpagina draagt een ondertekend token, dus zonder deze variabele weigert `/api/checkout/create` met een 503 en kan er niemand bestellen. Ook nodig voor de volglinks in je mails en de beheersessie.
 - [ ] `ADMIN_PASSWORD_HASH` zetten — je beheerwachtwoord. Genereer beide met één commando:
 
 ```bash

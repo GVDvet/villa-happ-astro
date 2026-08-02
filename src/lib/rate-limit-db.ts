@@ -25,11 +25,22 @@ export interface Begrenzing {
   retryNaSeconden: number;
 }
 
-function hashSleutel(bereik: string, sleutel: string): string {
+/**
+ * Null als AUTH_SECRET ontbreekt, in plaats van een exception.
+ *
+ * Dit gooide eerst, en dat is de verkeerde afweging voor een rate limiter:
+ * `begrens()` is de eerste regel van /api/checkout/create, en die aanroep
+ * staat niet in een try. Ontbrak het secret, dan gaf afrekenen een kale 500
+ * voordat er ook maar iets gebeurd was. Een teller die de winkel kan sluiten
+ * is erger dan een teller die even terugvalt op de zwakkere variant.
+ *
+ * De tokens in order-token.ts blijven wél gooien: een token dat met een
+ * ontbrekend of zwak secret is getekend, is vervalsbaar. Daar is hard falen
+ * juist de goede uitkomst.
+ */
+function hashSleutel(bereik: string, sleutel: string): string | null {
   const geheim = import.meta.env.AUTH_SECRET;
-  if (!geheim || geheim.length < 32) {
-    throw new Error('[Villa Happ] AUTH_SECRET ontbreekt of is korter dan 32 tekens.');
-  }
+  if (!geheim || geheim.length < 32) return null;
   return createHmac('sha256', geheim).update(`${bereik}:${sleutel}`).digest('hex');
 }
 
@@ -46,15 +57,24 @@ export async function begrens(
   vensterSeconden = 60,
 ): Promise<Begrenzing> {
   const sb = getSupabaseAdmin();
-  if (!sb) {
-    // Demo-modus: geen database, dus terugvallen op de instance-teller.
+  const hash = hashSleutel(bereik, sleutel);
+
+  if (!sb || !hash) {
+    // Geen database of geen AUTH_SECRET: terugvallen op de instance-teller.
+    // Zwakker, maar de winkel blijft open.
+    if (!hash) {
+      console.warn(
+        `[rate-limit] AUTH_SECRET ontbreekt of is te kort; teller valt terug ` +
+        `op het geheugen van deze instance. Zet AUTH_SECRET in de omgeving.`,
+      );
+    }
     const ok = geheugenLimiet(`${bereik}:${sleutel}`, maximum, vensterSeconden * 1000);
     return { toegestaan: ok, retryNaSeconden: vensterSeconden };
   }
 
   const { data, error } = await sb.rpc('rate_limit_hit', {
     p_bereik: bereik,
-    p_sleutel_hash: hashSleutel(bereik, sleutel),
+    p_sleutel_hash: hash,
     p_venster_seconden: vensterSeconden,
   });
 

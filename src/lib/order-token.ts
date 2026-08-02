@@ -51,6 +51,20 @@ function secret(): string {
   return s;
 }
 
+/**
+ * Is er een bruikbaar AUTH_SECRET? Bedoeld om een route vroeg en met een
+ * duidelijke melding te laten stoppen, in plaats van halverwege te laten
+ * gooien op een plek waar de fout iets anders lijkt.
+ *
+ * Zonder deze check gaf een ontbrekend secret in de checkout een 502
+ * "Betaling kon niet worden gestart", wat naar Mollie wijst terwijl die er
+ * niets mee te maken heeft.
+ */
+export function authSecretOntbreekt(): boolean {
+  const s = import.meta.env.AUTH_SECRET;
+  return typeof s !== 'string' || s.length < 32;
+}
+
 /** Per-publiek afgeleide sleutel. Cross-publiek hergebruik is onmogelijk. */
 function subSleutel(publiek: TokenPubliek): Buffer {
   return createHmac('sha256', secret()).update(`villahapp-order:${publiek}`).digest();
