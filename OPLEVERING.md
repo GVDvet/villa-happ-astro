@@ -77,17 +77,72 @@ transactiemails lezen allemaal uit dat bestand.
    hoort, en een willekeurige `AUTH_SECRET`.
 2. **Zet `ADMIN_PASSWORD_HASH`** uit datzelfde commando. Zonder deze blijft
    `/beheer` op het inlogscherm staan.
-3. **Draai de migraties** (zie C1). Zonder de tabel `uitgaande_mail` wordt
-   er geen orderbevestiging verstuurd: de bestelling lukt, de klant hoort
-   niets.
-4. Pas daarna de Mollie-testronde uit C2 doorlopen.
+3. ~~Draai de migraties~~ **Gedaan op 2 augustus 2026.** Zie C1.
+4. **Trigger een redeploy op Vercel.** De shoppagina's zijn geprerenderd en
+   halen de catalogus op bij het bouwen. De huidige deploy is gemaakt toen
+   de database nog leeg was, dus die toont nog demoproducten. Elke nieuwe
+   commit op `main` doet dit vanzelf.
+5. Pas daarna de Mollie-testronde uit C2 doorlopen.
 
-### C1. Supabase 🔴
+### C1. Supabase ✅ gedaan op 2 augustus 2026
 
-De sleutels staan sinds 9 juni in Vercel. Wat nog ontbreekt is het schema:
-zolang `seed.sql` niet gedraaid is, valt de shop terug op de
-demo-catalogus, en zolang de nieuwe migraties niet gedraaid zijn, mist het
-orderbeheer zijn tabellen.
+Project `Villa-Happ` (`xnlsuindjegvbcpmusnp`), regio eu-central-1,
+PostgreSQL 17. De sleutels stonden al sinds 9 juni in Vercel.
+
+Uitgevoerd:
+
+- Migratie `atelier_number_sequence`: sequence, `next_atelier_number()` en
+  de unieke index op (edition, number).
+- Migratie `orderbeheer_tijdlijn_outbox_ratelimit`: de kolommen
+  `delivered_at`, `refunded_at` en `refunded_cents` op `orders`, de tabellen
+  `order_events`, `uitgaande_mail` en `rate_limit`, plus de drie functies.
+- `seed.sql`: de echte catalogus.
+
+Stand nu: 16 tabellen, allemaal met RLS aan, 10 functies, 5 gepubliceerde
+producten met 15 varianten en voorraad. Een build tegen deze database levert
+echte variant-id's op in plaats van `demo-`, dus de demo-modus in de
+checkout is voorbij.
+
+De Supabase-adviseur meldt tien keer `rls_enabled_no_policy` op INFO-niveau.
+Dat is geen probleem maar het ontwerp: RLS aan zonder policies betekent dicht
+voor de publieke sleutel, en alleen de servercode komt erbij met de
+service-role key.
+
+#### Prijzen of voorraad wijzigen
+
+**Niet via `seed.sql`.** Elke insert daarin eindigt op
+`ON CONFLICT ... DO NOTHING`, dus op een gevulde database verandert opnieuw
+draaien niets. Je krijgt geen foutmelding, en de winkel blijft de oude prijs
+rekenen. Getest op de echte database: prijs van 21,95 naar 24,95 gezet via de
+seed, en hij bleef 21,95.
+
+Dat gedrag is bewust en moet zo blijven: `inventory.quantity` wordt door
+verkopen verlaagd. Zou de seed die kolom overschrijven, dan zet elke run de
+voorraad terug op de startwaarde en verdwijnt wat er verkocht is.
+
+Wijzigen doe je met een UPDATE in de SQL Editor:
+
+```sql
+-- Prijs
+update products
+set price_cents = 2495, compare_at_cents = 2795, updated_at = now()
+where slug = 'villa-happ-back-cap';
+
+-- Voorraad, per SKU
+update inventory i
+set quantity = 60, updated_at = now()
+from product_variants pv
+where pv.id = i.variant_id and pv.sku = 'VH-CAP-001';
+
+-- Product uit de winkel halen zonder te verwijderen
+update products set status = 'archived' where slug = 'stap-voor-stap-sokken';
+```
+
+Werk daarna `seed.sql` bij, zodat een verse database dezelfde cijfers krijgt.
+
+**Let op:** de shoppagina's zijn geprerenderd. Een prijswijziging in de
+database is pas zichtbaar na een redeploy. De voorraad ververst zichzelf wel
+live via `/api/stock`, dus daarvoor is geen deploy nodig.
 
 - [ ] Project aanmaken in **regio EU (Frankfurt)**
 - [ ] `supabase/schema.sql` draaien (bevat alles, inclusief de nieuwe migraties)
