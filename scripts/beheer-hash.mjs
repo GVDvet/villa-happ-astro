@@ -6,7 +6,11 @@ import { scryptSync, randomBytes } from 'node:crypto';
 
 const wachtwoord = process.argv[2];
 if (!wachtwoord || wachtwoord.length < 12) {
-  console.error('Geef een wachtwoord van minimaal 12 tekens:\n  npm run beheer:hash -- \'jouw wachtwoord\'');
+  console.error(
+    'Geef een wachtwoord van minimaal 12 tekens.\n\n' +
+    'Draai dit vanuit de projectmap, dus de map met package.json:\n' +
+    "  npm run beheer:hash -- 'jouw wachtwoord'\n",
+  );
   process.exit(1);
 }
 const salt = randomBytes(16);

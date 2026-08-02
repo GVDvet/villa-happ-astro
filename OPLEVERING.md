@@ -63,8 +63,18 @@ transactiemails lezen allemaal uit dat bestand.
 
 1. **Zet `AUTH_SECRET` in Vercel** (minimaal 32 tekens). Zonder deze is
    afrekenen uitgeschakeld: `/api/checkout/create` geeft een 503 en er komt
-   geen bestelling doorheen. Genereer hem met
-   `npm run beheer:hash -- 'wachtwoord'`, dat print er meteen een.
+   geen bestelling doorheen.
+
+   Genereer hem samen met je beheerwachtwoord. **Draai dit vanuit de
+   projectmap**, niet vanuit `Documents`:
+
+   ```powershell
+   cd "$HOME\Documents\Websites_en_tools\Villa Happ\Astro_Website"
+   npm run beheer:hash -- 'kies-hier-een-wachtwoord'
+   ```
+
+   Dat print twee waarden: de `ADMIN_PASSWORD_HASH` die bij jouw wachtwoord
+   hoort, en een willekeurige `AUTH_SECRET`.
 2. **Zet `ADMIN_PASSWORD_HASH`** uit datzelfde commando. Zonder deze blijft
    `/beheer` op het inlogscherm staan.
 3. **Draai de migraties** (zie C1). Zonder de tabel `uitgaande_mail` wordt
