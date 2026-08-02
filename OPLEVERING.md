@@ -108,8 +108,41 @@ Dat is geen probleem maar het ontwerp: RLS aan zonder policies betekent dicht
 voor de publieke sleutel, en alleen de servercode komt erbij met de
 service-role key.
 
-**Nog te doen op deze database:** niets, tenzij prijzen of voorraad wijzigen.
-Pas die dan aan in `seed.sql` en draai hem opnieuw; hij is idempotent.
+#### Prijzen of voorraad wijzigen
+
+**Niet via `seed.sql`.** Elke insert daarin eindigt op
+`ON CONFLICT ... DO NOTHING`, dus op een gevulde database verandert opnieuw
+draaien niets. Je krijgt geen foutmelding, en de winkel blijft de oude prijs
+rekenen. Getest op de echte database: prijs van 21,95 naar 24,95 gezet via de
+seed, en hij bleef 21,95.
+
+Dat gedrag is bewust en moet zo blijven: `inventory.quantity` wordt door
+verkopen verlaagd. Zou de seed die kolom overschrijven, dan zet elke run de
+voorraad terug op de startwaarde en verdwijnt wat er verkocht is.
+
+Wijzigen doe je met een UPDATE in de SQL Editor:
+
+```sql
+-- Prijs
+update products
+set price_cents = 2495, compare_at_cents = 2795, updated_at = now()
+where slug = 'villa-happ-back-cap';
+
+-- Voorraad, per SKU
+update inventory i
+set quantity = 60, updated_at = now()
+from product_variants pv
+where pv.id = i.variant_id and pv.sku = 'VH-CAP-001';
+
+-- Product uit de winkel halen zonder te verwijderen
+update products set status = 'archived' where slug = 'stap-voor-stap-sokken';
+```
+
+Werk daarna `seed.sql` bij, zodat een verse database dezelfde cijfers krijgt.
+
+**Let op:** de shoppagina's zijn geprerenderd. Een prijswijziging in de
+database is pas zichtbaar na een redeploy. De voorraad ververst zichzelf wel
+live via `/api/stock`, dus daarvoor is geen deploy nodig.
 
 - [ ] Project aanmaken in **regio EU (Frankfurt)**
 - [ ] `supabase/schema.sql` draaien (bevat alles, inclusief de nieuwe migraties)

@@ -3,6 +3,16 @@
 -- Draai dit NA schema.sql, op een verse database.
 -- Idempotent: ON CONFLICT DO NOTHING, dus veilig om opnieuw te draaien.
 --
+-- LET OP: idempotent betekent hier "verandert niets", niet "werkt bij".
+-- Bestaat een product of voorraadregel al, dan slaat de insert hem over
+-- zonder foutmelding. Een gewijzigde prijs in dit bestand komt dus NIET in
+-- een gevulde database terecht. Wijzigen gaat met een UPDATE; zie het kopje
+-- "Prijzen of voorraad wijzigen" in OPLEVERING.md.
+--
+-- Dat gedrag moet zo blijven: inventory.quantity wordt door verkopen
+-- verlaagd. Zou deze seed die kolom overschrijven, dan zet elke run de
+-- voorraad terug op de startwaarde en verdwijnt wat er verkocht is.
+--
 -- Prijzen in cents. status='published' = zichtbaar in de winkel.
 -- created_at loopt af zodat de shop-volgorde klopt (olijf -> navy ->
 -- cap -> sokken -> 5-pack); de catalogus sorteert op created_at DESC.
