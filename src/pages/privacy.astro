@@ -36,7 +36,9 @@ const processors = [
     name: 'Resend',
     role: 'Verzenden van bevestigings- en servicemails',
     data: 'E-mailadres, naam, bestelgegevens',
-    where: 'VS, op basis van EU-modelcontractbepalingen',
+    // Regio Ierland gekozen bij het aanmelden van het domein. Wijzigt dat,
+    // dan moet deze regel mee: dan gaat er alsnog data naar de VS.
+    where: 'EU (Ierland)',
   },
   {
     name: 'PostNL',
