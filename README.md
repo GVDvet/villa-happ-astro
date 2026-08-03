@@ -1,187 +1,106 @@
 # Villa Happ — Astro storefront
 
-E-commerce frontend voor Villa Happ, het heritage lifestyle merk uit Tilburg. Gebouwd met **Astro 5 + React islands + Three.js + Mollie + Supabase**.
+Webshop van Villa Happ, een Nederlands heritage lifestylelabel. Het merk
+ontstond in 1960 in Tilburg en is vandaag gevestigd in Waalwijk — die twee
+plaatsen zijn nadrukkelijk niet inwisselbaar, zie `src/lib/entity.ts`.
 
-## ✨ Wat zit erin
+Gebouwd met **Astro 6**, **Supabase**, **Mollie** en **Resend**, gehost op
+Vercel.
 
-- 🎬 **Scroll-driven homepage** met dynamische 2D camera-flight over 9 story scenes (GSAP + ScrollTrigger + Lenis)
-- 🎲 **Hybrid 3D**: subtle Three.js scene in de hero (React Three Fiber via Astro island)
-- 🎨 **Editorial design system** met Villa Happ tokens (Inter sans + Plantin/Cormorant italic accents)
-- 🛒 **Mollie checkout** met iDEAL, Bancontact, Apple/Shop Pay, Klarna
-- 📦 **Supabase backend** voor producten, varianten (size/color), voorraad, orders, drops, newsletter
-- 📬 **Newsletter** signup via Supabase
-- 🌱 **SSR mode** met `@astrojs/node` adapter — dynamic cart/checkout
-- ♿ **A11y**: skip link, focus management, reduced-motion safe-mode
+> **Ga je deployen of DNS aanpassen? Lees eerst [`docs/workflow.md`](docs/workflow.md).**
+> Daar staat welke repository leidend is, hoe een wijziging live komt, en de
+> valkuilen die eerder een dag hebben gekost.
 
-## 🚀 Quick start
+---
+
+## Quick start
 
 ```bash
 cp .env.example .env
-# Vul Supabase + Mollie keys in (zie hieronder)
-
 npm install
 npm run dev
-# Open http://localhost:4321
 ```
 
-## 🔑 Environment variables
+De site draait dan op `http://localhost:4321`. Zonder Supabase-sleutels valt
+de catalogus terug op `src/lib/demo-products.ts`, zodat je zonder database
+kunt werken.
 
-| Variable | Required | Doel |
-|---|---|---|
-| `PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL (https://xxx.supabase.co) |
-| `PUBLIC_SUPABASE_ANON_KEY` | ✅ | Public anon key (RLS-protected) |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Server-only admin key — orders + inventory mutations |
-| `MOLLIE_API_KEY` | ✅ | `test_xxx` of `live_xxx` |
-| `PUBLIC_SITE_URL` | ✅ | Base URL voor redirects/webhook (`http://localhost:4321` of prod URL) |
-| `RESEND_API_KEY` | optional | Voor order confirmation emails |
-| `MAIL_FROM` | optional | Default `hello@villahapp.com` |
+## Commands
 
-## 🗄 Supabase setup
-
-1. Maak een nieuwe Supabase project op [supabase.com](https://supabase.com).
-2. Kopieer de URL + anon key + service role key naar `.env`.
-3. Open **SQL Editor** in Supabase dashboard en plak `supabase/schema.sql` — run.
-4. (Optional) Decomment de `INSERT INTO` regels onderaan `schema.sql` voor seed data.
-
-### Storage (productafbeeldingen)
-- Maak een storage bucket `products` (public) in Supabase.
-- Upload productafbeeldingen. Image URLs lijken op `https://xxx.supabase.co/storage/v1/object/public/products/hoodie-grey.png`.
-- Of: gebruik lokale paden onder `/public/img/products/` (sneller voor self-hosted).
-
-## 💳 Mollie setup
-
-1. Account op [mollie.com](https://mollie.com) — registreer als business.
-2. Test API key uit dashboard → kopieer als `MOLLIE_API_KEY=test_xxx`.
-3. **Webhook**: in productie, zorg dat `PUBLIC_SITE_URL` publiek bereikbaar is (Mollie POST naar `/api/checkout/webhook`).
-4. Voor lokaal testen: gebruik [ngrok](https://ngrok.com) → `ngrok http 4321` → vul ngrok URL als `PUBLIC_SITE_URL`.
-
-## 📁 Project structure
-
-```
-.
-├── public/
-│   └── img/                   # productafbeeldingen, heritage, brand assets
-├── src/
-│   ├── components/
-│   │   ├── 3d/                # Three.js islands (Hero3D, ProductViewer)
-│   │   ├── home/              # 9 scenes + 4 interludes
-│   │   ├── layout/            # Header, Footer
-│   │   ├── product/           # PDP, gallery, swatches (TODO)
-│   │   ├── commerce/          # Cart drawer, checkout (TODO)
-│   │   └── ui/                # Buttons, modals, toasts (TODO)
-│   ├── layouts/Base.astro     # Site-wide shell
-│   ├── lib/
-│   │   ├── supabase.ts        # Supabase clients (public + admin)
-│   │   ├── mollie.ts          # Mollie SDK wrapper
-│   │   ├── commerce.ts        # Products, drops, inventory queries
-│   │   ├── cart.ts            # Client-side cart (localStorage)
-│   │   ├── homepage-motion.ts # Camera-flight engine (GSAP)
-│   │   └── types.ts           # TypeScript types
-│   ├── pages/
-│   │   ├── index.astro        # Homepage met 9 scenes
-│   │   ├── shop/              # (TODO) Listing + PDP
-│   │   ├── cart.astro         # (TODO) Cart page
-│   │   ├── checkout/          # (TODO) Checkout form + success
-│   │   └── api/
-│   │       ├── newsletter.ts
-│   │       └── checkout/
-│   │           ├── create.ts  # Create order + Mollie payment
-│   │           └── webhook.ts # Mollie status callback
-│   └── styles/
-│       ├── tokens.css         # Design tokens
-│       ├── base.css           # Reset + typography baseline
-│       ├── buttons.css        # Button system
-│       └── home.css           # Homepage scenes
-├── supabase/schema.sql        # Postgres schema
-└── astro.config.mjs
-```
-
-## 🎬 Hoe de camera-flight werkt
-
-1. **9 scenes** zijn absoluut gepositioneerd in een grote canvas (`.vh-canvas`).
-2. **Posities** voor elke scene in `src/lib/homepage-motion.ts` → `SCENE_POSITIONS`. Tweak x/y/scale/rotation voor verschillende flight pathways.
-3. **GSAP timeline** animeert `transform: translate3d + scale + rotate` op de canvas terwijl je scrollt.
-4. **ScrollTrigger** pint de hele homepage en koppelt scroll progress aan de timeline.
-5. **Lenis** geeft smooth scroll feel.
-6. **Reveal animations** per scene via `.is-active` class (set door `onUpdate`).
-7. **Mobiel**: camera-flight uit, scenes stacken normaal (zie `home.css` media query).
-
-### Tweak een scene
-Open `src/lib/homepage-motion.ts`:
-```ts
-const SCENE_POSITIONS = [
-  { x: 0,    y: 0,    scale: 1,    rotation: 0 },     // Hero
-  { x: 1.8,  y: -0.6, scale: 1.05, rotation: -2 },    // Origin
-  // ...
-];
-```
-`x` en `y` zijn multipliers van viewport. Tweak voor verschillende routes.
-
-## 🎲 Three.js 3D in de hero
-
-Zie `src/components/3d/Hero3D.tsx`. Nu een floating distorted orb. Vervangen door echt 3D model:
-
-```tsx
-import { useGLTF } from '@react-three/drei';
-
-function HoodieModel() {
-  const { scene } = useGLTF('/models/hoodie.glb');
-  return <primitive object={scene} scale={1.5} />;
-}
-```
-
-Plaats `.glb` in `public/models/`. Export vanuit Blender met Draco compressie.
-
-## 🧞 Commands
-
-| Command | Action |
+| Command | Doet |
 |---|---|
-| `npm install` | Install deps |
-| `npm run dev` | Dev server op `localhost:4321` |
-| `npm run build` | Production build naar `./dist/` |
-| `npm run preview` | Preview production build |
-| `npm run astro check` | TypeScript / Astro typecheck |
+| `npm run dev` | Dev-server op `localhost:4321` |
+| `npm run build` | Productiebuild (hetzelfde als Vercel draait) |
+| `npm run preview` | Bekijk de productiebuild lokaal |
+| `npm run check` | Astro- en TypeScript-typecheck |
+| `npm test` | Unit tests (vitest) |
+| `npm run beheer:hash -- 'wachtwoord'` | Genereert `AUTH_SECRET` + `ADMIN_PASSWORD_HASH` |
 
-## 🚢 Deployment
+Vóór elke commit: `npm test` groen en `npm run check` op 0 errors.
 
-### Vercel
-1. Push naar GitHub.
-2. Connect repo in Vercel → framework: Astro (auto-detected).
-3. Add env vars in Vercel dashboard.
-4. Deploy.
-5. In Mollie: zet `PUBLIC_SITE_URL` op je Vercel URL (`https://villa-happ.vercel.app`).
+## Environment variables
 
-### Netlify
-1. Push naar GitHub.
-2. Add `@astrojs/netlify` adapter (vervang `@astrojs/node`):
-   ```bash
-   npm uninstall @astrojs/node
-   npx astro add netlify
-   ```
-3. Add env vars in Netlify dashboard.
+De volledige lijst met wat er stukgaat als ze ontbreken staat in
+[`docs/workflow.md`](docs/workflow.md#3-environment-variabelen). Kort:
 
-### Self-hosted (VPS / Cloudways)
-1. Build lokaal: `npm run build`.
-2. Upload `dist/` naar server.
-3. Run met `node ./dist/server/entry.mjs` (Astro Node adapter standalone).
-4. Reverse proxy via Nginx → port 4321.
+| Variabele | Nodig | Doel |
+|---|---|---|
+| `PUBLIC_SUPABASE_URL` | ja | catalogus, orders |
+| `PUBLIC_SUPABASE_ANON_KEY` | ja | catalogus |
+| `SUPABASE_SERVICE_ROLE_KEY` | ja | orders, voorraad, beheer — server-only |
+| `MOLLIE_API_KEY` | ja | betalingen, `test_` of `live_` |
+| `PUBLIC_SITE_URL` | ja | canonical, sitemap, robots, Mollie-redirect |
+| `AUTH_SECRET` | ja | ondertekent bestel- en beheertokens; zonder deze **geen checkout** |
+| `ADMIN_PASSWORD_HASH` | ja | toegang tot `/beheer` |
+| `CRON_SECRET` | ja | beveiligt de dagelijkse cron |
+| `RESEND_API_KEY` | optioneel | transactiemail; zonder deze wordt er bewust niets verstuurd |
+| `MAIL_FROM` | optioneel | afzender, default staat in `src/lib/mail.ts` |
 
-## 🛠 Volgende stappen (TODO)
+## Bron van waarheid
 
-- [ ] Shop listing `/shop` met filters (kleur, maat, prijs)
-- [ ] Product detail page `/shop/[slug]` met gallery, swatch selector, voorraad badge
-- [ ] Cart drawer (slide-out) + free shipping bar
-- [ ] Checkout form (multi-step: address → shipping → payment)
-- [ ] Success/cancelled pages
-- [ ] Drops archive `/drops` + single drop pagina
-- [ ] Heritage/story pagina
-- [ ] Journal (blog)
-- [ ] Wishlist (localStorage)
-- [ ] Search modal
-- [ ] Toast notifications
-- [ ] Order confirmation emails (Resend)
-- [ ] Admin dashboard (kan via Supabase Studio of custom)
+Wijzig gegevens op één plek, nooit in een pagina.
 
-## 📝 Licentie
+| Wat | Bestand |
+|---|---|
+| KvK, btw, adressen, mailadres, retourtermijnen | `src/lib/business.ts` |
+| Verzendtarieven, gratis-verzendgrens | `src/lib/shipping.ts` |
+| Juridische formuleringen | `src/lib/legal.ts` |
+| Merkfeiten voor schema en `llms.txt` | `src/lib/entity.ts` |
+| Domein en indexeerbaarheid | `src/lib/site.ts` |
+| Retourberekening | `src/lib/retour.ts` |
+
+## Structuur
+
+```
+src/
+├── components/
+│   ├── commerce/     cart drawer
+│   ├── home/         homepage-scenes
+│   ├── layout/       header, footer
+│   └── legal/        layout voor de juridische pagina's
+├── layouts/          Base.astro, BeheerLayout.astro
+├── lib/              bron van waarheid + pure logica (zie tabel hierboven)
+├── pages/
+│   ├── api/          checkout, webhook, contact, beheer, atelier
+│   ├── beheer/       orderbeheer achter wachtwoord
+│   ├── bestelling/   klantportaal op capability-token
+│   ├── shop/         listing + productpagina's
+│   └── …             story, atelier, journal, voor-merken, juridisch
+└── styles/           tokens, base, home, shop, atelier, beheer
+supabase/             schema, seed, migraties
+tests/                vitest — checkout, retour, atelier, orderstatus
+docs/                 workflow, retourbeleid, Astro 7-migratie
+```
+
+## Documentatie
+
+| Document | Waarover |
+|---|---|
+| [`docs/workflow.md`](docs/workflow.md) | **Deploy, repositories, DNS, env-variabelen.** Begin hier. |
+| [`docs/retourbeleid.md`](docs/retourbeleid.md) | Retourregeling en de rekenregel; leidend boven de code |
+| [`docs/astro-7-migratie.md`](docs/astro-7-migratie.md) | Waarom Astro 7 is teruggedraaid |
+| [`OPLEVERING.md`](OPLEVERING.md) | Opleverchecklist en openstaande punten |
+
+## Licentie
 
 Proprietary — Villa Happ © 2026
