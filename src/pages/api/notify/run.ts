@@ -6,6 +6,13 @@
  *     wegschrijven niet meteen weg kon);
  *  2. de back-in-stock-meldingen versturen.
  *
+ * Frequentie: één keer per dag is het maximum op Vercel Hobby. Draait het
+ * project op Pro, zet de schedule in vercel.json dan op '0 * * * *'. Een
+ * orderbevestiging die bij het wegschrijven niet weg kon blijft dan hooguit
+ * een uur liggen in plaats van een dag. (Deze toelichting stond eerst in
+ * vercel.json zelf; JSON kent geen commentaar en Vercel weigert onbekende
+ * sleutels, waardoor elke build faalde.)
+ *
  * Draait via de Vercel-cron (zie vercel.json) of handmatig met
  * `Authorization: Bearer <CRON_SECRET>`. Loopt de open meldingen na,
  * mailt iedereen van wie de gevraagde maat weer beschikbaar is en zet

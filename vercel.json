@@ -4,7 +4,6 @@
   "crons": [
     { "path": "/api/notify/run", "schedule": "0 8 * * *" }
   ],
-  "_crons_toelichting": "Deze taak leegt eerst de mail-outbox en verstuurt daarna de voorraadmeldingen. Een keer per dag is het maximum op Vercel Hobby. Op Pro kan het vaker; zet de schedule dan op '0 * * * *' zodat een orderbevestiging die bij het wegschrijven niet weg kon hooguit een uur blijft liggen in plaats van een dag.",
   "headers": [
     {
       "source": "/(.*)",
