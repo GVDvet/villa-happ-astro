@@ -2,7 +2,15 @@
 export const prerender = true;
 
 import Base from '../../layouts/Base.astro';
+import { levertijdIndicatie } from '../../lib/order-status';
 import '../../styles/shop.css';
+
+// Deze pagina is prerendered, dus het land is bij het bouwen onbekend. Beide
+// varianten gaan mee als data-attribuut; het script kiest de juiste zodra de
+// statusroute het bezorgland teruggeeft. Zo blijft order-status.ts de enige
+// plek waar een levertermijn staat.
+const levNL = levertijdIndicatie('NL');
+const levEU = levertijdIndicatie('BE');
 ---
 <Base
   title="Bedankt · Villa Happ"
@@ -41,7 +49,7 @@ import '../../styles/shop.css';
 
         <div class="vh-success-card">
           <div class="vh-success-row"><span>Bestelnummer</span><b id="vh-ordernr">…</b></div>
-          <div class="vh-success-row"><span>Verwachte bezorging</span><b id="vh-deliv">…</b></div>
+          <div class="vh-success-row"><span>Verwachte bezorging</span><b id="vh-deliv" data-lev-nl={levNL} data-lev-eu={levEU}>…</b></div>
           <div class="vh-success-row"><span>Verzending</span><b>PostNL · met track &amp; trace</b></div>
         </div>
 
@@ -151,10 +159,18 @@ import '../../styles/shop.css';
      kan bijwerken belooft geen exacte dag. Deze pagina noemde er wel een,
      berekend uit werkdagen, zonder feestdagen en zonder weet van een
      vertraagde rit. Die datum werd daarmee een afspraak. */
-  (function bezorging() {
+  /* Stond hier als vaste tekst met de Nederlandse termijn, waardoor een
+     Belgische of Duitse klant hier 3 werkdagen las terwijl zijn eigen
+     klantportaal 5 zei. Beide varianten komen nu uit order-status.ts en
+     staan als data-attribuut op het element; zodra de statusroute het
+     bezorgland meldt, wordt de juiste gekozen. */
+  function zetBezorging(land) {
     const el = document.getElementById('vh-deliv');
-    if (el) el.textContent = 'Doorgaans binnen 3 werkdagen na bestelling';
-  })();
+    if (!el) return;
+    const eu = land === 'BE' || land === 'DE';
+    el.textContent = eu ? el.dataset.levEu : el.dataset.levNl;
+  }
+  zetBezorging('NL');
 
   /**
    * Mollie stuurt de klant hierheen bij élke afloop — betaald, mislukt,
@@ -184,6 +200,7 @@ import '../../styles/shop.css';
         const json = await res.json();
         state = json.state || 'unknown';
         if (json.order_number) zetNummer(json.order_number);
+        if (json.land) zetBezorging(json.land);
       }
     } catch { /* netwerkfout: hieronder afgehandeld als 'unknown' */ }
 

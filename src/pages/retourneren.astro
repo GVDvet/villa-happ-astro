@@ -7,9 +7,25 @@ import {
   RETURN_FEE_TEXT, RETURN_FEE_FROM_DAY, FREE_SHIPPING_TEXT,
   RETURN_SHIPPING_CORRECTION_SENTENCE, RETURN_CONDITION_SENTENCE, SHIPPING_TABLE, eur,
 } from '../lib/legal';
+import { berekenRetour } from '../lib/retour';
 import '../styles/shop.css';
 
 const returnLines = returnAddressLines();
+
+/**
+ * Het rekenvoorbeeld hieronder komt uit dezelfde functie die een echte
+ * retour berekent. De bedragen stonden er eerst met de hand in; dan klopt
+ * het voorbeeld niet meer zodra een tarief verandert — en het is een
+ * rekensom over geld op een juridische pagina.
+ */
+const vbHoodieCents = 5995;
+const vb = berekenRetour({
+  artikelBedragCents: vbHoodieCents * 2,
+  behoudenWaardeCents: vbHoodieCents,
+  betaaldeVerzendkostenCents: 0,
+  land: 'NL',
+  aangemeldOpDag: 3,
+});
 
 const steps = [
   { n: '01', t: 'Meld je retour', d: `Mail ons binnen ${BUSINESS.returnDays} dagen na ontvangst met je bestelnummer, of gebruik het herroepingsformulier. De dag waarop je meldt bepaalt of er verwerkingskosten gelden.` },
@@ -91,13 +107,13 @@ const steps = [
           </ul>
 
           <div class="vh-retour-voorbeeld">
-            <p><b>Een rekenvoorbeeld.</b> Je bestelt drie hoodies van {eur(5995)}, samen
-            {eur(17985)}, dus de verzending is gratis. Je houdt er één en stuurt er twee
+            <p><b>Een rekenvoorbeeld.</b> Je bestelt drie hoodies van {eur(vbHoodieCents)}, samen
+            {eur(vbHoodieCents * 3)}, dus de verzending is gratis. Je houdt er één en stuurt er twee
             terug, binnen {BUSINESS.statutoryReturnDays} dagen:</p>
             <p class="vh-mono" style="font-size:13px;line-height:1.9;">
-              Retour 2 × {eur(5995)} = {eur(11990)}<br />
-              Verzendcorrectie (je houdt {eur(5995)}, onder de {FREE_SHIPPING_TEXT}) − {eur(895)}<br />
-              <b>Terugbetaling {eur(11095)}</b>
+              Retour 2 × {eur(vbHoodieCents)} = {eur(vb.basisCents)}<br />
+              Verzendcorrectie (je houdt {eur(vbHoodieCents)}, onder de {FREE_SHIPPING_TEXT}) − {eur(vb.correctieCents)}<br />
+              <b>Terugbetaling {eur(vb.terugbetalingCents)}</b>
             </p>
             <p>De retourzending betaal je daarnaast zelf aan de vervoerder.</p>
           </div>

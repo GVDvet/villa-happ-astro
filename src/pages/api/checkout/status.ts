@@ -46,27 +46,32 @@ export const GET: APIRoute = async ({ request, url }) => {
 
   const { data: order } = await sb
     .from('orders')
-    .select('order_number, payment_status, mollie_payment_id')
+    .select('order_number, payment_status, mollie_payment_id, shipping_address')
     .eq('id', inhoud.orderId)
     .maybeSingle();
 
   if (!order) return json({ error: 'not found' }, 404);
 
+  // Alleen de landcode, niet het hele adres: de bedanktpagina heeft er de
+  // levertijdindicatie voor nodig en meer hoeft er niet over de lijn. Het
+  // token hoort bij deze bestelling, dus dit lekt niets aan een derde.
+  const land = (order.shipping_address as { country?: string } | null)?.country ?? 'NL';
+
   // Al betaald volgens de webhook? Dan hoeft Mollie er niet aan te pas.
   if (order.payment_status === 'paid') {
-    return json({ state: 'paid', order_number: order.order_number });
+    return json({ state: 'paid', order_number: order.order_number, land });
   }
 
   if (!order.mollie_payment_id) {
-    return json({ state: 'pending', order_number: order.order_number });
+    return json({ state: 'pending', order_number: order.order_number, land });
   }
 
   try {
     const payment = await getMollie().payments.get(order.mollie_payment_id);
-    return json({ state: paymentState(payment.status), order_number: order.order_number });
+    return json({ state: paymentState(payment.status), order_number: order.order_number, land });
   } catch (err) {
     console.error('[checkout-status] Mollie ophalen faalde:', err);
     // Niets beweren wat we niet weten: de pagina houdt het mandje dan vast.
-    return json({ state: 'unknown', order_number: order.order_number });
+    return json({ state: 'unknown', order_number: order.order_number, land });
   }
 };
