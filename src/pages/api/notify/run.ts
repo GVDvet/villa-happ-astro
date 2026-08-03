@@ -1,5 +1,10 @@
 /**
- * GET /api/notify/run — back-in-stock-verzender
+ * GET /api/notify/run — dagelijkse mailtaak
+ *
+ * Twee dingen, in deze volgorde:
+ *  1. de mail-outbox legen (vangnet voor transactionele mail die bij het
+ *     wegschrijven niet meteen weg kon);
+ *  2. de back-in-stock-meldingen versturen.
  *
  * Draait via de Vercel-cron (zie vercel.json) of handmatig met
  * `Authorization: Bearer <CRON_SECRET>`. Loopt de open meldingen na,
@@ -14,6 +19,7 @@ import type { APIRoute } from 'astro';
 import { getSupabaseAdmin } from '../../../lib/supabase';
 import { dueNotifications, stockKey, type PendingNotification } from '../../../lib/backinstock';
 import { sendBackInStock, isMailConfigured } from '../../../lib/mail';
+import { verwerkWachtrij } from '../../../lib/outbox';
 import { getSiteOrigin } from '../../../lib/site';
 
 export const prerender = false;
@@ -30,9 +36,26 @@ export const GET: APIRoute = async ({ request }) => {
   const sb = getSupabaseAdmin();
   if (!sb) return new Response(JSON.stringify({ error: 'no-db' }), { status: 503 });
 
+  // 1. Eerst de mail-outbox legen.
+  //
+  // Dit is het vangnet voor transactionele mail. De outbox probeert bij het
+  // wegschrijven meteen te versturen, maar hapert Resend op dat moment, dan
+  // blijft de orderbevestiging staan. Zonder deze stap wachtte die tot
+  // iemand handmatig op de knop in het beheerportaal drukte, en dat weet je
+  // alleen als je gaat kijken.
+  //
+  // Een cron per dag is traag voor een orderbevestiging; de snelle route
+  // blijft de directe poging bij het wegschrijven. Draait dit project ooit
+  // op Vercel Pro, zet deze cron dan op elk uur (zie vercel.json).
+  const outbox = await verwerkWachtrij();
+
   if (!isMailConfigured()) {
     // Zonder mailkanaal niets markeren: de wachtrij blijft intact
-    return new Response(JSON.stringify({ sent: 0, skipped: 'mail niet geconfigureerd' }), { status: 200 });
+    return new Response(JSON.stringify({
+      outbox,
+      sent: 0,
+      skipped: 'mail niet geconfigureerd',
+    }), { status: 200 });
   }
 
   const { data: pending, error: pErr } = await sb
@@ -42,8 +65,8 @@ export const GET: APIRoute = async ({ request }) => {
     .order('created_at', { ascending: true })
     .limit(200);
 
-  if (pErr) return new Response(JSON.stringify({ error: 'query failed' }), { status: 500 });
-  if (!pending?.length) return new Response(JSON.stringify({ sent: 0, pending: 0 }), { status: 200 });
+  if (pErr) return new Response(JSON.stringify({ outbox, error: 'query failed' }), { status: 500 });
+  if (!pending?.length) return new Response(JSON.stringify({ outbox, sent: 0, pending: 0 }), { status: 200 });
 
   // Voorraad + productnaam per (slug, maat) in één query
   const slugs = [...new Set(pending.map((p: any) => p.product_slug))];
@@ -53,7 +76,7 @@ export const GET: APIRoute = async ({ request }) => {
     .in('slug', slugs)
     .eq('status', 'published');
 
-  if (prErr) return new Response(JSON.stringify({ error: 'query failed' }), { status: 500 });
+  if (prErr) return new Response(JSON.stringify({ outbox, error: 'query failed' }), { status: 500 });
 
   const availableByKey: Record<string, number> = {};
   const nameBySlug: Record<string, string> = {};
@@ -83,7 +106,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
   }
 
-  return new Response(JSON.stringify({ pending: pending.length, due: due.length, sent }), {
+  return new Response(JSON.stringify({ outbox, pending: pending.length, due: due.length, sent }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });

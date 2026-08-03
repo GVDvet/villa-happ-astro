@@ -33,3 +33,7 @@ pnpm-debug.log*
 
 # Werkmap voor buildvergelijkingen (scripts/tekst-uit-build.py)
 .tmp/
+
+# Losse curl-uitvoer bij het controleren van een deploy
+*.html
+!src/**/*.html

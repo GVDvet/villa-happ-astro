@@ -13,8 +13,9 @@
  *      veilig, ook als de rest van de request omvalt.
  *   2. Direct daarna proberen we hem te versturen (snelle route), zodat een
  *      klant niet op een cron hoeft te wachten.
- *   3. Mislukt dat, dan blijft hij staan met oplopende backoff en pakt de
- *      cron of de knop in het beheerportaal hem later op.
+ *   3. Mislukt dat, dan blijft hij staan met oplopende backoff. De
+ *      dagelijkse cron (/api/notify/run) leegt de wachtrij alsnog, en in
+ *      het beheerportaal zit een knop om er niet op te hoeven wachten.
  *
  * Een outbox zonder backoff is een stille datavernietiger; die les komt uit
  * prWize Core, net als het atomair claimen met SKIP LOCKED zodat twee
