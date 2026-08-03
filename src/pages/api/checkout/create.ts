@@ -112,9 +112,17 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // 4. Create order
+  // Geen zelfverzonnen terugval hier. Die maakte van een tijdstempel een
+  // bestelnummer (VH-2026-84713), en de teller telt vanaf het hoogste
+  // uitgegeven nummer: één misser vergiftigt daarmee de hele reeks.
+  // Liever eerlijk falen; de klant kan opnieuw proberen en houdt zijn geld.
   const { data: orderNumberData, error: onErr } = await sb.rpc('generate_order_number');
-  const orderNumber = (!onErr && orderNumberData)
-    || `VH-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`;
+  const orderNumber = typeof orderNumberData === 'string' ? orderNumberData : null;
+  if (onErr || !orderNumber) {
+    console.error('[checkout] generate_order_number faalde:', onErr);
+    await rollback();
+    return new Response(JSON.stringify({ error: 'Bestellen lukt nu even niet. Probeer het zo opnieuw.' }), { status: 503 });
+  }
 
   // Upsert customer
   const { data: cust } = await sb.from('customers').upsert({

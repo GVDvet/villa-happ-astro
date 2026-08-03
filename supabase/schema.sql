@@ -320,19 +320,37 @@ $$;
 REVOKE ALL ON FUNCTION next_atelier_number(INT) FROM PUBLIC, anon;
 
 -- Genereer order_number (VH-YYYY-XXXXX)
+--
+-- Via een tellertabel, niet via MAX(...) + 1: dat laatste heeft geen slot,
+-- dus twee klanten die tegelijk afrekenen krijgen hetzelfde nummer en de
+-- tweede insert botst op de UNIQUE. INSERT ... ON CONFLICT DO UPDATE neemt
+-- een rijslot, dus gelijktijdige aanroepen komen netjes achter elkaar.
+-- Zie migrations/20260803_bestelnummer_teller.sql.
+CREATE TABLE IF NOT EXISTS order_counters (
+  jaar    INT PRIMARY KEY,
+  laatste INT NOT NULL DEFAULT 0
+);
+
+ALTER TABLE order_counters ENABLE ROW LEVEL SECURITY;
+-- Geen policies: alleen de service-role key komt erbij, net als bij orders.
+
 CREATE OR REPLACE FUNCTION generate_order_number() RETURNS TEXT
 LANGUAGE plpgsql SET search_path = '' AS $$
 DECLARE
-  yr INT := EXTRACT(YEAR FROM NOW());
+  yr  INT := EXTRACT(YEAR FROM NOW());
   seq INT;
 BEGIN
-  SELECT COALESCE(MAX(CAST(SUBSTRING(order_number FROM 9) AS INT)), 0) + 1
-  INTO seq
-  FROM public.orders
-  WHERE order_number LIKE 'VH-' || yr || '-%';
+  INSERT INTO public.order_counters (jaar, laatste)
+  VALUES (yr, 1)
+  ON CONFLICT (jaar) DO UPDATE
+    SET laatste = public.order_counters.laatste + 1
+  RETURNING laatste INTO seq;
+
   RETURN 'VH-' || yr || '-' || LPAD(seq::TEXT, 5, '0');
 END;
 $$;
+
+REVOKE ALL ON FUNCTION generate_order_number() FROM PUBLIC, anon;
 
 -- Voorraadmutaties (atomair; zie ook migrations/20260704_inventory_functions.sql)
 CREATE OR REPLACE FUNCTION reserve_inventory(v_id UUID, qty INT) RETURNS BOOLEAN
