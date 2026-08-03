@@ -14,6 +14,14 @@ export default defineConfig({
   // Console. Dit stuurt Astro.url; de 308-redirect van /shop/ naar /shop
   // staat in vercel.json ("trailingSlash": false).
   trailingSlash: 'never',
+  security: {
+    // Uit, en vervangen door src/middleware.ts. Astro's eigen controle kent
+    // geen uitzonderingen en weigerde daardoor de Mollie-webhook: die komt
+    // form-encoded binnen vanaf Mollie's servers en heeft dus geen Origin.
+    // Gevolg was dat een betaalde bestelling nooit op 'betaald' kwam.
+    // De middleware doet exact dezelfde controle, met die ene vrijstelling.
+    checkOrigin: false,
+  },
   build: {
     // Kleine CSS-bundels (~7-9 KiB) inline zetten haalt de render-
     // blokkerende <link>-verzoeken van het kritieke pad (Lighthouse: ~1,3s
