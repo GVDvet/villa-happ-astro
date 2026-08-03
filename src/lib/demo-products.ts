@@ -22,7 +22,6 @@ export interface CatalogProduct {
   name: string;
   color: string;
   price_cents: number;
-  compare_at_cents?: number;
   short_desc: string;
   description: string;
   details: string[];
@@ -44,7 +43,6 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Organic Cotton Hoodie',
     color: 'Olijfgroen',
     price_cents: 5995,
-    compare_at_cents: 6995,
     short_desc: 'Unisex hoodie van biologisch katoen en gerecycled polyester, in olijfgroen.',
     description:
       'De Organic Cotton Hoodie is het eerste vaste stuk van de comeback. Gemaakt van biologisch katoen en gerecycled polyester: zacht, stevig en verantwoord. Het Villa Happ embleem is geborduurd, niet geprint, precies zoals op de stukken uit het archief.',
@@ -52,7 +50,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       'Biologisch katoen en gerecycled polyester',
       'Geborduurd Villa Happ embleem',
       'Unisex pasvorm, maat S tot XXL',
-      'Ontworpen in Tilburg',
+      'Ontworpen in Waalwijk',
     ],
     images: [
       '/img/products/hoodie-grey-front-v2.webp',
@@ -60,9 +58,8 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       '/img/products/hoodie-grey-lifestyle-v2.webp',
       '/img/products/hoodie-logo-detail-v2.webp',
     ],
-    badge: 'Sale',
     meta: 'Olijfgroen · Unisex',
-    note: 'Biologisch katoen, embleem geborduurd in Tilburg.',
+    note: 'Biologisch katoen, embleem geborduurd, niet geprint.',
     variants: [
       { id: 'demo-olijf-s', size: 'S', stock: 2, sku: 'VH-OCH-OL-S' },
       { id: 'demo-olijf-m', size: 'M', stock: 11, sku: 'VH-OCH-OL-M' },
@@ -76,7 +73,6 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Organic Cotton Hoodie',
     color: 'Navy',
     price_cents: 5995,
-    compare_at_cents: 6995,
     short_desc: 'Dezelfde hoodie van biologisch katoen, in diep navy.',
     description:
       'De Organic Cotton Hoodie in navy: hetzelfde biologische katoen, hetzelfde geborduurde embleem, een kleur die overal bij past. De maten L en XL zijn bijna op, en XXL is al uitverkocht. Als het op is, is het op.',
@@ -84,15 +80,14 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       'Biologisch katoen en gerecycled polyester',
       'Geborduurd Villa Happ embleem',
       'Unisex pasvorm, maat S tot XXL',
-      'Ontworpen in Tilburg',
+      'Ontworpen in Waalwijk',
     ],
     images: [
       '/img/products/hoodie-blue-front-v2.webp',
       '/img/products/hoodie-blue-back.webp',
     ],
-    badge: 'Sale',
     meta: 'Navy · Unisex',
-    note: 'Biologisch katoen, embleem geborduurd in Tilburg.',
+    note: 'Biologisch katoen, embleem geborduurd, niet geprint.',
     variants: [
       { id: 'demo-navy-s', size: 'S', stock: 10, sku: 'VH-OCH-NV-S' },
       { id: 'demo-navy-m', size: 'M', stock: 12, sku: 'VH-OCH-NV-M' },
@@ -106,7 +101,6 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Villa Happ Back-Cap',
     color: 'Limited Edition',
     price_cents: 2195,
-    compare_at_cents: 2795,
     short_desc: 'Genummerde oplage van 500 stuks, met uniek code-label en certificaat van echtheid.',
     description:
       'Het allereerste product van de comeback: de Villa Happ Back-Cap. Een oplage van precies 500 stuks, elk exemplaar met een uniek code-label en een certificaat van echtheid. Drop 001 uit het nieuwe hoofdstuk. Als deze 500 op zijn, komen ze niet terug.',
@@ -115,7 +109,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       'Uniek code-label per exemplaar',
       'Certificaat van echtheid',
       'One size, verstelbaar',
-      'Ontworpen in Tilburg',
+      'Ontworpen in Waalwijk',
     ],
     images: [
       '/img/products/back-cap-front-v2.webp',
@@ -147,7 +141,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
       'Verkrijgbaar in 36/41 en 42/46',
       'Villa Happ embleem ingebreid',
       'Ook als 5-pack verkrijgbaar',
-      'Ontworpen in Tilburg',
+      'Ontworpen in Waalwijk',
     ],
     images: [
       '/img/brand/villa-happ-logo.webp',
@@ -164,20 +158,18 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Stap voor Stap sokken · 5-pack',
     color: 'Villa Happ',
     price_cents: 2995,
-    compare_at_cents: 4475,
-    short_desc: 'Vijf paar Stap voor Stap sokken in één voordeelpack.',
+    short_desc: 'Vijf paar Stap voor Stap sokken in één pack.',
     description:
-      'Voor wie elke dag een stap zet: vijf paar Stap voor Stap sokken in één pack, met voordeel. Verkrijgbaar in maat 36/41 en 42/46.',
+      'Voor wie elke dag een stap zet: vijf paar Stap voor Stap sokken in één pack. Verkrijgbaar in maat 36/41 en 42/46.',
     details: [
       'Vijf paar per pack',
       'Verkrijgbaar in 36/41 en 42/46',
       'Villa Happ embleem ingebreid',
-      'Ontworpen in Tilburg',
+      'Ontworpen in Waalwijk',
     ],
     images: [
       '/img/brand/villa-happ-logo.webp',
     ],
-    badge: 'Voordeel',
     meta: '5-pack · 2 maten',
     note: 'Vijf paar, voor elke stap een nieuwe.',
     variants: [

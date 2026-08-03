@@ -74,8 +74,6 @@
 .vh-card-info { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
 .vh-card-name { font-size: 15px; font-weight: 500; margin: 0; }
 .vh-card-price { font-family: var(--vh-font-serif); font-size: 16px; margin: 0; white-space: nowrap; }
-.vh-card-price del { color: var(--vh-ink-muted); font-size: 0.8em; margin-right: 7px; }
-.vh-card-badge--sale { background: var(--vh-ink); color: var(--vh-paper); }
 .vh-card-meta {
 	font-family: var(--vh-font-mono); font-size: 10px;
 	letter-spacing: 0.06em; text-transform: uppercase;
@@ -449,7 +447,6 @@
 	font-size: clamp(24px, 2.4vw, 32px);
 	margin: 0 0 22px;
 }
-.vh-pdp-price del { color: var(--vh-ink-muted); font-size: 0.7em; margin-right: 10px; }
 .vh-pdp-short { font-size: 15px; line-height: 1.65; color: var(--vh-ink-soft); margin: 0 0 30px; }
 
 /* Maten */
@@ -528,18 +525,8 @@
 .vh-breadcrumb a:hover { color: var(--vh-accent); }
 .vh-breadcrumb-current { color: var(--vh-ink); }
 
-/* Prijs-anchoring: huidige prijs + expliciete besparing */
+/* Eén prijs, geen doorgestreepte vanaf-prijs: we verkopen niet met korting. */
 .vh-pdp-price-now { font-weight: 500; }
-.vh-pdp-save {
-	display: inline-block;
-	margin-left: 12px;
-	font-family: var(--vh-font-mono);
-	font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
-	color: var(--vh-accent-ink);
-	background: rgba(254, 107, 1, 0.1);
-	padding: 4px 10px; border-radius: var(--vh-radius-pill);
-	vertical-align: middle;
-}
 
 /* Echte schaarste-balk (oplage) */
 .vh-pdp-scarcity {

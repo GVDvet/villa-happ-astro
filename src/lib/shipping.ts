@@ -11,12 +11,12 @@
  * hoort daar niet in terecht te komen.
  */
 
-export const FREE_SHIPPING_CENTS = 7500;
+export const FREE_SHIPPING_CENTS = 15000;
 
 export const SHIPPING_RATES_CENTS: Record<string, number> = {
-  NL: 495,
-  BE: 695,
-  DE: 895,
+  NL: 895,
+  BE: 1250,
+  DE: 1250,
 };
 
 /** Onbekend land valt bewust op het hoogste tarief terug, nooit op het laagste. */

@@ -17,7 +17,7 @@ Dat is eerlijker voor de wereld en eerlijker voor jou: jouw stuk wordt niet volg
 
 ## Van schets tot nummer
 
-Een drop begint in Tilburg, op papier. Het ontwerp gaat pas in productie als materiaal, pasvorm en afwerking kloppen. Voor de hoodies betekent dat zwaar biologisch katoen van 350 gram, voor de caps een geborduurd embleem in plaats van een print die na tien wasbeurten barst.
+Een drop begint in Waalwijk, op papier. Het ontwerp gaat pas in productie als materiaal, pasvorm en afwerking kloppen. Voor de hoodies betekent dat zwaar biologisch katoen van 350 gram, voor de caps een geborduurd embleem in plaats van een print die na tien wasbeurten barst.
 
 Daarna krijgt elk exemplaar zijn eigen nummer in de oplage. Dat nummer staat niet op een sticker maar hoort bij het stuk, samen met een certificaat van echtheid dat meegeleverd wordt.
 

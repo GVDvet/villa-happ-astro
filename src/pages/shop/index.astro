@@ -65,12 +65,10 @@ const ficheOf = (p: Product) =>
           >
             <div class="vh-card-media" transition:name={`product-${p.slug}`}>
               <span class="vh-card-num">0{i + 1}</span>
-              {p.compare_at_cents
-                ? <span class="vh-card-badge vh-card-badge--sale">−{Math.round((1 - p.price_cents / p.compare_at_cents) * 100)}%</span>
-                : p.badge && <span class="vh-card-badge">{p.badge}</span>}
+              {p.badge && <span class="vh-card-badge">{p.badge}</span>}
               <button type="button" class="vh-card-wish" aria-label="Bewaar op verlanglijst"
                 data-wish-slug={p.slug} data-wish-name={p.name}
-                data-wish-price={p.price_cents} data-wish-compare={p.compare_at_cents || ''}
+                data-wish-price={p.price_cents}
                 data-wish-image={p.images[0]} data-wish-color={p.color}>♡</button>
               <Pic src={p.images[0]} alt={`${p.name} ${p.color}`} class="vh-card-img main" width={600} height={750} loading={i < 3 ? 'eager' : 'lazy'} />
               {p.images[1] && <Pic src={p.images[1]} alt="" class="vh-card-img alt" width={600} height={750} loading="lazy" aria-hidden="true" />}
@@ -79,10 +77,7 @@ const ficheOf = (p: Product) =>
             <a href={`/shop/${p.slug}`} class="vh-card-link" aria-label={p.name}></a>
             <div class="vh-card-info">
               <p class="vh-card-name">{p.name}</p>
-              <p class="vh-card-price">
-                {p.compare_at_cents && <del>{formatPrice(p.compare_at_cents)}</del>}
-                {formatPrice(p.price_cents)}
-              </p>
+              <p class="vh-card-price">{formatPrice(p.price_cents)}</p>
             </div>
             <p class="vh-card-meta vh-mono">{ficheOf(p)}</p>
           </article>
@@ -114,8 +109,8 @@ const ficheOf = (p: Product) =>
           generatie kleedde. De collectie van vandaag bouwt op dat vakmanschap voort:
           biologisch katoen, geborduurde emblemen en stukken die in beperkte,
           genummerde oplages worden gemaakt. Geen overproductie, geen wegwerpmode.
-          Elk stuk wordt in Tilburg ontworpen en geleverd met de zorg van een merk
-          dat al ruim 65 jaar weet wat blijven betekent.
+          Elk stuk wordt vanuit Waalwijk ontworpen en geleverd met de zorg van een
+          merk dat al ruim 65 jaar weet wat blijven betekent.
         </p>
         <p>
           Benieuwd naar het verhaal achter het merk? Lees over
@@ -147,12 +142,10 @@ const ficheOf = (p: Product) =>
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const compare = btn.dataset.wishCompare ? parseInt(btn.dataset.wishCompare, 10) : undefined;
       const on = toggleWishlist({
         slug,
         name: btn.dataset.wishName!,
         price_cents: parseInt(btn.dataset.wishPrice!, 10),
-        compare_at_cents: compare,
         image_url: btn.dataset.wishImage!,
         color: btn.dataset.wishColor,
       });

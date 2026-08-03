@@ -41,7 +41,7 @@ const SCENE_LABELS = [
 
 const SCENE_YEARS = [
   '', "'60", "'60s", "'70s & '80s",
-  '1999', '2000+', '2008', '2021', '2024',
+  '1999', '2000+', '2008', '2021', '2026',
 ];
 
 const FLIGHT_DUR = 1.6;   // tijd om naar volgende scene te 'vliegen'

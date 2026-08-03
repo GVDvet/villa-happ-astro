@@ -46,7 +46,7 @@ export const BUSINESS = {
    * website. NIET het omzetbelastingnummer: dat is op het BSN gebaseerd
    * en hoort nooit gepubliceerd te worden.
    */
-  vatId: PENDING,
+  vatId: 'NL003630352B94',
 
   /* ---------- Adressen ---------- */
   /**
@@ -55,14 +55,14 @@ export const BUSINESS = {
    * gaat hier bewust niet op, dus hier hoort een zakelijk adres.
    */
   visitingAddress: {
-    street: PENDING,
-    postalCode: PENDING,
-    city: PENDING,
+    street: 'Vijzelweg 18E',
+    postalCode: '5145 NK',
+    city: 'Waalwijk',
   },
-  /** Postadres. Mag wél een postbus zijn. */
+  /** Postadres. Mag wél een postbus zijn; hier gelijk aan het bezoekadres. */
   postalAddress: {
-    line: 'Postbus 1',
-    postalCode: '5140 AA',
+    line: 'Vijzelweg 18E',
+    postalCode: '5145 NK',
     city: 'Waalwijk',
   },
   /** Vestigingsplaats volgens de KvK; voedt het Organization-schema. */
@@ -75,10 +75,10 @@ export const BUSINESS = {
    * kan ook een retourpunt of afhaaladres zijn.
    */
   returnAddress: {
-    name: PENDING,
-    street: PENDING,
-    postalCode: PENDING,
-    city: PENDING,
+    name: 'Villa Happ Nederland',
+    street: 'Vijzelweg 18E',
+    postalCode: '5145 NK',
+    city: 'Waalwijk',
   },
 
   /* ---------- Contact ---------- */
@@ -93,10 +93,25 @@ export const BUSINESS = {
   /* ---------- Beleid (moet matchen met de praktijk) ---------- */
   /** Wettelijk minimum is 14 dagen; wij geven er meer. */
   returnDays: 30,
+  /**
+   * De wettelijke bedenktijd (art. 6:230o BW). Binnen deze termijn mogen we
+   * geen verwerkingskosten rekenen; de dagen daarna zijn onze eigen,
+   * vrijwillige verlenging en daar hangt wél een vergoeding aan.
+   */
+  statutoryReturnDays: 14,
   /** Terugbetaaltermijn na ontvangst van de retour. */
   refundDays: 14,
-  /** Landen waar retourneren gratis is. Daarbuiten eigen rekening. */
-  freeReturnCountries: ['NL'] as string[],
+  /**
+   * Landen waar retourneren gratis is. Sinds de herstart nergens: de klant
+   * betaalt de retourzending zelf en er gaan verwerkingskosten af.
+   */
+  freeReturnCountries: [] as string[],
+  /**
+   * Verwerkingskosten die we bij een retour inhouden op de terugbetaling.
+   * Staat los van de retourverzending, die de klant zelf regelt en betaalt.
+   * Geldt alleen vanaf dag 15: binnen de wettelijke bedenktijd mag dit niet.
+   */
+  returnFeeCents: 1000,
   vatRate: 21,
 } as const;
 

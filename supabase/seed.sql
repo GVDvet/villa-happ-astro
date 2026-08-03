@@ -27,7 +27,7 @@ VALUES (
   'Het eerste hoofdstuk van de comeback. Een genummerde oplage van 500 back-caps, elk met een uniek code-label en een certificaat van echtheid.',
   'live',
   500,
-  'Dit exemplaar is een van de 500 uit Drop 001. Genummerd en gecertificeerd door Villa Happ, Tilburg.',
+  'Dit exemplaar is een van de 500 uit Drop 001. Genummerd en gecertificeerd door Villa Happ, Waalwijk.',
   TRUE
 )
 ON CONFLICT (slug) DO NOTHING;
@@ -36,19 +36,19 @@ ON CONFLICT (slug) DO NOTHING;
 -- PRODUCT 1 — Organic Cotton Hoodie · Olijfgroen
 -- ============================================================
 INSERT INTO products
-  (slug, name, short_desc, description, price_cents, compare_at_cents, category, status, featured,
+  (slug, name, short_desc, description, price_cents, category, status, featured,
    image_url, gallery, details, note, badge, created_at)
 VALUES (
   'organic-cotton-hoodie-olijfgroen',
   'Organic Cotton Hoodie',
   'Unisex hoodie van biologisch katoen en gerecycled polyester, in olijfgroen.',
   'De Organic Cotton Hoodie is het eerste vaste stuk van de comeback. Gemaakt van biologisch katoen en gerecycled polyester: zacht, stevig en verantwoord. Het Villa Happ embleem is geborduurd, niet geprint, precies zoals op de stukken uit het archief.',
-  5995, 6995, 'Olijfgroen · Unisex', 'published', TRUE,
+  5995, 'Olijfgroen · Unisex', 'published', TRUE,
   '/img/products/hoodie-grey-front-v2.webp',
   '["/img/products/hoodie-grey-back-v2.webp","/img/products/hoodie-grey-lifestyle-v2.webp","/img/products/hoodie-logo-detail-v2.webp"]'::jsonb,
-  '["Biologisch katoen en gerecycled polyester","Geborduurd Villa Happ embleem","Unisex pasvorm, maat S tot XXL","Ontworpen in Tilburg"]'::jsonb,
-  'Biologisch katoen, embleem geborduurd in Tilburg.',
-  'Sale',
+  '["Biologisch katoen en gerecycled polyester","Geborduurd Villa Happ embleem","Unisex pasvorm, maat S tot XXL","Ontworpen in Waalwijk"]'::jsonb,
+  'Biologisch katoen, embleem geborduurd, niet geprint.',
+  NULL,
   '2026-07-10 12:00:05+00'
 )
 ON CONFLICT (slug) DO NOTHING;
@@ -75,19 +75,19 @@ ON CONFLICT (variant_id) DO NOTHING;
 -- PRODUCT 2 — Organic Cotton Hoodie · Navy
 -- ============================================================
 INSERT INTO products
-  (slug, name, short_desc, description, price_cents, compare_at_cents, category, status, featured,
+  (slug, name, short_desc, description, price_cents, category, status, featured,
    image_url, gallery, details, note, badge, created_at)
 VALUES (
   'organic-cotton-hoodie-navy',
   'Organic Cotton Hoodie',
   'Dezelfde hoodie van biologisch katoen, in diep navy.',
   'De Organic Cotton Hoodie in navy: hetzelfde biologische katoen, hetzelfde geborduurde embleem, een kleur die overal bij past. De maten L en XL zijn bijna op, en XXL is al uitverkocht. Als het op is, is het op.',
-  5995, 6995, 'Navy · Unisex', 'published', FALSE,
+  5995, 'Navy · Unisex', 'published', FALSE,
   '/img/products/hoodie-blue-front-v2.webp',
   '["/img/products/hoodie-blue-back.webp"]'::jsonb,
-  '["Biologisch katoen en gerecycled polyester","Geborduurd Villa Happ embleem","Unisex pasvorm, maat S tot XXL","Ontworpen in Tilburg"]'::jsonb,
-  'Biologisch katoen, embleem geborduurd in Tilburg.',
-  'Sale',
+  '["Biologisch katoen en gerecycled polyester","Geborduurd Villa Happ embleem","Unisex pasvorm, maat S tot XXL","Ontworpen in Waalwijk"]'::jsonb,
+  'Biologisch katoen, embleem geborduurd, niet geprint.',
+  NULL,
   '2026-07-10 12:00:04+00'
 )
 ON CONFLICT (slug) DO NOTHING;
@@ -114,17 +114,17 @@ ON CONFLICT (variant_id) DO NOTHING;
 -- PRODUCT 3 — Villa Happ Back-Cap (genummerde oplage 500)
 -- ============================================================
 INSERT INTO products
-  (slug, name, short_desc, description, price_cents, compare_at_cents, category, status, featured,
+  (slug, name, short_desc, description, price_cents, category, status, featured,
    image_url, gallery, details, note, edition, badge, drop_id, created_at)
 VALUES (
   'villa-happ-back-cap',
   'Villa Happ Back-Cap',
   'Genummerde oplage van 500 stuks, met uniek code-label en certificaat van echtheid.',
   'Het allereerste product van de comeback: de Villa Happ Back-Cap. Een oplage van precies 500 stuks, elk exemplaar met een uniek code-label en een certificaat van echtheid. Drop 001 uit het nieuwe hoofdstuk. Als deze 500 op zijn, komen ze niet terug.',
-  2195, 2795, 'Drop 001 · One size', 'published', TRUE,
+  2195, 'Drop 001 · One size', 'published', TRUE,
   '/img/products/back-cap-front-v2.webp',
   '["/img/products/back-cap-side-v2.webp","/img/products/back-cap-angle-v2.webp"]'::jsonb,
-  '["Limited edition, oplage 500 stuks","Uniek code-label per exemplaar","Certificaat van echtheid","One size, verstelbaar","Ontworpen in Tilburg"]'::jsonb,
+  '["Limited edition, oplage 500 stuks","Uniek code-label per exemplaar","Certificaat van echtheid","One size, verstelbaar","Ontworpen in Waalwijk"]'::jsonb,
   'Genummerd, een van vijfhonderd. Komt niet terug.',
   500, 'Limited · 500',
   (SELECT id FROM drops WHERE slug = 'drop-001'),
@@ -158,7 +158,7 @@ VALUES (
   895, 'Sokken · 2 maten', 'published', FALSE,
   '/img/brand/villa-happ-logo.webp',
   '[]'::jsonb,
-  '["Verkrijgbaar in 36/41 en 42/46","Villa Happ embleem ingebreid","Ook als 5-pack verkrijgbaar","Ontworpen in Tilburg"]'::jsonb,
+  '["Verkrijgbaar in 36/41 en 42/46","Villa Happ embleem ingebreid","Ook als 5-pack verkrijgbaar","Ontworpen in Waalwijk"]'::jsonb,
   'De sokken waarmee de comeback begon.',
   '2026-07-10 12:00:02+00'
 )
@@ -184,19 +184,19 @@ ON CONFLICT (variant_id) DO NOTHING;
 -- PRODUCT 5 — Stap voor Stap sokken · 5-pack
 -- ============================================================
 INSERT INTO products
-  (slug, name, short_desc, description, price_cents, compare_at_cents, category, status, featured,
+  (slug, name, short_desc, description, price_cents, category, status, featured,
    image_url, gallery, details, note, badge, created_at)
 VALUES (
   'stap-voor-stap-sokken-5-pack',
   'Stap voor Stap sokken · 5-pack',
-  'Vijf paar Stap voor Stap sokken in een voordeelpack.',
-  'Voor wie elke dag een stap zet: vijf paar Stap voor Stap sokken in een pack, met voordeel. Verkrijgbaar in maat 36/41 en 42/46.',
-  2995, 4475, '5-pack · 2 maten', 'published', FALSE,
+  'Vijf paar Stap voor Stap sokken in een pack.',
+  'Voor wie elke dag een stap zet: vijf paar Stap voor Stap sokken in een pack. Verkrijgbaar in maat 36/41 en 42/46.',
+  2995, '5-pack · 2 maten', 'published', FALSE,
   '/img/brand/villa-happ-logo.webp',
   '[]'::jsonb,
-  '["Vijf paar per pack","Verkrijgbaar in 36/41 en 42/46","Villa Happ embleem ingebreid","Ontworpen in Tilburg"]'::jsonb,
+  '["Vijf paar per pack","Verkrijgbaar in 36/41 en 42/46","Villa Happ embleem ingebreid","Ontworpen in Waalwijk"]'::jsonb,
   'Vijf paar, voor elke stap een nieuwe.',
-  'Voordeel',
+  NULL,
   '2026-07-10 12:00:01+00'
 )
 ON CONFLICT (slug) DO NOTHING;

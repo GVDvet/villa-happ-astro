@@ -3,25 +3,35 @@ export const prerender = true;
 
 import Base from '../layouts/Base.astro';
 import { BUSINESS, returnAddressLines } from '../lib/business';
-import { RETURN_SENTENCE } from '../lib/legal';
+import {
+  RETURN_FEE_TEXT, RETURN_FEE_FROM_DAY, FREE_SHIPPING_TEXT,
+  RETURN_SHIPPING_CORRECTION_SENTENCE, RETURN_CONDITION_SENTENCE, SHIPPING_TABLE, eur,
+} from '../lib/legal';
 import '../styles/shop.css';
 
 const returnLines = returnAddressLines();
 
 const steps = [
-  { n: '01', t: 'Meld je retour', d: `Mail ons binnen ${BUSINESS.returnDays} dagen na ontvangst met je bestelnummer, of gebruik het herroepingsformulier.` },
+  { n: '01', t: 'Meld je retour', d: `Mail ons binnen ${BUSINESS.returnDays} dagen na ontvangst met je bestelnummer, of gebruik het herroepingsformulier. De dag waarop je meldt bepaalt of er verwerkingskosten gelden.` },
   { n: '02', t: 'Pak het in', d: 'Stop het stuk ongedragen terug in de verpakking, met de labels er nog aan.' },
-  { n: '03', t: 'Stuur het terug', d: 'Je hebt daarna nog 14 dagen om het pakket op de post te doen. Vanuit Nederland krijg je een gratis retourlabel.' },
-  { n: '04', t: 'Geld terug', d: `Binnen ${BUSINESS.refundDays} dagen na je melding krijg je het volledige bedrag terug via dezelfde betaalmethode.` },
+  { n: '03', t: 'Stuur het terug', d: 'Je hebt daarna nog 14 dagen om het pakket op de post te doen. Je regelt en betaalt de retourzending zelf; bewaar het verzendbewijs.' },
+  { n: '04', t: 'Geld terug', d: `Binnen ${BUSINESS.refundDays} dagen na je melding krijg je je geld terug via dezelfde betaalmethode. Wat je precies terugkrijgt, hangt af van wanneer je meldde en of je alles terugstuurt.` },
 ];
 ---
-<Base title="Retourneren · Villa Happ" description={`Niet goed? Je hebt bij Villa Happ ${BUSINESS.returnDays} dagen bedenktijd en retourneren vanuit Nederland is gratis. Zo werkt het, stap voor stap.`}>
+<Base title="Retourneren · Villa Happ" description={`Niet goed? Je hebt bij Villa Happ ${BUSINESS.returnDays} dagen bedenktijd. Zo werkt retourneren, stap voor stap, inclusief de kosten.`}>
   <section class="vh-page">
     <div class="vh-page-inner">
       <header class="vh-page-head">
         <p class="vh-page-label vh-mono">Hulp & service</p>
         <h1 class="vh-page-title">Retour&shy;neren</h1>
-        <p class="vh-page-sub">Niet helemaal wat je hoopte? Geen zorgen. {RETURN_SENTENCE}</p>
+        {/* Kort in de kop; de volledige regeling staat hieronder per onderwerp,
+            zodat "vooraf melden" ook echt leesbaar is. */}
+        <p class="vh-page-sub">
+          Niet helemaal wat je hoopte? Geen zorgen. Je hebt {BUSINESS.returnDays} dagen
+          bedenktijd, ruimer dan de wettelijke {BUSINESS.statutoryReturnDays}. De
+          retourzending regel en betaal je zelf. Hieronder lees je precies wat je
+          terugkrijgt.
+        </p>
       </header>
 
       <div class="vh-trust">
@@ -39,12 +49,90 @@ const steps = [
         </ol>
 
         <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Wanneer je meldt, bepaalt de kosten</h2>
+          <ul class="vh-prose-list">
+            <li>
+              <b>Dag 1 tot en met {BUSINESS.statutoryReturnDays}:</b> geen verwerkingskosten.
+              Je betaalt alleen de retourzending. Dit is je wettelijke bedenktijd.
+            </li>
+            <li>
+              <b>Dag {RETURN_FEE_FROM_DAY} tot en met {BUSINESS.returnDays}:</b> we houden
+              {' '}{RETURN_FEE_TEXT} verwerkingskosten in op de terugbetaling, bovenop de
+              retourzending die je zelf betaalt. Deze extra dagen geven we je vrijwillig;
+              de wet verplicht ons er {BUSINESS.statutoryReturnDays} te geven.
+            </li>
+          </ul>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Hele bestelling of een deel ervan</h2>
+          <ul class="vh-prose-list">
+            <li>
+              <b>Volledige retour:</b> je krijgt het hele aankoopbedrag terug, inclusief
+              de standaard verzendkosten die je bij de bestelling betaalde. Ook als je
+              bestelling boven de {FREE_SHIPPING_TEXT} lag en de verzending gratis was,
+              houden we nooit alsnog verzendkosten in.
+            </li>
+            <li>
+              <b>Gedeeltelijke retour:</b> we vergoeden alleen de artikelen die je
+              terugstuurt. De verzendkosten van de heenzending krijg je dan niet terug,
+              want de rest van je bestelling is gewoon bezorgd.
+            </li>
+            <li>
+              <b>Verzendcorrectie:</b> {RETURN_SHIPPING_CORRECTION_SENTENCE} Die correctie
+              is nooit hoger dan het echte tarief van je bezorgland
+              ({SHIPPING_TABLE.map((s) => eur(s.costCents)).filter((v, i, a) => a.indexOf(v) === i).join(' of ')}),
+              en we rekenen hem per bestelling maar één keer.
+            </li>
+            <li>
+              Koos je bij het bestellen voor een duurdere verzendmethode, dan vergoeden
+              we het standaardtarief.
+            </li>
+          </ul>
+
+          <div class="vh-retour-voorbeeld">
+            <p><b>Een rekenvoorbeeld.</b> Je bestelt drie hoodies van {eur(5995)}, samen
+            {eur(17985)}, dus de verzending is gratis. Je houdt er één en stuurt er twee
+            terug, binnen {BUSINESS.statutoryReturnDays} dagen:</p>
+            <p class="vh-mono" style="font-size:13px;line-height:1.9;">
+              Retour 2 × {eur(5995)} = {eur(11990)}<br />
+              Verzendcorrectie (je houdt {eur(5995)}, onder de {FREE_SHIPPING_TEXT}) − {eur(895)}<br />
+              <b>Terugbetaling {eur(11095)}</b>
+            </p>
+            <p>De retourzending betaal je daarnaast zelf aan de vervoerder.</p>
+          </div>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">De staat van je stuk</h2>
+          <p class="vh-prose">{RETURN_CONDITION_SENTENCE}</p>
+          <p class="vh-prose" style="margin-top:12px;">
+            Vinden we bij ontvangst iets, dan mailen we je binnen één werkdag met de
+            bevinding, een foto en het bedrag dat we willen verrekenen. Je kunt er dan
+            ook voor kiezen het stuk terug te laten sturen; de verzendkosten daarvan
+            zijn voor jou. We beoordelen elk geval afzonderlijk, nooit met een vast
+            percentage.
+          </p>
+        </div>
+
+        <div class="vh-trust-group">
+          <h2 class="vh-trust-group-title">Waarom we dit zo doen</h2>
+          <p class="vh-prose">
+            Elke retour is een rit heen en een rit terug. Wij maken kleding die lang mee
+            moet gaan, en dat verhoudt zich slecht tot drie maten bestellen om er twee
+            weg te sturen. Daarom betaal je de retourzending zelf en rekenen we de
+            verzendkosten alsnog door als je bestelling door een retour onder de
+            {' '}{FREE_SHIPPING_TEXT} zakt. Twijfel je over je maat? Onze maattabel geeft
+            de opgemeten maten per stuk, en we helpen je liever vooraf dan achteraf.
+          </p>
+        </div>
+
+        <div class="vh-trust-group">
           <h2 class="vh-trust-group-title">Voorwaarden</h2>
           <ul class="vh-prose-list">
             <li>Je meldt je retour binnen {BUSINESS.returnDays} dagen na ontvangst; daarna heb je nog 14 dagen om terug te sturen.</li>
-            <li>Je mag het stuk passen zoals je in een winkel zou doen. Is de waarde daarna minder doordat je verder ging dan dat, dan mogen we die waardevermindering verrekenen.</li>
-            <li>Retourneren vanuit Nederland is gratis. Vanuit België en Duitsland zijn de retourkosten voor eigen rekening.</li>
-            <li>Je krijgt het volledige aankoopbedrag terug, inclusief de standaard verzendkosten die je betaalde.</li>
+            <li>De datum van je melding telt, niet de dag waarop het pakket bij ons binnenkomt.</li>
+            <li>De verzendkosten van de retourzending zijn voor eigen rekening, uit Nederland, België en Duitsland.</li>
             <li>Terugbetaling gaat via dezelfde betaalmethode, binnen {BUSINESS.refundDays} dagen na je melding.</li>
           </ul>
           <p class="vh-prose" style="margin-top:14px;">
@@ -71,3 +159,24 @@ const steps = [
     </div>
   </section>
 </Base>
+
+<style>
+  /* Rekenvoorbeeld-kader. De juridische pagina's hebben hiervoor
+     `.vh-legal-callout`, maar die stijl is scoped aan LegalLayout en geldt
+     hier dus niet. */
+  .vh-retour-voorbeeld {
+    margin-top: 18px;
+    padding: 18px 20px;
+    background: var(--vh-paper-soft);
+    border-left: 2px solid var(--vh-accent);
+    border-radius: var(--vh-radius-sm, 6px);
+  }
+  .vh-retour-voorbeeld p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--vh-ink-soft);
+    margin: 0 0 12px;
+    max-width: 62ch;
+  }
+  .vh-retour-voorbeeld p:last-child { margin-bottom: 0; }
+</style>

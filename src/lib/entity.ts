@@ -19,17 +19,24 @@ export const BRAND = {
   domain: 'villa-happ.nl',
   email: BUSINESS.orderEmail,
   foundingYear: '1960',
+  /** Het jaar waarin het merk als lifestylelabel opnieuw van start ging. */
+  relaunchYear: '2026',
   /**
-   * Waar het verhaal begon en waar nog steeds ontworpen wordt. Dit is
-   * NIET het vestigingsadres van het bedrijf: dat staat in business.ts
-   * (Waalwijk) en voedt het `address`-veld van het schema. Een schema
-   * dat een andere plaats claimt dan de KvK-inschrijving is een
-   * controleerbaar onjuist feit.
+   * Waar het verhaal begon: Tilburg, 1960. Uitsluitend een historisch feit
+   * en dus alleen goed voor `foundingLocation`. Het merk zit vandaag niet
+   * meer in Tilburg.
    */
-  locality: 'Tilburg',
+  foundingLocality: 'Tilburg',
+  /**
+   * Waar Villa Happ nu zit. Gelijk aan de KvK-vestiging in business.ts
+   * (Waalwijk) en aan het `address`-veld van het schema. Een schema dat
+   * een andere plaats claimt dan de inschrijving is een controleerbaar
+   * onjuist feit.
+   */
+  locality: 'Waalwijk',
   country: 'NL',
   founder: 'Toni Kuijpers',
-  /** De derde generatie die het merk terughaalde en in 2024 heropstartte */
+  /** De derde generatie die het merk terughaalde en in 2026 heropstartte */
   steward: 'Rutger van Happen',
   slogan: 'Stap voor stap, sinds 1960.',
   /**
@@ -38,17 +45,18 @@ export const BRAND = {
    * Consistentie is wat een AI-model overtuigt dat het feit klopt.
    */
   definition:
-    'Villa Happ is een Nederlands heritage lifestylelabel uit Tilburg, opgericht in 1960 als Babyparadijs en in 2024 heropgericht door de derde generatie. Het merk maakt genummerde, gelimiteerde oplages van zwaar biologisch katoen.',
+    'Villa Happ is een Nederlands heritage lifestylelabel uit Waalwijk, in 1960 in Tilburg opgericht als Babyparadijs en in 2026 heropgericht door de derde generatie. Het merk maakt genummerde, gelimiteerde oplages van zwaar biologisch katoen.',
   /** Kernfeiten, kort en citeerbaar (voor llms.txt en answer-first content) */
   facts: [
     'Opgericht in 1960 in Tilburg door Toni Kuijpers, aanvankelijk als kinderspeciaalzaak Babyparadijs.',
     'In 2007 gaf de vakpers het merk de bijnaam The Comeback Kid na een terugkoop door de familie.',
     'In 2021 haalde Rutger van Happen, kleinzoon van de oprichters, de merkrechten terug naar de familie.',
-    'In 2024 keerde Villa Happ terug als lifestylelabel, met een Back-Cap in een genummerde oplage van 500 stuks met certificaat.',
+    'In 2026 keerde Villa Happ terug als lifestylelabel, met een Back-Cap in een genummerde oplage van 500 stuks met certificaat.',
+    'Het merk ontstond in Tilburg en is vandaag gevestigd in Waalwijk.',
     'De Heritage Hoodie is gemaakt van biologisch katoen van 350 gram per vierkante meter.',
   ],
   /** Onderwerpen waar het merk geloofwaardig over is (knowsAbout in schema) */
-  knowsAbout: ['heritage mode', 'biologisch katoen', 'genummerde oplages', 'Tilburgs vakmanschap', 'lifestyle apparel'],
+  knowsAbout: ['heritage mode', 'biologisch katoen', 'genummerde oplages', 'Brabants vakmanschap', 'lifestyle apparel'],
   /** Leeftijd van het merk, berekend i.p.v. hardgecodeerd ("65 jaar" liep achter). */
   get age(): number {
     return new Date().getFullYear() - Number(this.foundingYear);
@@ -72,7 +80,7 @@ export function organizationLd(origin: string = getSiteOrigin()) {
     description: BRAND.definition,
     slogan: BRAND.slogan,
     foundingDate: BRAND.foundingYear,
-    foundingLocation: { '@type': 'Place', name: `${BRAND.locality}, Nederland` },
+    foundingLocation: { '@type': 'Place', name: `${BRAND.foundingLocality}, Nederland` },
     founder: { '@type': 'Person', name: BRAND.founder },
     legalName: BUSINESS.legalName,
     // Vestigingsplaats volgens de KvK, niet de plaats uit het verhaal

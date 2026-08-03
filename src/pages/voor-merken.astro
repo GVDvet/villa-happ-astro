@@ -1,0 +1,267 @@
+---
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+import { BUSINESS } from '../lib/business';
+import '../styles/shop.css';
+
+/**
+ * Aanmeldpagina voor merken die op het platform van Villa Happ getoond of
+ * verkocht willen worden.
+ *
+ * Bewust losgekoppeld van /brands (H_APProved): die selectie is nog niet
+ * gevuld en staat op noindex. Deze pagina is de ingang voor merken zelf en
+ * belooft niets over een selectie die nog niet bestaat.
+ *
+ * Het formulier post naar /api/contact, dezelfde route als de contactpagina:
+ * één mailpad, één rate limit, één honeypot. Zonder RESEND_API_KEY geeft die
+ * route 503 en toont de pagina eerlijk een mailadres in plaats van een
+ * bevestiging voor een bericht dat niet verstuurd is.
+ */
+
+const siteOrigin = Astro.site?.origin || Astro.url.origin;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Word partnermerk van Villa Happ',
+  url: `${siteOrigin}/voor-merken`,
+  inLanguage: 'nl-NL',
+  description:
+    'Meld je merk aan om op het platform van Villa Happ getoond en verkocht te worden.',
+  publisher: { '@id': `${siteOrigin}/#organization` },
+};
+
+const steps = [
+  { n: '01', t: 'Je meldt je aan', d: 'Vul het formulier in met je merk, je collectie en waar we jullie werk kunnen zien.' },
+  { n: '02', t: 'Wij kijken mee', d: 'We beoordelen of het past bij waar Villa Happ voor staat: kwaliteit, herkomst en een verhaal dat klopt. Je hoort binnen tien werkdagen van ons.' },
+  { n: '03', t: 'We spreken af', d: 'Past het, dan plannen we een gesprek over voorwaarden, marges, levering en de manier waarop we jullie tonen.' },
+  { n: '04', t: 'Je staat op het platform', d: 'We nemen jullie op in de selectie, met eigen beeld en een eigen verhaal naast onze eigen collectie.' },
+];
+---
+<Base
+  title="Voor merken · Villa Happ"
+  description="Merk of fashion label dat op het platform van Villa Happ verkocht wil worden? Meld je hier aan. We kijken naar kwaliteit, herkomst en het verhaal erachter."
+>
+  <section class="vh-page">
+    <div class="vh-page-inner">
+      <header class="vh-page-head">
+        <p class="vh-page-label vh-mono">Voor merken</p>
+        <h1 class="vh-page-title">Verkoop je merk via <span class="vh-italic-accent">Villa Happ</span></h1>
+        <p class="vh-page-sub">
+          Villa Happ bouwt aan een platform waar we naast onze eigen collectie
+          merken tonen en verkopen die we zelf zouden dragen. Maak je zoiets?
+          Meld je hier aan.
+        </p>
+      </header>
+
+      <div class="vh-contact">
+        <form class="vh-form vh-contact-form" id="vh-brand-form" novalidate>
+          <div class="vh-form-row">
+            <div class="vh-field">
+              <label for="br-brand">Merknaam</label>
+              <input id="br-brand" name="brand" required />
+            </div>
+            <div class="vh-field">
+              <label for="br-company">Bedrijfsnaam</label>
+              <input id="br-company" name="companyName" autocomplete="organization" required />
+            </div>
+          </div>
+
+          <div class="vh-form-row">
+            <div class="vh-field">
+              <label for="br-name">Contactpersoon</label>
+              <input id="br-name" name="name" autocomplete="name" required />
+            </div>
+            <div class="vh-field">
+              <label for="br-email">E-mailadres</label>
+              <input id="br-email" name="email" type="email" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="vh-form-row">
+            <div class="vh-field">
+              <label for="br-site">Website of Instagram</label>
+              <input id="br-site" name="website" placeholder="https://" required />
+            </div>
+            <div class="vh-field">
+              <label for="br-category">Categorie</label>
+              <select id="br-category" name="category">
+                <option value="Kleding">Kleding</option>
+                <option value="Accessoires">Accessoires</option>
+                <option value="Schoenen">Schoenen</option>
+                <option value="Anders">Anders</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="vh-field">
+            <label for="br-message">Vertel over je merk</label>
+            <textarea id="br-message" name="message" rows="6" required
+              placeholder="Wat maak je, waar wordt het gemaakt, hoe lang bestaan jullie, en waarom past het bij Villa Happ?"></textarea>
+          </div>
+
+          <!-- Honeypot: onzichtbaar voor mensen, ingevuld door bots -->
+          <div class="vh-hp" aria-hidden="true">
+            <label for="br-hp">Bedrijf (niet invullen)</label>
+            <input id="br-hp" name="hp" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <button type="submit" class="vh-btn vh-btn--accent" id="vh-brand-send">
+            <span id="vh-brand-send-label">Verstuur aanmelding</span>
+            <svg class="vh-btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="vh-contact-error" id="vh-brand-error" role="alert"></p>
+          <p class="vh-contact-note vh-mono">
+            We gebruiken je gegevens alleen om je aanmelding te beoordelen en
+            contact met je op te nemen. Zie de <a href="/privacy">privacyverklaring</a>.
+          </p>
+        </form>
+
+        <div class="vh-contact-done" id="vh-brand-done" hidden>
+          <p class="vh-contact-done-mark">✦</p>
+          <h2>Bedankt, <span class="vh-italic-accent">we hebben je aanmelding</span>.</h2>
+          <p>We nemen je merk door en laten binnen tien werkdagen weten wat we ervan vinden.</p>
+          <a href="/story" class="vh-btn vh-btn--ghost"><span>Lees ons verhaal</span></a>
+        </div>
+
+        <aside class="vh-contact-aside">
+          <div class="vh-trust-group">
+            <h2 class="vh-trust-group-title">Waar we op letten</h2>
+            <ul class="vh-prose-list">
+              <li>Kwaliteit die je terugziet in het product, niet alleen in de campagne.</li>
+              <li>Een herkomst en productie die je kunt uitleggen.</li>
+              <li>Een merk met een eigen verhaal, geen doorverkocht assortiment.</li>
+              <li>Beschikbaarheid: je kunt leveren wat je belooft.</li>
+            </ul>
+          </div>
+
+          <div class="vh-trust-group">
+            <h2 class="vh-trust-group-title">Zo gaat het verder</h2>
+            <ol class="vh-trust-steps">
+              {steps.map((s) => (
+                <li>
+                  <span class="vh-trust-step-n vh-mono">{s.n}</span>
+                  <div>
+                    <h3>{s.t}</h3>
+                    <p>{s.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div class="vh-trust-group">
+            <h2 class="vh-trust-group-title">Liever direct mailen?</h2>
+            <p class="vh-prose">
+              Dat mag ook: <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>,
+              met &ldquo;merkaanmelding&rdquo; in het onderwerp.
+            </p>
+            <p class="vh-prose" style="margin-top:10px;">
+              {BUSINESS.legalName}<br />
+              {BUSINESS.visitingAddress.street}<br />
+              {BUSINESS.visitingAddress.postalCode} {BUSINESS.visitingAddress.city}
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} is:inline></script>
+</Base>
+
+<script>
+  import '../lib/cart';
+  import { onPageReady } from '../lib/page';
+
+  onPageReady(() => {
+    const form = document.getElementById('vh-brand-form') as HTMLFormElement | null;
+    if (!form) return;
+    const done = document.getElementById('vh-brand-done')!;
+
+    const reqInputs = Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]'));
+    function fieldMsg(input: Element): HTMLElement {
+      let m = input.parentElement!.querySelector('.vh-field-msg') as HTMLElement | null;
+      if (!m) { m = document.createElement('small'); m.className = 'vh-field-msg'; input.parentElement!.appendChild(m); }
+      return m;
+    }
+    function validate(input: HTMLInputElement | HTMLTextAreaElement): boolean {
+      const v = input.value.trim();
+      let ok = !!v;
+      if (ok && (input as HTMLInputElement).type === 'email') ok = /.+@.+\..+/.test(v);
+      input.classList.toggle('is-invalid', !ok);
+      input.classList.toggle('is-valid', ok);
+      fieldMsg(input).textContent = ok ? '' : ((input as HTMLInputElement).type === 'email' ? 'Vul een geldig e-mailadres in' : 'Dit veld is verplicht');
+      return ok;
+    }
+    reqInputs.forEach((input) => {
+      input.addEventListener('blur', () => validate(input));
+      input.addEventListener('input', () => { if (input.classList.contains('is-invalid')) validate(input); });
+    });
+
+    const sendBtn = document.getElementById('vh-brand-send') as HTMLButtonElement;
+    const sendLabel = document.getElementById('vh-brand-send-label')!;
+    const errEl = document.getElementById('vh-brand-error')!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.textContent = '';
+      errEl.classList.remove('is-visible');
+
+      let valid = true;
+      reqInputs.forEach((input) => { if (!validate(input)) valid = false; });
+      if (!valid) { form.querySelector<HTMLElement>('.is-invalid')?.focus(); return; }
+
+      const fd = new FormData(form);
+      const val = (k: string) => String(fd.get(k) || '').trim();
+
+      // De aanmelding gaat als één bericht door de bestaande contactroute.
+      // Alle merkvelden staan in de tekst, zodat er geen tweede mailpad en
+      // geen tweede rate limit onderhouden hoeft te worden.
+      const message = [
+        `Merk: ${val('brand')}`,
+        `Bedrijfsnaam: ${val('companyName')}`,
+        `Categorie: ${val('category')}`,
+        `Website / Instagram: ${val('website')}`,
+        '',
+        val('message'),
+      ].join('\n');
+
+      sendBtn.disabled = true;
+      sendLabel.textContent = 'Versturen…';
+
+      let data: any = null;
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: val('name'),
+            email: val('email'),
+            subject: 'Merkaanmelding',
+            message,
+            company: val('hp'), // honeypot
+          }),
+        });
+        data = await res.json().catch(() => null);
+      } catch { /* netwerkfout: hieronder afgehandeld */ }
+
+      sendBtn.disabled = false;
+      sendLabel.textContent = 'Verstuur aanmelding';
+
+      if (data?.success) {
+        form.hidden = true;
+        done.removeAttribute('hidden');
+        done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const mailto = data?.mailto;
+      errEl.innerHTML = mailto
+        ? `${data?.error || 'Versturen lukte niet.'} Mail ons rechtstreeks op <a href="mailto:${mailto}">${mailto}</a>, dan pakken we het alsnog op.`
+        : (data?.error || 'Versturen lukte niet. Controleer je verbinding en probeer het opnieuw.');
+      errEl.classList.add('is-visible');
+    });
+  }); // einde onPageReady
+</script>

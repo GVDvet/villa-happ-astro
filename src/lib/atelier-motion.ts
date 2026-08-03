@@ -3,7 +3,7 @@
  *
  * Robuuste scroll-choreografie: Lenis voor soepel scrollen, GSAP
  * ScrollTrigger voor de gescrubde micro-interacties per station
- * (weefloep, verf-vulling, borduursteek, oplageteller). De visuals
+ * (loep, borduursteek, oplageteller). De visuals
  * kleven via CSS `position: sticky`, dus geen fragiele GSAP-pinning.
  *
  * prefers-reduced-motion of een fout => safe mode: alles staat statisch
@@ -83,13 +83,7 @@ export function initAtelier() {
       if (img) img.style.transform = `scale(${1.15 - p * 0.12})`;
     });
 
-    // Station 2 — de kleur: verf vult de stof van onder naar boven
-    scrubStation('[data-station="kleur"]', (p) => {
-      const fill = document.querySelector<HTMLElement>('.atl-dye-fill');
-      if (fill) fill.style.height = `${Math.round(Math.min(1, p * 1.25) * 100)}%`;
-    });
-
-    // Station 3 — het borduursel: de steek trekt zich dicht, embleem fadet in
+    // Station 2 — het borduursel: de steek trekt zich dicht, embleem fadet in
     const stitchMark = document.querySelector<HTMLElement>('.atl-stitch-mark');
     scrubStation('[data-station="borduursel"]', (p) => {
       document.querySelectorAll<SVGElement>('.atl-stitch-draw').forEach((path) => {
@@ -98,7 +92,7 @@ export function initAtelier() {
       if (stitchMark) stitchMark.style.opacity = String(Math.max(0, Math.min(1, (p - 0.55) / 0.35)));
     });
 
-    // Station 4 — de oplage: teller loopt op en de balk vult
+    // Station 3 — de oplage: teller loopt op en de balk vult
     const editionNum = document.querySelector<HTMLElement>('.atl-edition-num');
     const editionBar = document.querySelector<HTMLElement>('.atl-edition-bar span');
     const edition = Number(editionNum?.dataset.edition || 500);

@@ -1,7 +1,7 @@
 /**
  * POST /api/atelier/claim — claim je nummer in de oplage
  *
- * Body: { email, name?, colour? }
+ * Body: { email, name?, garment? }
  * Kent een nummer toe in de genummerde oplage, schrijft de claim weg en
  * schrijft het e-mailadres in voor de nieuwsbrief/drop. Idempotent: wie
  * al geclaimd heeft, krijgt hetzelfde nummer terug.
@@ -60,7 +60,6 @@ export const POST: APIRoute = async ({ request }) => {
     email: body.email,
     name: body.name,
     garment: body.garment,
-    colour: body.colour,
     number,
     edition: EDITION,
   });

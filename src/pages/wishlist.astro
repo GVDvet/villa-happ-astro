@@ -52,7 +52,7 @@ import '../styles/shop.css';
         </a>
         <div class="vh-card-info">
           <p class="vh-card-name">${w.name}</p>
-          <p class="vh-card-price">${w.compare_at_cents ? `<del>${eur(w.compare_at_cents)}</del>` : ''}${eur(w.price_cents)}</p>
+          <p class="vh-card-price">${eur(w.price_cents)}</p>
         </div>
         <div class="vh-wish-actions">
           <a href="/shop/${w.slug}" class="vh-btn vh-btn--primary"><span>Bekijk &amp; kies maat</span></a>

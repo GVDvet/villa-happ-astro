@@ -13,9 +13,9 @@ const pageUrl = `${siteOrigin}/het-atelier`;
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'CreativeWork',
-  name: 'Het Atelier — van schets tot jouw nummer',
+  name: 'Het Atelier — van schets tot jouw nummer op de Back-Cap',
   headline: 'Het Atelier',
-  description: 'Loop door hoe een Villa Happ stuk ontstaat: van bio-katoen en kleur tot het geborduurde embleem en jouw eigen nummer in de genummerde oplage.',
+  description: 'Loop door hoe de Villa Happ Back-Cap ontstaat: van materiaal en geborduurd embleem tot jouw eigen nummer in de genummerde oplage van 500.',
   url: pageUrl,
   inLanguage: 'nl-NL',
   publisher: { '@id': `${siteOrigin}/#organization` },
@@ -23,7 +23,7 @@ const ld = {
 ---
 <Base
   title="Het Atelier · Villa Happ"
-  description="Loop door hoe een Villa Happ stuk ontstaat: bio-katoen, kleur, het geborduurde embleem en jouw eigen nummer in de genummerde oplage."
+  description="Loop door hoe de Villa Happ Back-Cap ontstaat: het materiaal, het geborduurde embleem en jouw eigen nummer in de genummerde oplage van 500."
   ogImage="/img/og/villa-happ-og.webp"
   bodyClass="vh-atelier"
 >
@@ -32,69 +32,44 @@ const ld = {
 
     <!-- Intro: de schets -->
     <section class="atl-intro">
-      <span class="atl-frame-tag">Atelier · Tilburg · sinds 1960</span>
+      <span class="atl-frame-tag">Atelier · Waalwijk · sinds 1960</span>
       <h1 class="atl-intro-title">Het <em>Atelier</em></h1>
       <p class="atl-intro-sub">
-        Elk stuk begint met een schets in Tilburg en eindigt met een nummer.
-        Loop mee langs de stof, de kleur en het borduursel, en claim aan het
-        eind jouw eigen plek in de oplage.
+        De Back-Cap begint met een schets in Waalwijk en eindigt met een nummer.
+        Loop mee langs het materiaal, het borduursel en de oplage, en claim aan
+        het eind jouw eigen plek in de vijfhonderd.
       </p>
       <span class="atl-scrollcue">Scrol om te beginnen</span>
     </section>
 
-    <!-- Station 1: de stof -->
+    <!-- Station 1: het materiaal -->
     <section class="atl-station" id="station-stof" data-station="stof">
       <div class="atl-visual-wrap">
         <div class="atl-visual">
-          <span class="atl-frame-tag">Station 01 · De stof</span>
+          <span class="atl-frame-tag">Station 01 · Het materiaal</span>
           <div class="atl-weave">
-            <Pic src="/img/products/hoodie-logo-detail-v2.webp" alt="Close-up van het geweven biologisch katoen" width={900} height={1125} widths={[480, 768, 1080]} sizes="(max-width: 900px) 100vw, 46vw" loading="lazy" />
+            <Pic src="/img/products/back-cap-angle-v2.webp" alt="Close-up van de Villa Happ Back-Cap" width={900} height={1125} widths={[480, 768, 1080]} sizes="(max-width: 900px) 100vw, 46vw" loading="lazy" />
           </div>
           <div class="atl-loupe" aria-hidden="true"></div>
         </div>
       </div>
       <div class="atl-copy">
         <p class="atl-copy-num atl-reveal">Station 01</p>
-        <h2 class="atl-reveal">De stof draagt het verhaal</h2>
+        <h2 class="atl-reveal">Eén uitvoering, goed gemaakt</h2>
         <p class="atl-reveal">
-          We beginnen zwaar: biologisch katoen van 350 gram per vierkante meter.
-          Dat valt beter, houdt warmte vast en slijt langzamer dan de dunne
-          kwaliteiten uit de winkelstraat. Zoom in en je ziet de weving zelf.
+          De Back-Cap komt in één klassieke uitvoering: grijs met zwart mesh.
+          Geen seizoenskleuren, geen varianten die volgend jaar weer verdwijnen.
+          Verstelbaar achter, zodat één maat echt één maat is.
         </p>
-        <span class="atl-spec atl-reveal"><b>350</b> gram / m² · biologisch katoen</span>
+        <span class="atl-spec atl-reveal"><b>1</b> uitvoering · one size, verstelbaar</span>
       </div>
     </section>
 
-    <!-- Station 2: de kleur -->
-    <section class="atl-station" id="station-kleur" data-station="kleur">
-      <div class="atl-visual-wrap">
-        <div class="atl-visual">
-          <span class="atl-frame-tag">Station 02 · De kleur</span>
-          <div class="atl-dye-base" aria-hidden="true"></div>
-          <div class="atl-dye-fill" id="atl-dye" aria-hidden="true"></div>
-          <div class="atl-swatches" role="group" aria-label="Kies een kleur">
-            <button type="button" class="atl-swatch" data-colour="olijfgroen" style="background:#828875" aria-pressed="true" aria-label="Olijfgroen"></button>
-            <button type="button" class="atl-swatch" data-colour="navy" style="background:#252C3D" aria-pressed="false" aria-label="Navy"></button>
-          </div>
-        </div>
-      </div>
-      <div class="atl-copy">
-        <p class="atl-copy-num atl-reveal">Station 02</p>
-        <h2 class="atl-reveal">De kleur trekt in de vezel</h2>
-        <p class="atl-reveal">
-          Geen oppervlaktelaagje dat na een paar wasbeurten verschiet, maar kleur
-          die in de vezel trekt. Olijfgroen of navy. Kies alvast de jouwe, dan
-          komt hij straks terug op je certificaat.
-        </p>
-        <span class="atl-spec atl-reveal"><b>2</b> tinten · kleurecht gewassen op 30°</span>
-      </div>
-    </section>
-
-    <!-- Station 3: het borduursel -->
+    <!-- Station 2: het borduursel -->
     <section class="atl-station" id="station-borduursel" data-station="borduursel">
       <div class="atl-visual-wrap">
         <div class="atl-visual" style="background:var(--vh-paper-deep)">
-          <span class="atl-frame-tag">Station 03 · Het borduursel</span>
+          <span class="atl-frame-tag">Station 02 · Het borduursel</span>
           <div class="atl-stitch" aria-hidden="true">
             <svg viewBox="0 0 200 200" role="img" aria-label="Het geborduurde VH-embleem">
               <rect class="atl-stitch-draw" x="34" y="44" width="132" height="112" rx="10" pathLength="1"></rect>
@@ -104,7 +79,7 @@ const ld = {
         </div>
       </div>
       <div class="atl-copy">
-        <p class="atl-copy-num atl-reveal">Station 03</p>
+        <p class="atl-copy-num atl-reveal">Station 02</p>
         <h2 class="atl-reveal">Geborduurd, niet geprint</h2>
         <p class="atl-reveal">
           Een print barst na tien wasbeurten. Ons embleem wordt geborduurd, draad
@@ -115,11 +90,11 @@ const ld = {
       </div>
     </section>
 
-    <!-- Station 4: de oplage -->
+    <!-- Station 3: de oplage -->
     <section class="atl-station" id="station-oplage" data-station="oplage">
       <div class="atl-visual-wrap">
         <div class="atl-visual" style="background:var(--vh-espresso);color:var(--vh-paper)">
-          <span class="atl-frame-tag">Station 04 · De oplage</span>
+          <span class="atl-frame-tag">Station 03 · De oplage</span>
           <div class="atl-edition">
             <div class="atl-edition-num" id="atl-edition-num" data-edition={EDITION} style="color:var(--vh-paper)">{EDITION}</div>
             <div class="atl-edition-bar" aria-hidden="true"><span></span></div>
@@ -128,7 +103,7 @@ const ld = {
         </div>
       </div>
       <div class="atl-copy">
-        <p class="atl-copy-num atl-reveal">Station 04</p>
+        <p class="atl-copy-num atl-reveal">Station 03</p>
         <h2 class="atl-reveal">Een vast aantal, en op is op</h2>
         <p class="atl-reveal">
           We maken vooraf een vast aantal en daarna stopt het. Geen overproductie,
@@ -142,52 +117,36 @@ const ld = {
     <!-- Finale: de ontwerpstudio -->
     <section class="atl-finale" id="atl-finale">
       <header class="atl-studio-head">
-        <p class="vh-mono atl-studio-kicker">Station 05 · De ontwerpstudio</p>
-        <h2>Ontwerp <em>jouw stuk</em></h2>
+        <p class="vh-mono atl-studio-kicker">Station 04 · De ontwerpstudio</p>
+        <h2>Claim <em>jouw nummer</em></h2>
         <p class="atl-studio-sub">
-          Alles wat je zag komt hier samen. Kies je stuk, je kleur en je eigen
-          borduursel, en claim jouw nummer in de oplage.
+          Alles wat je zag komt hier samen. Bekijk de cap van alle kanten en
+          claim jouw nummer in de oplage van {EDITION}.
         </p>
       </header>
 
       <div class="atl-studio">
         <!-- Mockup -->
         <div class="atl-studio-stage">
-          <span class="atl-frame-tag" id="atl-mockup-tag">Hoodie · Olijfgroen · Voorkant</span>
+          <span class="atl-frame-tag" id="atl-mockup-tag">Cap · Grijs melange · Voorkant</span>
           <img
             id="atl-mockup"
-            src="/img/atelier/hoodie-olijfgroen-v2.webp"
-            alt="Ontwerp: hoodie · olijfgroen, voorkant"
+            src="/img/atelier/cap-front.webp"
+            alt="Ontwerp: cap · grijs melange, voorkant"
             width="896" height="1200" loading="lazy"
           />
         </div>
 
         <!-- Configurator -->
         <div class="atl-studio-controls" id="atl-config">
-          <div class="atl-control">
-            <span class="atl-control-label vh-mono">Het stuk</span>
-            <div class="atl-seg" role="group" aria-label="Kies een stuk">
-              <button type="button" class="atl-seg-btn is-on" data-garment="hoodie" aria-pressed="true">Hoodie</button>
-              <button type="button" class="atl-seg-btn" data-garment="cap" aria-pressed="false">Cap</button>
-            </div>
-          </div>
-
-          <div class="atl-control" id="atl-colour-control">
-            <span class="atl-control-label vh-mono">De kleur</span>
-            <div class="atl-studio-swatches" role="group" aria-label="Kies een kleur">
-              <button type="button" class="atl-cswatch is-on" data-colour="olijfgroen" style="--sw:#828875" aria-pressed="true" aria-label="Olijfgroen"></button>
-              <button type="button" class="atl-cswatch" data-colour="navy" style="--sw:#252C3D" aria-pressed="false" aria-label="Navy"></button>
-            </div>
-          </div>
-
           <div class="atl-control" id="atl-angle-control">
             <span class="atl-control-label vh-mono">Bekijk van</span>
             <div class="atl-angles" role="group" aria-label="Kies een hoek">
               <button type="button" class="atl-angle-btn is-on" data-angle="front" aria-pressed="true">Voorkant</button>
-              <button type="button" class="atl-angle-btn" data-angle="side" aria-pressed="false" hidden>Zijkant</button>
+              <button type="button" class="atl-angle-btn" data-angle="side" aria-pressed="false">Zijkant</button>
               <button type="button" class="atl-angle-btn" data-angle="back" aria-pressed="false">Achterkant</button>
             </div>
-            <p class="atl-onesize" id="atl-onesize" hidden>Onze cap komt in één klassieke uitvoering: grijs met zwart mesh.</p>
+            <p class="atl-onesize" id="atl-onesize">Onze cap komt in één klassieke uitvoering: grijs met zwart mesh.</p>
           </div>
 
           <form class="atl-form" id="atl-form" novalidate>
@@ -212,12 +171,12 @@ const ld = {
         <div class="atl-cert" id="atl-cert">
           <div class="atl-cert-head">
             <div>
-              <p class="atl-cert-kicker">Villa Happ · Tilburg</p>
+              <p class="atl-cert-kicker">Villa Happ · Waalwijk</p>
               <p class="atl-cert-title">Certificaat van echtheid</p>
             </div>
             <span class="atl-cert-seal">VH</span>
           </div>
-          <img class="atl-cert-mockup" id="atl-cert-mockup" src="/img/atelier/hoodie-olijfgroen-v2.webp" alt="" width="928" height="1152" />
+          <img class="atl-cert-mockup" id="atl-cert-mockup" src="/img/atelier/cap-front.webp" alt="" width="928" height="1152" />
           <p class="atl-cert-number" id="atl-cert-number">—</p>
           <p class="atl-cert-meta" id="atl-cert-meta">Genummerde oplage</p>
           <p class="atl-cert-foot" id="atl-cert-foot">
@@ -242,90 +201,43 @@ const ld = {
   import { initAtelier } from '../lib/atelier-motion';
   import {
     formatEdition, EDITION, describePiece,
-    assetName, anglesFor, resolveAngle, ANGLE_LABELS, type Angle,
+    assetName, resolveAngle, ANGLE_LABELS, type Angle,
   } from '../lib/atelier';
   import '../lib/cart';
 
   initAtelier();
 
-  // Gemeten uit de productfoto's (gemiddelde stofkleur op borsthoogte), zodat
-  // het staal belooft wat de klant krijgt. Stond eerder op een duidelijk
-  // groenere olijftint dan de hoodie werkelijk heeft.
-  const colourHex: Record<string, string> = { olijfgroen: '#828875', navy: '#252C3D' };
-
-  /* Station 2 (tour): verf-teaser — verandert alvast de studiokleur mee */
-  const dye = document.getElementById('atl-dye');
-
-  /* ---------- De ontwerpstudio ---------- */
-  let garment = 'hoodie';
-  let colour = 'olijfgroen';
-  let angle: Angle = 'front'; // welke hoeken bestaan verschilt per stuk
+  /* ---------- De ontwerpstudio ----------
+     Alleen de cap: dat is het enige stuk dat in een genummerde oplage
+     loopt. Er valt dus geen stuk en geen kleur te kiezen, alleen de hoek
+     waaronder je hem bekijkt. */
+  let angle: Angle = 'front';
 
   const mockup = document.getElementById('atl-mockup') as HTMLImageElement;
   const mockupTag = document.getElementById('atl-mockup-tag')!;
-  const colourControl = document.getElementById('atl-colour-control')!;
-  const oneSizeNote = document.getElementById('atl-onesize')!;
 
-  /**
-   * Eén plek die het beeld en alle bedieningen op de huidige keuze zet.
-   * De hoodie heeft voor- en achterkant, de cap ook een zijkant: hoeken
-   * zonder beeld verbergen we, en een niet-bestaande hoek valt terug op
-   * de voorkant (bv. cap-zijkant → hoodie).
-   */
+  /** Eén plek die het beeld en de hoekknoppen op de huidige keuze zet. */
   function syncMockup() {
-    angle = resolveAngle(garment, angle);
-    const piece = describePiece(garment, colour);
+    angle = resolveAngle(angle);
+    const piece = describePiece();
     const view = ANGLE_LABELS[angle];
 
     if (mockup) {
-      mockup.src = `/img/atelier/${assetName(garment, colour, angle)}.webp`;
+      mockup.src = `/img/atelier/${assetName(angle)}.webp`;
       mockup.alt = `Ontwerp: ${piece.toLowerCase()}, ${view.toLowerCase()}`;
     }
     mockupTag.textContent = `${piece} · ${view}`;
 
-    // Kleur alleen bij de hoodie; de cap komt in één uitvoering
-    colourControl.toggleAttribute('hidden', garment === 'cap');
-    oneSizeNote.toggleAttribute('hidden', garment !== 'cap');
-
-    const available = anglesFor(garment);
     document.querySelectorAll<HTMLButtonElement>('.atl-angle-btn').forEach((b) => {
-      const a = b.dataset.angle as Angle;
-      b.toggleAttribute('hidden', !available.includes(a));
-      const on = a === angle;
+      const on = b.dataset.angle === angle;
       b.classList.toggle('is-on', on);
       b.setAttribute('aria-pressed', String(on));
     });
   }
 
-  document.querySelectorAll<HTMLButtonElement>('.atl-seg-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      garment = btn.dataset.garment!;
-      document.querySelectorAll('.atl-seg-btn').forEach((b) => {
-        b.classList.toggle('is-on', b === btn); b.setAttribute('aria-pressed', String(b === btn));
-      });
-      syncMockup();
-    });
-  });
-
-  function pickColour(c: string) {
-    colour = c;
-    document.querySelectorAll<HTMLButtonElement>('.atl-cswatch').forEach((b) => {
-      const on = b.dataset.colour === c; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on));
-    });
-    if (dye) dye.style.background = colourHex[c];
-    syncMockup();
-  }
-  document.querySelectorAll<HTMLButtonElement>('.atl-cswatch').forEach((btn) => {
-    btn.addEventListener('click', () => pickColour(btn.dataset.colour!));
-  });
-  // De tour-verfstalen (station 2) sturen de studiokleur alvast mee
-  document.querySelectorAll<HTMLButtonElement>('.atl-swatch').forEach((btn) => {
-    btn.addEventListener('click', () => pickColour(btn.dataset.colour!));
-  });
-
   document.querySelectorAll<HTMLButtonElement>('.atl-angle-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      angle = resolveAngle(garment, btn.dataset.angle);
+      angle = resolveAngle(btn.dataset.angle);
       syncMockup(); // zet zelf de is-on/aria-pressed-status
     });
   });
@@ -356,20 +268,20 @@ const ld = {
     return (h % EDITION) + 1;
   }
 
-  interface Claim { number: number; edition: number; name: string; garment: string; colour: string; angle: string; date: string; }
+  interface Claim { number: number; edition: number; name: string; angle: string; date: string; }
 
-  const claimAsset = (c: Claim) => `/img/atelier/${assetName(c.garment, c.colour, c.angle)}.webp`;
+  const claimAsset = (c: Claim) => `/img/atelier/${assetName(c.angle)}.webp`;
 
   function showResult(c: Claim) {
     config.setAttribute('hidden', '');
     result.removeAttribute('hidden');
     certNumber.textContent = formatEdition(c.number, c.edition);
-    certMeta.textContent = `${c.name ? c.name + ' · ' : ''}${describePiece(c.garment, c.colour)} · ${c.date}`;
+    certMeta.textContent = `${c.name ? c.name + ' · ' : ''}${describePiece()} · ${c.date}`;
     // Geen "gereserveerd": er wordt geen voorraad vastgehouden. Wat we wel
     // waarmaken is dat dit nummer aan dit e-mailadres verbonden blijft.
     certFoot.textContent = 'Dit nummer staat op jouw naam. Je hoort als eerste wanneer de oplage live gaat.';
     certMockup.src = claimAsset(c);
-    certMockup.alt = describePiece(c.garment, c.colour);
+    certMockup.alt = describePiece();
   }
 
   /** Terug naar de configurator zonder de claim weg te gooien. */
@@ -385,9 +297,7 @@ const ld = {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (saved && saved.number) {
-      garment = saved.garment || garment;
-      colour = saved.colour || colour;
-      angle = resolveAngle(garment, saved.angle);
+      angle = resolveAngle(saved.angle);
       showResult(saved);
     }
   } catch {}
@@ -412,8 +322,7 @@ const ld = {
         body: JSON.stringify({
           email,
           name: name || undefined,
-          garment,
-          colour: garment === 'cap' ? undefined : colour,
+          garment: 'cap',
           // Inschrijven op de nieuwsbrief alleen als er expliciet is
           // aangevinkt; eerder gebeurde dat stilzwijgend bij elke claim.
           newsletter: (document.getElementById('atl-newsletter') as HTMLInputElement)?.checked === true,
@@ -432,7 +341,7 @@ const ld = {
       number = localNumber(email);
     }
 
-    const claim: Claim = { number, edition, name, garment, colour, angle, date: fmtDate() };
+    const claim: Claim = { number, edition, name, angle, date: fmtDate() };
     try { localStorage.setItem(KEY, JSON.stringify(claim)); } catch {}
     showResult(claim);
     window.dispatchEvent(new CustomEvent('vh:toast', { detail: `Nummer ${formatEdition(number, edition)} is van jou ✦` }));
@@ -470,7 +379,7 @@ const ld = {
     // koppen
     ctx.textAlign = 'left';
     ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '10px "Space Mono", monospace';
-    ctx.fillText('VILLA HAPP · TILBURG', 34, 380);
+    ctx.fillText('VILLA HAPP · WAALWIJK', 34, 380);
     ctx.fillStyle = '#1C1813'; ctx.font = '22px "Fraunces Variable", Georgia, serif';
     ctx.fillText('Certificaat van echtheid', 34, 406);
     // nummer
@@ -483,11 +392,11 @@ const ld = {
     ctx.fillText('VH', w - 62, 445);
     // meta
     ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '11px "Space Mono", monospace';
-    ctx.fillText(`${(c.name ? c.name.toUpperCase() + ' · ' : '')}${describePiece(c.garment, c.colour).toUpperCase()}`, 34, 496);
+    ctx.fillText(`${(c.name ? c.name.toUpperCase() + ' · ' : '')}${describePiece().toUpperCase()}`, 34, 496);
     // voet
     ctx.strokeStyle = 'rgba(28,24,19,0.12)'; ctx.beginPath(); ctx.moveTo(34, 520); ctx.lineTo(w - 34, 520); ctx.stroke();
     ctx.fillStyle = 'rgba(28,24,19,0.6)'; ctx.font = '12px "Fraunces Variable", Georgia, serif';
-    ctx.fillText('Genummerd · gemaakt in Tilburg · komt niet terug', 34, 542);
+    ctx.fillText('Genummerd · ontworpen in Waalwijk · komt niet terug', 34, 542);
     return cv;
   }
 
@@ -502,7 +411,7 @@ const ld = {
 
   document.getElementById('atl-share')?.addEventListener('click', async () => {
     const c = currentClaim(); if (!c) return;
-    const text = `Ik ontwierp mijn ${describePiece(c.garment, c.colour).toLowerCase()} en claimde nummer ${formatEdition(c.number, c.edition)} bij Villa Happ.`;
+    const text = `Ik claimde nummer ${formatEdition(c.number, c.edition)} van de Villa Happ Back-Cap.`;
     const url = `${location.origin}/het-atelier`;
     if ((navigator as any).share) {
       try { await (navigator as any).share({ title: 'Villa Happ · Het Atelier', text, url }); return; } catch {}

@@ -3,9 +3,8 @@ export const prerender = true;
 
 import LegalLayout from '../components/legal/LegalLayout.astro';
 import { BUSINESS, returnAddressLines } from '../lib/business';
-import { LEGAL_UPDATED, SHIPPING_TABLE, VAT_SENTENCE, DELIVERY_SENTENCE } from '../lib/legal';
+import { LEGAL_UPDATED, SHIPPING_TABLE, VAT_SENTENCE, DELIVERY_SENTENCE, FREE_SHIPPING_TEXT, RETURN_FEE_TEXT, RETURN_FEE_FROM_DAY, eur } from '../lib/legal';
 
-const eur = (c: number) => '€ ' + (c / 100).toFixed(2).replace('.', ',');
 const returnLines = returnAddressLines();
 ---
 <LegalLayout
@@ -84,8 +83,8 @@ const returnLines = returnAddressLines();
       </table>
     </div>
     <p>
-      Verzending binnen deze landen is gratis vanaf € 75. Wij bezorgen op dit
-      moment alleen in Nederland, België en Duitsland.
+      Verzending binnen deze landen is gratis vanaf {FREE_SHIPPING_TEXT}. Wij
+      bezorgen op dit moment alleen in Nederland, België en Duitsland.
     </p>
     <p>
       Genoemde levertijden zijn indicatief en nooit fataal. Duurt levering
@@ -101,11 +100,18 @@ const returnLines = returnAddressLines();
     <div class="vh-legal-callout">
       <p>
         <b>Je mag je bestelling {BUSINESS.returnDays} dagen bekijken en zonder
-        opgaaf van reden terugsturen.</b> De wet geeft je 14 dagen; wij geven
-        er {BUSINESS.returnDays}. De termijn begint op de dag dat jij of
-        iemand namens jou het laatste stuk uit de bestelling ontvangt.
+        opgaaf van reden terugsturen.</b> De wet geeft je
+        {' '}{BUSINESS.statutoryReturnDays} dagen; wij geven er
+        {' '}{BUSINESS.returnDays}. De termijn begint op de dag dat jij of
+        iemand namens jou het laatste stuk uit de bestelling ontvangt. Voor de
+        dagen die wij er bovenop geven, gelden de verwerkingskosten hieronder.
       </p>
     </div>
+    <p>
+      Voor de peildatum tellen we de dag waarop jij je herroeping bij ons
+      meldt, niet de dag waarop het pakket bij ons binnenkomt. Zo bepaalt de
+      vervoerder niet of er verwerkingskosten gelden.
+    </p>
     <p>
       Wil je herroepen, laat dat dan binnen die termijn ondubbelzinnig weten:
       per e-mail aan <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>,
@@ -122,19 +128,67 @@ const returnLines = returnAddressLines();
 
     <h3>Kosten van retourneren</h3>
     <p>
-      Retourneren vanuit Nederland is gratis; je ontvangt van ons een
-      retourlabel. Stuur je terug vanuit België of Duitsland, dan zijn de
-      verzendkosten van de retour voor jouw rekening.
+      Je regelt en betaalt de retourzending zelf. Dat geldt voor retouren uit
+      Nederland, België en Duitsland. Bewaar je verzendbewijs tot de
+      terugbetaling rond is.
+    </p>
+    <p>
+      Meld je je herroeping binnen de wettelijke termijn van
+      {' '}{BUSINESS.statutoryReturnDays} dagen, dan brengen wij geen
+      verwerkingskosten in rekening. Meld je hem op dag
+      {' '}{RETURN_FEE_FROM_DAY} tot en met {BUSINESS.returnDays} — de periode
+      die wij vrijwillig bovenop de wettelijke termijn geven — dan brengen wij
+      {' '}{RETURN_FEE_TEXT} verwerkingskosten in rekening. Dat bedrag houden we
+      in op de terugbetaling.
     </p>
 
-    <h3>Terugbetaling</h3>
+    <h3>Terugbetaling bij een volledige retour</h3>
     <p>
-      We betalen het volledige aankoopbedrag terug, inclusief de standaard
-      verzendkosten die je bij de bestelling betaalde. Koos je bij het bestellen
-      voor een duurdere verzendmethode, dan vergoeden we het standaardtarief.
+      Stuur je je hele bestelling terug, dan betalen we het volledige
+      aankoopbedrag terug, inclusief de standaard verzendkosten die je bij de
+      bestelling betaalde. Koos je bij het bestellen voor een duurdere
+      verzendmethode, dan vergoeden we het standaardtarief.
+    </p>
+
+    <h3>Terugbetaling bij een gedeeltelijke retour</h3>
+    <p>
+      Stuur je maar een deel van je bestelling terug, dan vergoeden we alleen
+      de artikelen die je terugstuurt. De verzendkosten van de heenzending
+      krijg je in dat geval niet terug: die zending is voor het deel dat je
+      houdt gewoon uitgevoerd.
+    </p>
+    <p>
+      Gratis verzending geldt vanaf {FREE_SHIPPING_TEXT} aan artikelen die je
+      houdt. Zakt je bestelling door een gedeeltelijke retour onder dat bedrag,
+      dan vervalt die voorwaarde en verrekenen we alsnog het verzendtarief van
+      je bezorgland. Die verzendcorrectie is nooit hoger dan het werkelijke
+      tarief en wordt per bestelling maar één keer toegepast, ook als je in
+      meerdere zendingen retourneert. Bij een <b>volledige</b> retour passen we
+      hem nooit toe.
+    </p>
+
+    <h3>Waardevermindering</h3>
+    <p>
+      Je mag een stuk hanteren zoals je in een winkel zou doen: uitpakken,
+      bekijken en passen, ook meerdere keren. Dat is geen gebruik en kost je
+      niets. Is een stuk gedragen, gewassen of gestreken, zijn de labels
+      verwijderd, of is het beschadigd of blijvend verontreinigd, dan mogen we
+      de werkelijke waardevermindering verrekenen.
+    </p>
+    <p>
+      We stellen die per geval vast en onderbouwen hem; we werken niet met een
+      vast percentage. Voordat we iets verrekenen laten we het je weten, met
+      een omschrijving van de bevinding, een foto en het bedrag. Je kunt er dan
+      ook voor kiezen het stuk terug te laten sturen; de verzendkosten daarvan
+      zijn voor jou.
+    </p>
+
+    <h3>Termijn van terugbetaling</h3>
+    <p>
       Terugbetalen gebeurt binnen 14 dagen nadat je je herroeping hebt gemeld,
-      via dezelfde betaalmethode. We mogen daarmee wachten tot we het stuk
-      terug hebben of jij hebt aangetoond dat je het verstuurd hebt.
+      via dezelfde betaalmethode, verminderd met de eventuele
+      verwerkingskosten. We mogen daarmee wachten tot we het stuk terug hebben
+      of jij hebt aangetoond dat je het verstuurd hebt.
     </p>
 
     <h3>Uitzonderingen</h3>

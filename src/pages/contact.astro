@@ -2,7 +2,10 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
+import { BUSINESS } from '../lib/business';
 import '../styles/shop.css';
+
+const visit = BUSINESS.visitingAddress;
 ---
 <Base title="Contact · Villa Happ" description="Vragen over je bestelling, een stuk of het merk? Neem contact op met Villa Happ. We reageren binnen 1 tot 2 werkdagen.">
   <section class="vh-page">
@@ -73,8 +76,25 @@ import '../styles/shop.css';
             <p class="vh-prose">Veel vragen over maten, verzending en retour beantwoorden we al in de <a href="/faq">veelgestelde vragen</a>.</p>
           </div>
           <div class="vh-trust-group">
-            <h2 class="vh-trust-group-title">Het huis</h2>
-            <p class="vh-prose">Villa Happ<br />Heritage lifestyle, sinds 1960<br />Tilburg, Nederland</p>
+            <h2 class="vh-trust-group-title">Bezoek- en postadres</h2>
+            <p class="vh-prose">
+              {BUSINESS.legalName}<br />
+              {visit.street}<br />
+              {visit.postalCode} {visit.city}<br />
+              {BUSINESS.countryName}
+            </p>
+            <p class="vh-prose" style="margin-top:10px;font-size:14px;">
+              Bezoek op afspraak. Het merk begon in 1960 in Tilburg; vandaag
+              zit Villa Happ in Waalwijk.
+            </p>
+          </div>
+          <div class="vh-trust-group">
+            <h2 class="vh-trust-group-title">Bedrijfsgegevens</h2>
+            <p class="vh-prose">
+              KvK {BUSINESS.kvk}<br />
+              Btw-id {BUSINESS.vatId}<br />
+              <a href={`mailto:${BUSINESS.supportEmail}`}>{BUSINESS.supportEmail}</a>
+            </p>
           </div>
         </aside>
       </div>

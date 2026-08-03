@@ -42,71 +42,50 @@ describe('ClaimSchema', () => {
   it('weigert een ongeldig e-mailadres', () => {
     expect(() => ClaimSchema.parse({ email: 'geen-email' })).toThrow();
   });
-  it('weigert een kleur buiten de collectie', () => {
-    expect(() => ClaimSchema.parse({ email: 'a@b.nl', colour: 'roze' })).toThrow();
-  });
   it('kapt geen geldige optionele velden af', () => {
-    const p = ClaimSchema.parse({ email: 'a@b.nl', name: 'Sanne', colour: 'navy' });
+    const p = ClaimSchema.parse({ email: 'a@b.nl', name: 'Sanne' });
     expect(p.name).toBe('Sanne');
-    expect(p.colour).toBe('navy');
   });
-  it('accepteert een kledingstuk uit de set', () => {
+  it('accepteert de cap als kledingstuk', () => {
     const p = ClaimSchema.parse({ email: 'a@b.nl', garment: 'cap' });
     expect(p.garment).toBe('cap');
   });
   it('weigert een kledingstuk buiten de set', () => {
+    // Alleen de cap loopt in een genummerde oplage; de hoodie hoort
+    // hier bewust niet meer bij.
+    expect(() => ClaimSchema.parse({ email: 'a@b.nl', garment: 'hoodie' })).toThrow();
     expect(() => ClaimSchema.parse({ email: 'a@b.nl', garment: 'schoen' })).toThrow();
   });
 });
 
 describe('describePiece', () => {
-  it('geeft de hoodie zijn kleur mee', () => {
-    expect(describePiece('hoodie', 'olijfgroen')).toBe('Hoodie · Olijfgroen');
-    expect(describePiece('hoodie', 'navy')).toBe('Hoodie · Navy');
-    expect(describePiece(undefined, undefined)).toBe('Hoodie · Olijfgroen');
-  });
-  it('beschrijft de cap als één klassieke uitvoering (geen kleur)', () => {
-    expect(describePiece('cap', 'navy')).toBe('Cap · Grijs melange');
-    expect(describePiece('cap')).toBe('Cap · Grijs melange');
+  it('beschrijft de cap als één klassieke uitvoering', () => {
+    expect(describePiece()).toBe('Cap · Grijs melange');
   });
 });
 
 describe('anglesFor / resolveAngle', () => {
-  it('geeft de hoodie voor- en achterkant, de cap ook een zijkant', () => {
-    expect(anglesFor('hoodie')).toEqual(['front', 'back']);
-    expect(anglesFor('cap')).toEqual(['front', 'side', 'back']);
-  });
-  it('valt bij een onbekend stuk terug op de hoodie', () => {
-    expect(anglesFor('schoen')).toEqual(['front', 'back']);
-    expect(anglesFor(undefined)).toEqual(['front', 'back']);
+  it('geeft de cap voorkant, zijkant en achterkant', () => {
+    expect(anglesFor()).toEqual(['front', 'side', 'back']);
   });
   it('houdt een bestaande hoek vast', () => {
-    expect(resolveAngle('hoodie', 'back')).toBe('back');
-    expect(resolveAngle('cap', 'side')).toBe('side');
+    expect(resolveAngle('back')).toBe('back');
+    expect(resolveAngle('side')).toBe('side');
   });
-  it('valt terug op de voorkant bij een hoek die dit stuk niet heeft', () => {
-    // cap-zijkant → hoodie: de hoodie heeft geen zijaanzicht
-    expect(resolveAngle('hoodie', 'side')).toBe('front');
-    expect(resolveAngle('hoodie', undefined)).toBe('front');
-    expect(resolveAngle('cap', 'onzin')).toBe('front');
+  it('valt terug op de voorkant bij een onbekende hoek', () => {
+    expect(resolveAngle('onzin')).toBe('front');
+    expect(resolveAngle(undefined)).toBe('front');
   });
 });
 
 describe('assetName', () => {
-  it('kiest het juiste hoodiebeeld per kleur en hoek', () => {
-    expect(assetName('hoodie', 'olijfgroen', 'front')).toBe('hoodie-olijfgroen-v2');
-    expect(assetName('hoodie', 'olijfgroen', 'back')).toBe('hoodie-olijfgroen-back-v2');
-    expect(assetName('hoodie', 'navy', 'back')).toBe('hoodie-navy-back-v2');
-  });
-  it('kiest het juiste capbeeld per hoek, kleur telt niet mee', () => {
-    expect(assetName('cap', 'navy', 'side')).toBe('cap-side');
-    expect(assetName('cap', undefined, 'back')).toBe('cap-back');
+  it('kiest het juiste capbeeld per hoek', () => {
+    expect(assetName('front')).toBe('cap-front');
+    expect(assetName('side')).toBe('cap-side');
+    expect(assetName('back')).toBe('cap-back');
   });
   it('levert nooit een bestand dat niet bestaat', () => {
-    // hoodie heeft geen zijaanzicht → voorkant
-    expect(assetName('hoodie', 'navy', 'side')).toBe('hoodie-navy-v2');
-    // onbekende kleur → de standaardkleur
-    expect(assetName('hoodie', 'knalroze', 'front')).toBe('hoodie-olijfgroen-v2');
-    expect(assetName(undefined, undefined, undefined)).toBe('hoodie-olijfgroen-v2');
+    expect(assetName('onzin')).toBe('cap-front');
+    expect(assetName(undefined)).toBe('cap-front');
   });
 });

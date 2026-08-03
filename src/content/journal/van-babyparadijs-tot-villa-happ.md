@@ -21,6 +21,6 @@ Wie de familie kent, weet dat het daar niet eindigt. Twee keer gevallen betekent
 
 ## Hoofdstuk drie
 
-Villa Happ vandaag is de derde generatie. Geen 80 winkels meer, maar een bewuste keuze voor klein en goed: genummerde oplages, biologisch katoen, ontwerpen die in Tilburg worden gemaakt en pas de deur uitgaan als ze kloppen. Geen overproductie. Als een oplage op is, komt hij niet terug.
+Villa Happ vandaag is de derde generatie, en werkt niet meer vanuit Tilburg maar vanuit Waalwijk. Geen 80 winkels meer, maar een bewuste keuze voor klein en goed: genummerde oplages, biologisch katoen, ontwerpen die pas de deur uitgaan als ze kloppen. Geen overproductie. Als een oplage op is, komt hij niet terug.
 
 Dat is geen nostalgie. Het is de les van 65 jaar: een merk blijft niet bestaan door groter te worden, maar door iets te maken dat mensen willen doorgeven. Precies daarom staat op elk stuk een nummer. Het is er één uit een verhaal dat al drie generaties duurt.

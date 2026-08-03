@@ -14,7 +14,7 @@ export const prerender = true;
  */
 const staticRoutes = [
   '', 'shop', 'story', 'het-atelier', 'journal', 'pers',
-  'faq', 'verzending', 'retourneren', 'contact',
+  'faq', 'verzending', 'retourneren', 'contact', 'voor-merken',
   'privacy', 'algemene-voorwaarden', 'herroeping', 'cookies',
 ];
 

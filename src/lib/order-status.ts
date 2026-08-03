@@ -171,9 +171,8 @@ export function bouwTijdlijn(events: Gebeurtenis[]): TijdlijnStap[] {
  * een vertraagde rit.
  */
 export function levertijdIndicatie(country = 'NL'): string {
-  if (country === 'BE') return 'Doorgaans 2 tot 3 werkdagen na verzending';
-  if (country === 'DE') return 'Doorgaans 2 tot 4 werkdagen na verzending';
-  return 'Doorgaans de volgende werkdag na verzending';
+  if (country === 'BE' || country === 'DE') return 'Doorgaans binnen 5 werkdagen na bestelling';
+  return 'Doorgaans binnen 3 werkdagen na bestelling';
 }
 
 /** Bedragen altijd in hele centen; presenteren als euro's. */

@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import Base from '../layouts/Base.astro';
-import { SHIPPING_TABLE, DELIVERY_SENTENCE, VAT_SENTENCE } from '../lib/legal';
+import { SHIPPING_TABLE, DELIVERY_SENTENCE, VAT_SENTENCE, FREE_SHIPPING_SHORT } from '../lib/legal';
 import { FREE_SHIPPING_CENTS } from '../lib/checkout-logic';
 import '../styles/shop.css';
 
@@ -36,7 +36,11 @@ const rates = SHIPPING_TABLE.map((s) => ({
           </tbody>
         </table>
 
-        <p class="vh-prose" style="margin: -24px 0 clamp(36px, 5vw, 56px);">{VAT_SENTENCE}</p>
+        {/* Onder 560px verbergt de tabel de kolom "Gratis vanaf"; deze regel
+            houdt de drempel dus ook op mobiel zichtbaar. */}
+        <p class="vh-prose" style="margin: -24px 0 clamp(36px, 5vw, 56px);">
+          {FREE_SHIPPING_SHORT}. {VAT_SENTENCE}
+        </p>
 
         <div class="vh-trust-group">
           <h2 class="vh-trust-group-title">Levertijd</h2>

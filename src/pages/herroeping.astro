@@ -3,7 +3,10 @@ export const prerender = true;
 
 import LegalLayout from '../components/legal/LegalLayout.astro';
 import { BUSINESS, returnAddressLines, addressLine } from '../lib/business';
-import { LEGAL_UPDATED } from '../lib/legal';
+import {
+  LEGAL_UPDATED, RETURN_FEE_SENTENCE, RETURN_SHIPPING_REFUND_SENTENCE,
+  RETURN_SHIPPING_CORRECTION_SENTENCE, RETURN_CONDITION_SENTENCE,
+} from '../lib/legal';
 
 /**
  * Modelformulier voor herroeping (Bijlage I bij Richtlijn 2011/83/EU,
@@ -117,8 +120,11 @@ const returnLines = returnAddressLines();
   <section>
     <h2>Wat er daarna gebeurt</h2>
     <ol>
-      <li>Je krijgt van ons een bevestiging en, bij een Nederlandse retour, een retourlabel.</li>
-      <li>Je stuurt het pakket binnen 14 dagen na je melding terug.</li>
+      <li>Je krijgt van ons een bevestiging met het retouradres.</li>
+      <li>Je stuurt het pakket binnen 14 dagen na je melding terug, op eigen kosten.</li>
+      <li>{RETURN_FEE_SENTENCE}</li>
+      <li>{RETURN_SHIPPING_REFUND_SENTENCE} {RETURN_SHIPPING_CORRECTION_SENTENCE}</li>
+      <li>{RETURN_CONDITION_SENTENCE}</li>
       <li>Wij betalen binnen 14 dagen na je melding terug via dezelfde betaalmethode. We mogen daarmee wachten tot we het pakket terug hebben of jij hebt aangetoond dat je het verstuurd hebt.</li>
     </ol>
     <p>

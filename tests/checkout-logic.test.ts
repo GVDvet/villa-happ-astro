@@ -9,22 +9,22 @@ import {
 
 describe('shippingCost', () => {
   it('rekent NL-tarief onder de gratis-verzendgrens', () => {
-    expect(shippingCost('NL', 5995)).toBe(495);
+    expect(shippingCost('NL', 5995)).toBe(895);
   });
   it('rekent BE- en DE-tarief', () => {
-    expect(shippingCost('BE', 2195)).toBe(695);
-    expect(shippingCost('DE', 2195)).toBe(895);
+    expect(shippingCost('BE', 2195)).toBe(1250);
+    expect(shippingCost('DE', 2195)).toBe(1250);
   });
   it('is gratis vanaf exact de grens, voor elk land', () => {
     expect(shippingCost('NL', FREE_SHIPPING_CENTS)).toBe(0);
     expect(shippingCost('BE', FREE_SHIPPING_CENTS)).toBe(0);
-    expect(shippingCost('DE', 9999)).toBe(0);
+    expect(shippingCost('DE', FREE_SHIPPING_CENTS + 500)).toBe(0);
   });
   it('is niet gratis op 1 cent onder de grens', () => {
-    expect(shippingCost('NL', FREE_SHIPPING_CENTS - 1)).toBe(495);
+    expect(shippingCost('NL', FREE_SHIPPING_CENTS - 1)).toBe(895);
   });
   it('valt voor onbekende landen terug op het hoogste tarief', () => {
-    expect(shippingCost('FR', 2195)).toBe(895);
+    expect(shippingCost('FR', 2195)).toBe(1250);
   });
 });
 

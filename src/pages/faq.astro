@@ -3,7 +3,11 @@ export const prerender = true;
 
 import Base from '../layouts/Base.astro';
 import { BUSINESS } from '../lib/business';
-import { RETURN_SENTENCE, DELIVERY_SENTENCE, VAT_SENTENCE } from '../lib/legal';
+import {
+  RETURN_SENTENCE, DELIVERY_SENTENCE, VAT_SENTENCE, SHIPPING_SENTENCE,
+  RETURN_FEE_SENTENCE, RETURN_SHIPPING_REFUND_SENTENCE,
+  RETURN_SHIPPING_CORRECTION_SENTENCE, RETURN_CONDITION_SENTENCE,
+} from '../lib/legal';
 import '../styles/shop.css';
 
 const groups = [
@@ -19,7 +23,7 @@ const groups = [
   {
     title: 'Verzending',
     items: [
-      { q: 'Wat kost verzending?', a: 'Binnen Nederland € 4,95, en gratis vanaf € 75. Naar België € 6,95 en naar Duitsland € 8,95.' },
+      { q: 'Wat kost verzending?', a: SHIPPING_SENTENCE },
       { q: 'Hoe snel is mijn bestelling in huis?', a: `${DELIVERY_SENTENCE} Je krijgt altijd een track en trace. Genoemde levertijden zijn een indicatie, geen garantie.` },
       { q: 'Naar welke landen versturen jullie?', a: 'Op dit moment bezorgen we in Nederland, België en Duitsland.' },
     ],
@@ -28,7 +32,10 @@ const groups = [
     title: 'Retour & ruilen',
     items: [
       { q: 'Kan ik mijn bestelling retourneren?', a: RETURN_SENTENCE },
-      { q: 'Hoe retourneer ik?', a: `Meld je retour per e-mail of via het herroepingsformulier op de site. Vanuit Nederland krijg je een gratis retourlabel. Binnen ${BUSINESS.refundDays} dagen na je melding krijg je het volledige bedrag terug via dezelfde betaalmethode.` },
+      { q: 'Hoe retourneer ik?', a: `Meld je retour per e-mail of via het herroepingsformulier op de site. Je verstuurt het pakket zelf, op eigen kosten, naar ons retouradres in Waalwijk. Binnen ${BUSINESS.refundDays} dagen na je melding betalen we terug via dezelfde betaalmethode.` },
+      { q: 'Wanneer betaal ik verwerkingskosten?', a: RETURN_FEE_SENTENCE },
+      { q: 'Krijg ik de verzendkosten van mijn bestelling terug?', a: `${RETURN_SHIPPING_REFUND_SENTENCE} ${RETURN_SHIPPING_CORRECTION_SENTENCE}` },
+      { q: 'Mag ik een stuk passen voordat ik het terugstuur?', a: RETURN_CONDITION_SENTENCE },
       { q: 'Kan ik een andere maat ruilen?', a: 'Retourneer het stuk en plaats een nieuwe bestelling in de juiste maat. Zo is de gewenste maat het snelst bij je.' },
     ],
   },

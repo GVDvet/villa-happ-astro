@@ -27,7 +27,6 @@ interface DbProduct {
   slug: string;
   name: string;
   price_cents: number;
-  compare_at_cents: number | null;
   short_desc: string | null;
   description: string | null;
   image_url: string | null;
@@ -39,6 +38,19 @@ interface DbProduct {
   featured: boolean | null;
   category: string | null;
   product_variants: DbVariant[];
+}
+
+/**
+ * Villa Happ verkoopt niet met korting: geen doorgestreepte vanaf-prijs en
+ * geen sale-badge. `compare_at_cents` lezen we daarom niet meer uit, en een
+ * kortingsbadge die nog in de database staat filteren we hier weg. Zo kan
+ * een oude rij in `products` nooit alsnog een korting op de site zetten.
+ */
+const DISCOUNT_BADGE = /sale|korting|voordeel|actie|%/i;
+
+function cleanBadge(badge: string | null): string | undefined {
+  if (!badge) return undefined;
+  return DISCOUNT_BADGE.test(badge) ? undefined : badge;
 }
 
 function variantStock(v: DbVariant): number {
@@ -55,7 +67,7 @@ export async function getCatalog(): Promise<CatalogProduct[]> {
   // Eén query met joins i.p.v. per product losse variant- en voorraadcalls
   const { data, error } = await sb
     .from('products')
-    .select('slug, name, price_cents, compare_at_cents, short_desc, description, image_url, gallery, details, note, edition, badge, featured, category, product_variants(id, sku, size, color, inventory(quantity, reserved))')
+    .select('slug, name, price_cents, short_desc, description, image_url, gallery, details, note, edition, badge, featured, category, product_variants(id, sku, size, color, inventory(quantity, reserved))')
     .eq('status', 'published')
     .order('created_at', { ascending: false });
 
@@ -73,12 +85,11 @@ export async function getCatalog(): Promise<CatalogProduct[]> {
     name: p.name,
     color: p.product_variants[0]?.color || '',
     price_cents: p.price_cents,
-    compare_at_cents: p.compare_at_cents || undefined,
     short_desc: p.short_desc || '',
     description: p.description || '',
     details: p.details || [],
     images: [p.image_url, ...(p.gallery || [])].filter(Boolean) as string[],
-    badge: p.badge || (p.compare_at_cents ? 'Sale' : (p.featured ? 'Featured' : undefined)),
+    badge: cleanBadge(p.badge) || (p.featured ? 'Featured' : undefined),
     meta: p.category || '',
     edition: p.edition || undefined,
     note: p.note || undefined,

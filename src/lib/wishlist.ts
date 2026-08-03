@@ -10,7 +10,6 @@ export interface WishItem {
   slug: string;
   name: string;
   price_cents: number;
-  compare_at_cents?: number;
   image_url: string;
   color?: string;
 }

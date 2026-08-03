@@ -7,7 +7,12 @@ import { getCatalog, type CatalogProduct } from '../../lib/catalog';
 import { formatPrice } from '../../lib/commerce';
 import { optimizedSrc } from '../../lib/img';
 import { BUSINESS } from '../../lib/business';
-import { RETURN_SENTENCE, RETURN_SHORT, VAT_SENTENCE, DELIVERY_SENTENCE } from '../../lib/legal';
+import {
+  RETURN_SENTENCE, RETURN_SHORT, VAT_SENTENCE, DELIVERY_SENTENCE,
+  SHIPPING_SENTENCE, SHIPPING_TABLE, FREE_SHIPPING_SHORT,
+  RETURN_FEE_TEXT, RETURN_FEE_FROM_DAY, RETURN_SHIPPING_REFUND_SENTENCE,
+  RETURN_SHIPPING_CORRECTION_SENTENCE, RETURN_CONDITION_SENTENCE,
+} from '../../lib/legal';
 import '../../styles/shop.css';
 
 export async function getStaticPaths() {
@@ -25,10 +30,6 @@ const related = catalog.filter((p) => p.slug !== product.slug).slice(0, 3);
 const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 const soldOut = totalStock === 0;
 const skuPrefix = product.variants[0]?.sku?.split('-').slice(0, 2).join('-') || 'VH';
-
-// Anchoring (Tversky & Kahneman, 1974): toon de echte besparing expliciet
-const savingsCents = product.compare_at_cents ? product.compare_at_cents - product.price_cents : 0;
-const savingsPct = product.compare_at_cents ? Math.round((savingsCents / product.compare_at_cents) * 100) : 0;
 
 // Echte schaarste + sociaal bewijs uit de werkelijke voorraad (alleen bij oplage)
 const edition = product.edition;
@@ -57,18 +58,24 @@ const absImages = product.images.map((i) => (i.startsWith('http') ? i : siteOrig
 
 // Merchant-velden (verzending, retour, prijsgeldigheid) maken het
 // aanbod compleet voor Google's productresultaten
-const shippingDetailsLd = (['NL', 'BE', 'DE'] as const).map((country) => ({
+const shippingDetailsLd = SHIPPING_TABLE.map((s) => ({
   '@type': 'OfferShippingDetails',
   shippingRate: {
     '@type': 'MonetaryAmount',
-    value: (({ NL: 4.95, BE: 6.95, DE: 8.95 })[country]).toFixed(2),
+    value: (s.costCents / 100).toFixed(2),
     currency: 'EUR',
   },
-  shippingDestination: { '@type': 'DefinedRegion', addressCountry: country },
+  shippingDestination: { '@type': 'DefinedRegion', addressCountry: s.code },
   deliveryTime: {
     '@type': 'ShippingDeliveryTime',
     handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
-    transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+    // Belofte op de site: NL binnen 3 werkdagen, BE en DE binnen 5.
+    transitTime: {
+      '@type': 'QuantitativeValue',
+      minValue: 1,
+      maxValue: s.code === 'NL' ? 3 : 5,
+      unitCode: 'DAY',
+    },
   },
 }));
 
@@ -125,25 +132,44 @@ const productLd = {
     availability: soldOut ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',
     shippingDetails: shippingDetailsLd,
-    // Twee beleidsregels, want retour is alléén vanuit Nederland gratis.
-    // Eén gecombineerde regel met FreeReturn zou België en Duitsland een
-    // gratis retour beloven die we niet waarmaken.
+    // Twee beleidsregels, want het retourvenster kent twee tarieven.
+    // Binnen de wettelijke bedenktijd zijn er geen verwerkingskosten; de
+    // dagen die wij er vrijwillig bovenop geven kennen een restockingFee.
+    // De klant betaalt in beide gevallen de retourzending zelf, dus nooit
+    // FreeReturn: dat zou een belofte zijn die we niet waarmaken.
     hasMerchantReturnPolicy: [
       {
         '@type': 'MerchantReturnPolicy',
-        applicableCountry: 'NL',
+        name: `Wettelijke bedenktijd — dag 1 tot en met ${BUSINESS.statutoryReturnDays}`,
+        applicableCountry: ['NL', 'BE', 'DE'],
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-        merchantReturnDays: BUSINESS.returnDays,
+        merchantReturnDays: BUSINESS.statutoryReturnDays,
         returnMethod: 'https://schema.org/ReturnByMail',
-        returnFees: 'https://schema.org/FreeReturn',
+        returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+        refundType: 'https://schema.org/FullRefund',
+        description:
+          `Melding binnen ${BUSINESS.statutoryReturnDays} dagen: geen verwerkingskosten. ` +
+          `${RETURN_SHIPPING_REFUND_SENTENCE} ${RETURN_SHIPPING_CORRECTION_SENTENCE} ${RETURN_CONDITION_SENTENCE}`,
       },
       {
         '@type': 'MerchantReturnPolicy',
-        applicableCountry: ['BE', 'DE'],
+        name: `Verlengde bedenktijd — dag ${RETURN_FEE_FROM_DAY} tot en met ${BUSINESS.returnDays}`,
+        applicableCountry: ['NL', 'BE', 'DE'],
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
         merchantReturnDays: BUSINESS.returnDays,
         returnMethod: 'https://schema.org/ReturnByMail',
         returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+        // De klant regelt de retourzending zelf, dus geen vast retourtarief
+        // van ons; de verwerkingskosten staan apart als restockingFee.
+        restockingFee: {
+          '@type': 'MonetaryAmount',
+          value: (BUSINESS.returnFeeCents / 100).toFixed(2),
+          currency: 'EUR',
+        },
+        description:
+          `Melding op dag ${RETURN_FEE_FROM_DAY} tot en met ${BUSINESS.returnDays}: ` +
+          `${RETURN_FEE_TEXT} verwerkingskosten. ${RETURN_SHIPPING_REFUND_SENTENCE} ` +
+          `${RETURN_SHIPPING_CORRECTION_SENTENCE} ${RETURN_CONDITION_SENTENCE}`,
       },
     ],
   },
@@ -168,11 +194,11 @@ const sizingAnswer =
 
 const faqItems = [
   { q: 'Hoe vallen de maten?', a: sizingAnswer },
-  { q: 'Wat zijn de levertijd en verzendkosten?', a: `${DELIVERY_SENTENCE} Verzending binnen Nederland is gratis vanaf € 75, daaronder € 4,95.` },
+  { q: 'Wat zijn de levertijd en verzendkosten?', a: `${DELIVERY_SENTENCE} ${SHIPPING_SENTENCE}` },
   { q: 'Kan ik retourneren?', a: RETURN_SENTENCE },
   { q: 'Is dit een origineel Villa Happ stuk?', a: edition
       ? `Ja. Dit komt uit een genummerde oplage van ${edition} stuks en wordt geleverd met een certificaat van echtheid.`
-      : 'Ja. Elk stuk wordt in Tilburg ontworpen en met zorg gemaakt, in beperkte oplage.' },
+      : 'Ja. Elk stuk wordt in Waalwijk ontworpen en met zorg gemaakt, in beperkte oplage.' },
 ];
 
 const faqLd = {
@@ -293,11 +319,7 @@ const pdpData = {
           {product.color && <p class="vh-pdp-color">{product.color}</p>}
 
           <p class="vh-pdp-price">
-            {product.compare_at_cents && <del>{formatPrice(product.compare_at_cents)}</del>}
             <span class="vh-pdp-price-now">{formatPrice(product.price_cents)}</span>
-            {savingsCents > 0 && (
-              <span class="vh-pdp-save">−{savingsPct}% · je bespaart {formatPrice(savingsCents)}</span>
-            )}
           </p>
           <p class="vh-pdp-short">{product.short_desc}</p>
 
@@ -319,7 +341,7 @@ const pdpData = {
               <span class="vh-cert-seal" aria-hidden="true">VH</span>
               <div>
                 <p class="vh-cert-title">Certificaat van echtheid</p>
-                <p class="vh-cert-meta vh-mono">Oplage {edition} · genummerd · Tilburg</p>
+                <p class="vh-cert-meta vh-mono">Oplage {edition} · genummerd · Waalwijk</p>
                 <p class="vh-cert-note">Elk exemplaar draagt een eigen nummer. Jouw nummer staat op het certificaat dat wordt meegeleverd.</p>
               </div>
             </div>
@@ -370,7 +392,7 @@ const pdpData = {
           </p>
 
           <div class="vh-pdp-trust">
-            <span><i>✦</i> Gratis verzending in NL vanaf € 75</span>
+            <span><i>✦</i> {FREE_SHIPPING_SHORT}</span>
             <span><i>✦</i> {RETURN_SHORT}</span>
             {edition && <span><i>✦</i> Genummerd · geleverd met certificaat van echtheid</span>}
             <span><i>✦</i> Veilig betalen via Mollie · iDEAL, Bancontact, creditcard</span>
@@ -906,8 +928,8 @@ const pdpData = {
     const werkdag = now.getDay() !== 0 && now.getDay() !== 6;
     const voorCutoff = werkdag && now.getHours() < 16;
     span.textContent = voorCutoff
-      ? 'Vandaag voor 16:00 besteld, vandaag nog verzonden. Doorgaans de volgende werkdag in huis'
-      : 'Op de eerstvolgende werkdag verzonden. Doorgaans de dag erna in huis';
+      ? 'Vandaag voor 16:00 besteld, vandaag nog verzonden. Doorgaans binnen 3 werkdagen in huis'
+      : 'Op de eerstvolgende werkdag verzonden. Doorgaans binnen 3 werkdagen in huis';
     box.removeAttribute('hidden');
   })();
 

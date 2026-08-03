@@ -1,13 +1,12 @@
 ---
 import { optimizedSrc } from '../../lib/img';
-import { BUSINESS, isPending } from '../../lib/business';
+import { BUSINESS, isPending, addressLine } from '../../lib/business';
 const navCols = [
   {
     title: 'Shop',
     links: [
       { label: 'Hele collectie', href: '/shop' },
       { label: 'Limited drops', href: '/drops' },
-      { label: 'H_APProved brands', href: '/brands' },
       { label: 'Wishlist', href: '/wishlist' },
     ],
   },
@@ -17,6 +16,7 @@ const navCols = [
       { label: 'Heritage', href: '/story' },
       { label: 'Journal', href: '/journal' },
       { label: 'Pers', href: '/pers' },
+      { label: 'Voor merken', href: '/voor-merken' },
     ],
   },
   {
@@ -35,6 +35,7 @@ const year = new Date().getFullYear();
 // Bedrijfsregel onderaan: verplichte identificatie (art. 3:15d BW)
 const identityLine = [
   BUSINESS.legalName,
+  addressLine(),
   `KvK ${BUSINESS.kvk}`,
   isPending(BUSINESS.vatId) ? null : `Btw ${BUSINESS.vatId}`,
 ].filter(Boolean).join(' · ');

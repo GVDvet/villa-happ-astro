@@ -8,6 +8,7 @@
 
 import { formatPrice } from './commerce';
 import { BUSINESS, isPending } from './business';
+import { RETURN_FEE_SENTENCE, RETURN_SHIPPING_REFUND_SENTENCE } from './legal';
 import { getSiteOrigin } from './site';
 
 /**
@@ -87,8 +88,9 @@ export function renderOrderConfirmation(order: OrderForMail): { subject: string;
       Je mag deze bestelling ${BUSINESS.returnDays} dagen bekijken en zonder opgaaf van reden
       terugsturen, gerekend vanaf de dag dat je het laatste stuk ontvangt. Meld je herroeping
       per e-mail of met het modelformulier, en stuur daarna binnen 14 dagen terug.
-      Retourneren vanuit Nederland is gratis; vanuit België en Duitsland zijn de retourkosten
-      voor eigen rekening.<br>
+      De verzendkosten van de retourzending zijn voor eigen rekening.<br>
+      ${RETURN_FEE_SENTENCE}<br>
+      ${RETURN_SHIPPING_REFUND_SENTENCE}<br>
       <a href="${origin}/herroeping" style="color:#2B2620;">Modelformulier voor herroeping</a> ·
       <a href="${origin}/algemene-voorwaarden" style="color:#2B2620;">Algemene voorwaarden</a> ·
       <a href="${origin}/retourneren" style="color:#2B2620;">Zo retourneer je</a>
@@ -198,7 +200,7 @@ export function renderShippingConfirmation(order: ShipmentForMail): { subject: s
     ${trackUrl ? `<p style="margin:0 0 24px;"><a href="${trackUrl}" style="display:inline-block;background:#2B2620;color:#F7F3EC;padding:14px 26px;text-decoration:none;">Volg je pakket</a></p>` : ''}
     <p style="margin:0;font-size:13px;color:#8A8072;line-height:1.6;">
       Vragen over je bestelling? Antwoord op deze mail.
-      Je hebt ${BUSINESS.returnDays} dagen bedenktijd vanaf ontvangst; retourneren vanuit Nederland is gratis.
+      Je hebt ${BUSINESS.returnDays} dagen bedenktijd vanaf ontvangst en betaalt de retourzending zelf. ${RETURN_FEE_SENTENCE}
       <a href="${getSiteOrigin()}/retourneren" style="color:#8A8072;">Zo werkt retourneren.</a>
     </p>
   </div>`;
