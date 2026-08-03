@@ -192,6 +192,18 @@ geen voorraadmelding, en werkt het contactformulier niet.
 - [ ] `MAIL_FROM` in Vercel, bv. `Villa Happ <bestellingen@villa-happ.nl>`
 - [ ] Zorg dat `bestellingen@villa-happ.nl` een échte mailbox is die je leest — daar komen contactformulier-berichten en klantreacties binnen
 
+**Wat er gebeurt zolang deze twee ontbreken:** de site blijft werken en er
+gaat niets verloren. Elke mail wordt eerst in de tabel `uitgaande_mail`
+vastgelegd en pas daarna verstuurd. Zonder sleutel blijft hij op `wacht`
+staan, zonder pogingen te verbruiken. Zodra `RESEND_API_KEY` er is, gaat de
+hele wachtrij alsnog de deur uit bij de eerstvolgende cron of bij een klik
+op "Nu verwerken" in `/beheer`.
+
+Concreet ligt zonder deze twee stil: de orderbevestiging, de
+verzendbevestiging, de terugbetalingsmail, de melding aan jou bij een nieuwe
+bestelling, en de voorraadmeldingen. Het contactformulier toont een eerlijke
+foutmelding met je mailadres erin in plaats van een valse bevestiging.
+
 ### C4. Vercel 🔴
 
 - [ ] Domein `villa-happ.nl` koppelen (plus `www` → redirect naar apex)

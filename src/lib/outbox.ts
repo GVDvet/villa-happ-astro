@@ -13,8 +13,9 @@
  *      veilig, ook als de rest van de request omvalt.
  *   2. Direct daarna proberen we hem te versturen (snelle route), zodat een
  *      klant niet op een cron hoeft te wachten.
- *   3. Mislukt dat, dan blijft hij staan met oplopende backoff en pakt de
- *      cron of de knop in het beheerportaal hem later op.
+ *   3. Mislukt dat, dan blijft hij staan met oplopende backoff. De
+ *      dagelijkse cron (/api/notify/run) leegt de wachtrij alsnog, en in
+ *      het beheerportaal zit een knop om er niet op te hoeven wachten.
  *
  * Een outbox zonder backoff is een stille datavernietiger; die les komt uit
  * prWize Core, net als het atomair claimen met SKIP LOCKED zodat twee
@@ -29,8 +30,18 @@ import { verstuurDirect, isMailConfigured } from './mail';
 const BACKOFF_MINUTEN = [1, 5, 15, 60, 180, 720];
 const MAX_POGINGEN = BACKOFF_MINUTEN.length;
 
-/** Ruim binnen de serverless-limiet, met marge voor het opruimwerk erna. */
-const TIJDSBUDGET_MS = 40_000;
+/**
+ * Ruim binnen de serverless-limiet. Die is 30 seconden op Vercel Hobby, dus
+ * de 40 seconden die hier eerst stonden pasten er niet in: het platform kapte
+ * de functie af vóór het budget op was, en de rijen die dan nog geclaimd
+ * stonden bleven liggen tot de volgende run ze als verweesd terugpakte.
+ *
+ * 15 seconden past ook naast het voorraadwerk dat in dezelfde aanroep draait
+ * (/api/notify/run doet eerst de outbox, dan de meldingen). Een batch van 20
+ * mails kost bij Resend ongeveer een halve seconde per stuk, dus dit is geen
+ * praktische rem — het is de bodem onder het opruimwerk.
+ */
+const TIJDSBUDGET_MS = 15_000;
 const BATCH = 20;
 
 export interface WachtrijMail {
