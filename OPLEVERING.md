@@ -188,12 +188,12 @@ geen voorraadmelding, en werkt het contactformulier niet.
 
 - [ ] Account aanmaken
 - [x] Domein `villa-happ.nl` verifiëren bij Resend — gedaan 3 augustus 2026. DKIM op `resend._domainkey`, SPF en MX op het subdomein `send`. Bewust op een subdomein: het root-SPF-record is exclusief voor Microsoft 365 en eindigt op `-all`, dus `include:amazonses.com` mag daar niet bij.
-- [x] `_dmarc` toegevoegd met `p=none` en rapportage naar `rutger@villa-happ.nl`. Verzwaren naar `p=quarantine` zodra de rapporten schoon zijn.
+- [x] `_dmarc` toegevoegd met `p=none` en rapportage naar `contact@villa-happ.nl`. Verzwaren naar `p=quarantine` zodra de rapporten schoon zijn.
 - [ ] `RESEND_API_KEY` in Vercel (sleutel met alleen verzendrechten)
-- [ ] `MAIL_FROM` in Vercel: `Villa Happ <rutger@villa-happ.nl>`
+- [ ] `MAIL_FROM` in Vercel: `Villa Happ <contact@villa-happ.nl>`
 
 > **Let op bij het mailadres.** De site publiceert één adres, en dat is
-> `rutger@villa-happ.nl` — de Microsoft 365-mailbox. Er is bewust géén
+> `contact@villa-happ.nl` — de Microsoft 365-mailbox. Er is bewust géén
 > `bestellingen@`-alias. Wil je dat later alsnog, maak dan éérst de alias in
 > Microsoft 365 en pas daarna `orderEmail`, `supportEmail` en `privacyEmail`
 > in `src/lib/business.ts` aan. Andersom publiceer je een adres dat bounced,

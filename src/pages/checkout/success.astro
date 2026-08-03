@@ -164,11 +164,13 @@ const levEU = levertijdIndicatie('BE');
      klantportaal 5 zei. Beide varianten komen nu uit order-status.ts en
      staan als data-attribuut op het element; zodra de statusroute het
      bezorgland meldt, wordt de juiste gekozen. */
-  function zetBezorging(land) {
-    const el = document.getElementById('vh-deliv');
+  function zetBezorging(land: string) {
+    const el = document.getElementById('vh-deliv') as HTMLElement | null;
     if (!el) return;
     const eu = land === 'BE' || land === 'DE';
-    el.textContent = eu ? el.dataset.levEu : el.dataset.levNl;
+    // `dataset` geeft `string | undefined`; een lege string is hier de veilige
+    // uitkomst, want een ontbrekend attribuut hoort geen "undefined" te tonen.
+    el.textContent = (eu ? el.dataset.levEu : el.dataset.levNl) || '';
   }
   zetBezorging('NL');
 

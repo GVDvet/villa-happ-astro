@@ -21,7 +21,7 @@ export function vatFromGross(grossCents: number, rate = BUSINESS.vatRate): numbe
 }
 
 const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
-const MAIL_FROM = import.meta.env.MAIL_FROM || 'Villa Happ <rutger@villa-happ.nl>';
+const MAIL_FROM = import.meta.env.MAIL_FROM || 'Villa Happ <contact@villa-happ.nl>';
 
 interface OrderForMail {
   order_number: string;

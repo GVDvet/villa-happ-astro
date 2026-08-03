@@ -83,16 +83,15 @@ export const BUSINESS = {
 
   /* ---------- Contact ---------- */
   /**
-   * Eén adres, en het bestaat ook echt: rutger@ is de Microsoft 365-mailbox
-   * waar de post binnenkomt. Hier stond bestellingen@, maar dat adres is
-   * nooit aangemaakt. Het staat op ruim tien plekken in de site, waaronder
+   * Eén adres voor de hele site. Dit staat op ruim tien plekken, waaronder
    * de wettelijk verplichte contactgegevens en de herroepingspagina — een
-   * herroeping naar een bouncend adres geldt als niet ontvangen.
+   * herroeping naar een bouncend adres geldt als niet ontvangen. Wijzig dit
+   * dus pas nadat het postvak of de alias in Microsoft 365 bestaat.
    */
-  orderEmail: 'rutger@villa-happ.nl',
-  supportEmail: 'rutger@villa-happ.nl',
+  orderEmail: 'contact@villa-happ.nl',
+  supportEmail: 'contact@villa-happ.nl',
   /** Aparte AVG-postbus is netjes maar niet verplicht bij een eenmanszaak. */
-  privacyEmail: 'rutger@villa-happ.nl',
+  privacyEmail: 'contact@villa-happ.nl',
   phone: PENDING,
   /** Openingstijden of reactietermijn telefonisch. */
   phoneHours: PENDING,
