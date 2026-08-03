@@ -30,7 +30,7 @@ ${BRAND.facts.map((f) => `- ${f}`).join('\n')}
 ## Belangrijkste pagina's
 
 - [Shop](${site}/shop): de volledige collectie, heritage hoodies en genummerde limited editions.
-- [Het verhaal](${site}/story): ${brandAge} jaar Villa Happ, van Toni's Babyparadijs (1960) tot The Comeback Kid en de heropstart in ${BRAND.relaunchYear}.
+- [Het verhaal](${site}/story): ${brandAge} jaar Villa Happ, van Tony's Babyparadijs (1960) tot The Comeback Kid en de heropstart in ${BRAND.relaunchYear}.
 - [Het Atelier](${site}/het-atelier): hoe een stuk ontstaat, van stof tot geborduurd embleem.
 - [Journal](${site}/journal): achtergronden over materiaal, herkomst en vakmanschap.
 - [Pers](${site}/pers): kernfeiten en beeldmateriaal voor media.

@@ -208,7 +208,81 @@ build uit cache gekomen.
 
 ---
 
-## 6. Dingen die je niet moet doen
+## 6. Prijzen, voorraad en producten wijzigen
+
+**Niet via `supabase/seed.sql`.** Elke insert daarin eindigt op
+`ON CONFLICT … DO NOTHING`, dus op een gevulde database verandert opnieuw
+draaien niets. Je krijgt geen foutmelding en de winkel blijft de oude prijs
+rekenen. Dit is getest op de echte database: prijs van 21,95 naar 24,95 gezet
+via de seed, en hij bleef 21,95.
+
+Dat gedrag is bewust en moet zo blijven. `inventory.quantity` wordt door
+verkopen verlaagd; zou de seed die kolom overschrijven, dan zet elke run de
+voorraad terug op de startwaarde en verdwijnt wat er verkocht is.
+
+Wijzigen doe je met een UPDATE in de Supabase SQL Editor:
+
+```sql
+-- Prijs
+update products
+set price_cents = 2495, updated_at = now()
+where slug = 'villa-happ-back-cap';
+
+-- Voorraad, per SKU
+update inventory i
+set quantity = 60, updated_at = now()
+from product_variants pv
+where pv.id = i.variant_id and pv.sku = 'VH-CAP-001';
+
+-- Product uit de winkel halen zonder te verwijderen
+update products set status = 'archived' where slug = 'stap-voor-stap-sokken';
+```
+
+Werk daarna `seed.sql` bij, zodat een verse database dezelfde cijfers krijgt.
+
+> **Een prijswijziging is pas zichtbaar na een redeploy.** De shoppagina's zijn
+> geprerenderd. De voorraad ververst zichzelf wél live via `/api/stock`, dus
+> daarvoor is geen deploy nodig.
+
+`compare_at_cents` blijft leeg: de site verkoopt niet met korting. Zie
+`src/lib/catalog.ts`, dat de kolom niet uitleest en kortingsbadges wegfiltert.
+
+### Database-migraties
+
+Draai een migratie **vóór** de deploy die hem nodig heeft, anders schrijft de
+code naar tabellen die nog niet bestaan. `schema.sql` bevat alles voor een
+verse database en is meermaals achter elkaar draaibaar zonder fouten.
+
+Migraties die nog niet zijn uitgevoerd staan in `supabase/migrations/`. Op dit
+moment ligt `20260803_retouren.sql` klaar: die hoort bij het retourscherm in
+`/beheer` dat nog gebouwd moet worden, en doet zonder dat scherm niets.
+
+---
+
+## 7. Orderbeheer
+
+`/beheer` draait op één wachtwoord (`ADMIN_PASSWORD_HASH`). Daar zie je
+bestellingen, zet je ze op verzonden of bezorgd, en verwerk je terugbetalingen.
+
+Het klantportaal op `/bestelling/<token>` werkt op een ondertekend
+capability-token uit de bevestigingsmail — geen account nodig.
+
+Wat je na de eerste echte bestelling controleert:
+
+- Staat de bestelling in `/beheer`?
+- Zet hem op verzonden met een tracking en kijk of de mail aankomt
+- Open de klantlink onderaan de orderpagina en controleer de tijdlijn
+- Zet hem op bezorgd en controleer de tijdlijn opnieuw
+
+Mail loopt via een outbox: elke mail wordt eerst vastgelegd in
+`uitgaande_mail` en pas daarna verstuurd. Blijft er iets op `wacht` staan, dan
+gaat het alsnog de deur uit bij de volgende cron of via "Nu verwerken" in
+`/beheer`. Vercel Hobby staat één cron per dag toe; bij drops van honderden
+stuks wil je Pro met een cron per uur.
+
+---
+
+## 8. Dingen die je niet moet doen
 
 - **De Dependabot-branch `astro-7.0.7` mergen.** Astro 7 is eerder
   teruggedraaid wegens een whitespace-regressie op elke pagina (#27). Zie
@@ -220,10 +294,18 @@ build uit cache gekomen.
   standaard en gooit `MX`, SPF, DKIM en DMARC weg. Je mail ligt er dan uit.
 - **Rechtstreeks op `main` committen.** De productiebranch bouwt direct naar
   het live domein.
+- **Prijzen wijzigen via `seed.sql`.** Zie hoofdstuk 6: het lijkt te werken en
+  doet niets.
+- **`AUTH_SECRET` roteren.** Alle volglinks die al in mailboxen van klanten
+  liggen verlopen dan. Zet hem één keer goed.
+- **Een `$` in `ADMIN_PASSWORD_HASH`.** De hash gebruikt dubbele punten als
+  scheidingsteken; een `$` in een env-waarde wordt als variabele gelezen,
+  waarna de salt verdwijnt en het juiste wachtwoord een 401 geeft zonder
+  enige foutmelding.
 
 ---
 
-## 7. Waar de bron van waarheid ligt
+## 9. Waar de bron van waarheid ligt
 
 Wijzig gegevens op één plek; de rest volgt automatisch.
 
@@ -239,3 +321,59 @@ Wijzig gegevens op één plek; de rest volgt automatisch.
 Hardcodeer geen bedragen, adressen of termijnen in een pagina. Dat is eerder
 misgegaan: verzendkosten stonden op vijf plekken los ingetypt en liepen uit
 de pas met wat de checkout werkelijk rekende.
+
+---
+
+## 10. Openstaande punten
+
+Overgenomen uit de opleverchecklist, die in dit document is opgegaan.
+Werk ze bij wanneer ze veranderen; dit is de enige plek waar ze staan.
+
+### Nog te beslissen
+
+| | Vraag | Waarom het uitmaakt |
+|---|---|---|
+| 🔴 | **Heet de hoodie "Olijfgroen"?** De foto is saliegroen (gemeten `#828875`), niet olijf. Het kleurstaal is met de foto gelijkgetrokken; de naam is een keuze: hernoemen of opnieuw fotograferen. | Kleurverwachting versus levering is dé retouroorzaak in fashion |
+| 🔴 | **Blijven de sokken in de shop?** Ze hebben nu het logo als productfoto, 256×256 uitgerekt in een 600×750 kader. | Twee van de vijf producten hebben geen echte foto |
+| 🟠 | **Klopt "Vercel Web Analytics gebruikt geen cookies"?** Zo staat het in het cookiebeleid, omdat het product cookieloos is. | Klopt het niet, dan is er wél een cookiebanner nodig |
+| 🟠 | **Worden `/drops` en `/brands` gevuld, of eruit?** Beide staan op `noindex` en buiten de sitemap. `/brands` is bovendien uit de navigatie gehaald. | Lege pagina's in de nav kosten vertrouwen |
+| 🟢 | **Dubbele opt-in op de nieuwsbrief?** Nu enkele opt-in met een expliciete toestemmingscheckbox. | Dubbele opt-in is bewijsbaarder bij een AVG-klacht |
+
+### Bekende grenzen
+
+| | Onderwerp | Toelichting |
+|---|---|---|
+| 🔴 | **Echte productfotografie** | De beelden ogen als AI-mockups, met wisselende achtergrondkleuren tussen voor- en achterkant. Op de achterkantfoto's is geen borduursel te zien, terwijl Het Atelier "geborduurd, niet geprint" als kernbelofte voert. Voor een merk dat op vakmanschap leunt is dit de investering met de hoogste opbrengst. |
+| 🟠 | **Geen 2FA op `/beheer`** | Eén wachtwoord. Voor een eenmanszaak verdedigbaar, maar een tweede factor is de logische volgende stap. |
+| 🟠 | **Retourscherm ontbreekt** | `src/lib/retour.ts` rekent de terugbetaling uit en is getest, maar er is nog geen scherm in `/beheer` en de tabellen uit `20260803_retouren.sql` zijn niet uitgerold. Retouren verwerk je nu handmatig. |
+| 🟢 | **Telefoonnummer ontbreekt** | Staat als `PENDING` in `business.ts`. Niet verplicht, wel een sterk vertrouwenssignaal in een webshop. |
+| 🟢 | **CSP heeft `'unsafe-inline'`** | Nodig omdat Astro inline scripts genereert en er bij een statische build geen nonce per request bestaat. Alle plekken waar HTML uit variabelen wordt samengesteld escapen hun invoer; dat is geverifieerd. |
+| 🟢 | **3D-viewer staat uit** | Zet je hem aan, dan laadt `@google/model-viewer` decoders van `gstatic.com` en `jsdelivr.net`. Die staan niet in de CSP, dus de viewer blijft zwart zonder zichtbare fout. |
+| 🟢 | **DNSSEC staat uit** | Uitgezet voor een nameserververhuizing die uiteindelijk niet nodig bleek. Het register heeft geen DS-sleutel meer. Opnieuw activeren bij Strato mag, maar heeft geen haast. |
+
+### Afgerond
+
+- **Supabase** — uitgerold 2 augustus 2026. 16 tabellen met RLS, 10 functies, 5 gepubliceerde producten met 15 varianten en voorraad. De adviseur meldt tienmaal `rls_enabled_no_policy` op INFO-niveau; dat is het ontwerp, niet een probleem: RLS aan zonder policies betekent dicht voor de publieke sleutel, en alleen de servercode komt erbij met de service-role key.
+- **Bedrijfsgegevens** — btw-id, bezoekadres, postadres en retouradres staan in `business.ts`. Alleen het telefoonnummer is nog `PENDING`.
+- **Resend** — domein geverifieerd, DKIM op `resend._domainkey`, SPF op subdomein `send`. DMARC op `p=none` met rapportage naar `contact@villa-happ.nl`; verzwaren naar `p=quarantine` zodra de rapporten schoon zijn.
+- **Mailadres** — `contact@villa-happ.nl` bestaat en `MAIL_FROM` staat er in Vercel op.
+- **Mollie** — sleutel staat op `live_`. Zet in het Mollie-dashboard iDEAL, Bancontact, Mastercard en Visa aan; dat zijn precies de vier die de site toont. De webhook-URL is `https://villa-happ.nl/api/checkout/webhook`.
+- **Domein** — `villa-happ.nl` live op Vercel, `www` doet een 308 naar de apex, HSTS actief.
+
+### Eerste echte bestelling
+
+De sleutel staat op live, dus dit kost echt geld. Doe één bestelling en
+controleer:
+
+1. Betaling voltooien → "Welkom in het archief", mandje leeg, bevestigingsmail
+2. Betaling annuleren → "Er is niets afgeschreven", **mandje intact**, geen bestelling
+3. Controleer in Supabase dat bij 2 de voorraad is teruggegeven (`inventory.reserved` omlaag)
+4. Loop daarna het orderbeheer na, zie hoofdstuk 7
+
+Scenario 2 is de belangrijkste: die ging eerder mis doordat de bedanktpagina
+"bedankt" zei zonder de betaling te controleren.
+
+### Google
+
+- Search Console is al geverifieerd via het TXT-record; sitemap indienen op `https://villa-happ.nl/sitemap.xml`
+- Rich Results Test draaien op een productpagina (ProductGroup + FAQ + Breadcrumb)

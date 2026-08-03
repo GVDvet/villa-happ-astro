@@ -35,7 +35,7 @@ export const BRAND = {
    */
   locality: 'Waalwijk',
   country: 'NL',
-  founder: 'Toni Kuijpers',
+  founder: 'Tony Kuijsters',
   /** De derde generatie die het merk terughaalde en in 2026 heropstartte */
   steward: 'Rutger van Happen',
   slogan: 'Stap voor stap, sinds 1960.',
@@ -48,7 +48,7 @@ export const BRAND = {
     'Villa Happ is een Nederlands heritage lifestylelabel uit Waalwijk, in 1960 in Tilburg opgericht als Babyparadijs en in 2026 heropgericht door de derde generatie. Het merk maakt genummerde, gelimiteerde oplages van zwaar biologisch katoen.',
   /** Kernfeiten, kort en citeerbaar (voor llms.txt en answer-first content) */
   facts: [
-    'Opgericht in 1960 in Tilburg door Toni Kuijpers, aanvankelijk als kinderspeciaalzaak Babyparadijs.',
+    'Opgericht in 1960 in Tilburg door Tony Kuijsters, aanvankelijk als kinderspeciaalzaak Babyparadijs.',
     'In 2007 gaf de vakpers het merk de bijnaam The Comeback Kid na een terugkoop door de familie.',
     'In 2021 haalde Rutger van Happen, kleinzoon van de oprichters, de merkrechten terug naar de familie.',
     'In 2026 keerde Villa Happ terug als lifestylelabel, met een Back-Cap in een genummerde oplage van 500 stuks met certificaat.',

@@ -96,10 +96,9 @@ docs/                 workflow, retourbeleid, Astro 7-migratie
 
 | Document | Waarover |
 |---|---|
-| [`docs/workflow.md`](docs/workflow.md) | **Deploy, repositories, DNS, env-variabelen.** Begin hier. |
+| [`docs/workflow.md`](docs/workflow.md) | **Deploy, repositories, DNS, env-variabelen, prijzen wijzigen, orderbeheer en openstaande punten.** Begin hier. |
 | [`docs/retourbeleid.md`](docs/retourbeleid.md) | Retourregeling en de rekenregel; leidend boven de code |
 | [`docs/astro-7-migratie.md`](docs/astro-7-migratie.md) | Waarom Astro 7 is teruggedraaid |
-| [`OPLEVERING.md`](OPLEVERING.md) | Opleverchecklist en openstaande punten |
 
 ## Licentie
 
