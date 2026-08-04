@@ -13,38 +13,78 @@ minuten terug. Verloren mail komt niet terug.
 |---|---|
 | `villahapp.nl` | registrar Nameshift, nameservers `ns1/ns2/xmhvxw.ns3.nameshift.com` |
 | | A-record `5.83.210.1` (geparkeerd), geen MX, geen TXT |
-| | **DNSSEC staat AAN** — dit blokkeert stap 3 |
+| | **DNSSEC staat AAN** — dit blokkeert stap 7 |
 | `villa-happ.nl` | registrar Strato, DNS bij Strato, site op Vercel, mail Microsoft 365 |
 | Vercel-project | `villa-happ-astro`, team `villa-happ-project` |
 
-Je verhuiscode blijft geldig. De registratie hoeft niet mee te verhuizen om
-dit af te ronden; dat kan later, of nooit.
+Bij Nameshift is er geen beheertoegang — alleen een verhuiscode. Daarom
+begint dit met de verhuizing: zolang het domein daar staat kun je geen
+nameservers, geen records en geen DNSSEC wijzigen.
 
 ---
 
-## Stap 1 — DNSSEC uitzetten bij Nameshift
+## Stap 1 — Verhuizen naar een registrar die je zelf beheert
 
-**Dit eerst, en dit is de enige stap waarmee je het domein echt onbereikbaar
-kunt maken.**
+Zonder eigen paneel kun je niets. De verhuizing is dus geen sluitstuk maar
+de eerste handeling.
 
-`villahapp.nl` heeft een DS-sleutel bij SIDN. Zet je straks de nameservers om
-terwijl die er nog staat, dan verwachten resolvers een handtekening die de
-nieuwe zone niet kan geven, en verklaren ze het domein ongeldig — site én
-mail, zonder foutmelding die je ergens ziet. Vercel DNS ondersteunt DNSSEC
-niet, dus het moet uit blijven.
+Kies een registrar waar je een account hebt. **Strato** ligt voor de hand:
+daar staat `villa-happ.nl` al. Let op dat het Domeinpakket .nl één gratis
+domein bevat; een tweede kost extra (rond de tien euro per jaar). Een andere
+Nederlandse registrar mag net zo goed — de rest van dit runbook verandert er
+niet door.
 
-Zet DNSSEC uit in het Nameshift-paneel en wacht tot de sleutel bij het
-register weg is. Controleren:
+Bij Strato: **Domeinen → Domein verhuizen**, `villahapp.nl` invullen en de
+verhuiscode plakken.
+
+> **Nameservers tijdens de verhuizing.** Vraagt de registrar hierom, kies dan
+> zijn eigen standaard nameservers, niet die van Vercel. Er staat nog niets
+> op dit domein, dus je verliest niets — en je voorkomt dat je nameservers
+> omzet terwijl DNSSEC nog aan staat. Dat is precies de combinatie die het
+> domein onbereikbaar maakt.
+
+Een `.nl`-verhuizing gaat meestal binnen een dag rond. Controleren:
+
+```bash
+nslookup -type=NS villahapp.nl 8.8.8.8
+```
+
+Staan daar de nameservers van je nieuwe registrar in plaats van
+`*.nameshift.com`, dan ben je binnen.
+
+> **Even kijken of je écht niets kunt bij Nameshift.** Zij verkopen domeinen
+> via een marktplaats en geven soms een tijdelijk account bij je aankoop. Kun
+> je daar wél inloggen en DNSSEC uitzetten, dan mag stap 3 meteen — maar
+> verhuizen blijft verstandig, want je wilt het domein op je eigen naam en in
+> je eigen beheer hebben.
+
+---
+
+## Stap 2 — DNSSEC uitzetten bij je nieuwe registrar
+
+**De enige stap waarmee je het domein echt onbereikbaar kunt maken.**
+
+`villahapp.nl` heeft nu een DS-sleutel bij SIDN. Zet je straks de nameservers
+om naar Vercel terwijl die er nog staat, dan verwachten resolvers een
+handtekening die de nieuwe zone niet kan geven en verklaren ze het domein
+ongeldig — site én mail, zonder foutmelding die je ergens ziet. Vercel DNS
+ondersteunt DNSSEC niet, dus het moet uit blijven.
+
+Een `.nl`-verhuizing wist de DS-sleutel vaak vanzelf, omdat de nieuwe
+registrar zijn eigen gegevens bij SIDN aanmeldt. Vaak, niet altijd. Controleer
+het dus:
 
 ```bash
 nslookup -type=DS villahapp.nl 8.8.8.8
 ```
 
-Ga pas verder als er geen DS-record meer terugkomt. Reken op enkele uren.
+Komt er nog een DS-record terug, zet DNSSEC dan uit in het paneel van je
+nieuwe registrar en wacht tot het weg is. Reken op enkele uren. Pas als deze
+controle leeg blijft, ga je verder.
 
 ---
 
-## Stap 2 — Domein toevoegen aan het Vercel-project
+## Stap 3 — Domein toevoegen aan het Vercel-project
 
 Vercel → project `villa-happ-astro` → **Settings → Domains → Add**.
 
@@ -53,7 +93,7 @@ villahapp.nl** (308), net als bij het oude domein.
 
 Vercel toont dan de DNS-records die het verwacht. Noteer de **CNAME-waarde
 voor `www`** — dat is een unieke hostnaam per domein (iets als
-`<hash>.vercel-dns-017.com`). Die heb je in stap 4 nodig.
+`<hash>.vercel-dns-017.com`). Die heb je in stap 5 nodig.
 
 Voor de apex hoef je niets te noteren: zodra de nameservers bij Vercel staan,
 maakt Vercel daar zelf een ALIAS-record voor aan. Dat is precies het record
@@ -63,7 +103,7 @@ Beide domeinen blijven voorlopig op *Invalid Configuration* staan. Klopt.
 
 ---
 
-## Stap 3 — Microsoft 365: domein toevoegen
+## Stap 4 — Microsoft 365: domein toevoegen
 
 Nog vóór de nameserverwissel, zodat de mailrecords al klaarstaan.
 
@@ -77,7 +117,7 @@ niet kan voorspellen:
 - een `MX`-host, meestal in de vorm `villahapp-nl.mail.protection.outlook.com`
 - een `CNAME` voor `autodiscover`
 
-Noteer ze; ze gaan in stap 4 de Vercel-zone in. Verifiëren lukt pas nadat de
+Noteer ze; ze gaan in stap 5 de Vercel-zone in. Verifiëren lukt pas nadat de
 nameservers om zijn — dat is normaal, laat het domein zolang op "in
 behandeling" staan.
 
@@ -99,18 +139,18 @@ verlies je niets — en die moet je toch aanhouden voor de redirects.
 
 ---
 
-## Stap 4 — Zone opbouwen in Vercel DNS
+## Stap 5 — Zone opbouwen in Vercel DNS
 
 Vercel → **Domains** (het accountbrede menu, niet in het project) →
 `villahapp.nl` → **DNS Records**.
 
-Voer in wat je in stap 3 hebt gekregen, plus de vaste records:
+Voer in wat je in stap 4 hebt gekregen, plus de vaste records:
 
 | Type | Naam | Waarde |
 |---|---|---|
-| `CNAME` | `www` | de waarde uit stap 2 |
-| `MX` | *(leeg)* | de M365-host uit stap 3, prioriteit 10 |
-| `TXT` | *(leeg)* | `MS=…` uit stap 3 |
+| `CNAME` | `www` | de waarde uit stap 3 |
+| `MX` | *(leeg)* | de M365-host uit stap 4, prioriteit 10 |
+| `TXT` | *(leeg)* | `MS=…` uit stap 4 |
 | `TXT` | *(leeg)* | `v=spf1 include:spf.protection.outlook.com -all` |
 | `TXT` | `_dmarc` | `v=DMARC1; p=none; rua=mailto:contact@villahapp.nl` |
 | `CNAME` | `autodiscover` | `autodiscover.outlook.com.` |
@@ -118,11 +158,11 @@ Voer in wat je in stap 3 hebt gekregen, plus de vaste records:
 Laat het naamveld leeg voor records op het hoofddomein. **Maak geen
 A-record** — dat regelt Vercel zelf.
 
-De Resend-records volgen in stap 5.
+De Resend-records volgen in stap 6.
 
 ---
 
-## Stap 5 — Resend opnieuw verifiëren
+## Stap 6 — Resend opnieuw verifiëren
 
 Je DKIM staat nu op `resend._domainkey.villa-happ.nl` en je SPF op
 `send.villa-happ.nl`. Die gelden **niet** voor het nieuwe domein.
@@ -144,11 +184,11 @@ Sla dit niet over. Zonder deze records bouncen je orderbevestigingen zodra
 
 ---
 
-## Stap 6 — Nameservers omzetten
+## Stap 7 — Nameservers omzetten
 
-Pas nu, en alleen als stap 1 bevestigd is.
+Pas nu, en alleen als de DS-controle uit stap 2 leeg bleef.
 
-Bij Nameshift, nameservers vervangen door:
+In het paneel van je nieuwe registrar, nameservers vervangen door:
 
 ```
 ns1.vercel-dns.com
@@ -168,7 +208,7 @@ automatisch SSL-certificaten uit. Verifieer daarna het domein in Microsoft
 
 ---
 
-## Stap 7 — De site omzetten
+## Stap 8 — De site omzetten
 
 Nu pas. Code eerst, dan de domeinen in Vercel.
 
@@ -223,7 +263,7 @@ zijn op pad gebaseerd en gelden dus op elk domein dat de site serveert.
 
 ---
 
-## Stap 8 — Google
+## Stap 9 — Google
 
 1. **Search Console:** nieuwe Domein-property voor `villahapp.nl`, verifiëren
    via DNS-TXT, sitemap indienen op `https://villahapp.nl/sitemap.xml`
@@ -239,7 +279,7 @@ script staat, ongeacht het domein.
 
 ---
 
-## Stap 9 — Wat je daarna nooit moet doen
+## Stap 10 — Wat je daarna nooit moet doen
 
 **`villa-happ.nl` laten verlopen.** De 301's moeten jaren blijven staan,
 anders verlies je alle opgebouwde linkwaarde in één keer. En je oude
@@ -250,9 +290,17 @@ Reken op minimaal twee jaar, en eigenlijk gewoon: aanhouden.
 
 ---
 
-## Later, als je wilt
+## Als je later nóg eens verhuist
 
-De registratie van `villahapp.nl` verhuizen van Nameshift naar Strato met je
-verhuiscode. Dat kan op elk moment en blokkeert niets. Let er wel op dat
-sommige registrars bij een transfer de nameservers terugzetten op hun eigen
-standaard — controleer daarna dus of ze nog op Vercel staan.
+Verhuis je de registratie ooit opnieuw, bijvoorbeeld van je huidige
+registrar naar Strato om alles op één plek te hebben: dat kan op elk moment
+en blokkeert niets. Let er wel op dat sommige registrars bij een transfer de
+nameservers terugzetten op hun eigen standaard. Controleer daarna dus of ze
+nog op Vercel staan, en of DNSSEC niet stilletjes weer is aangezet.
+
+```bash
+nslookup -type=NS villahapp.nl 8.8.8.8
+nslookup -type=DS villahapp.nl 8.8.8.8
+```
+
+De eerste moet `vercel-dns.com` geven, de tweede niets.
