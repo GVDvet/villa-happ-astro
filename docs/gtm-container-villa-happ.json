@@ -7,7 +7,7 @@
     "containerId": "0",
     "containerVersionId": "0",
     "name": "Villa Happ - GA4 en Ads",
-    "description": "Meetopstelling volgens docs/meetplan.md. Vul na import de variabele 'GA4 Meet-ID' met je G-nummer; alle tags lezen die variabele.",
+    "description": "Meetopstelling volgens docs/meetplan.md. Het GA4-meet-ID staat in de variabele GA4 Meet-ID; alle tags lezen die variabele.",
     "container": {
       "path": "accounts/0/containers/0",
       "accountId": "0",
@@ -23,9 +23,9 @@
         "variableId": "1",
         "name": "GA4 Meet-ID",
         "type": "c",
-        "notes": "Het meet-ID van de GA4-webstream (G-XXXXXXXXXX). Dit is de enige plek waar het staat; alle tags verwijzen hiernaar.",
+        "notes": "Het meet-ID van de GA4-webstream. Dit is de enige plek waar het staat; alle tags verwijzen hiernaar. Wijzig je van property, dan pas je alleen dit aan.",
         "parameter": [
-          { "type": "TEMPLATE", "key": "value", "value": "G-VULHIERIN" }
+          { "type": "TEMPLATE", "key": "value", "value": "G-KJH1QEH8HZ" }
         ]
       },
       {

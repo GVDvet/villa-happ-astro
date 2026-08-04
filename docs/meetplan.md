@@ -15,7 +15,7 @@ duiden. Wijkt de implementatie hiervan af, dan is de implementatie fout.
 | Tijdzone | Europe/Amsterdam |
 | CMP | Eigen banner (`src/components/layout/ConsentBanner.astro`) |
 | GTM-container | `GTM-PBFNLZ2M`, staat live |
-| GA4-property | aangemaakt, gekoppeld aan Search Console, Google-signalen aan |
+| GA4-property | `G-KJH1QEH8HZ`, gekoppeld aan Search Console, Google-signalen aan |
 | Google Ads | nog aan te maken; conversie via import van de GA4-key events |
 | Bestaande tags | Geen. Alleen Vercel Web Analytics (cookieloos, blijft staan) |
 
@@ -125,10 +125,15 @@ uit dit meetplan. Importeren gaat zo:
 
 1. GTM → **Beheer → Container importeren**
 2. Kies het bestand, selecteer **Bestaande werkruimte** (of maak een nieuwe)
-3. Kies **Samenvoegen** en daarbinnen **Conflicten overschrijven**. Neem
-   nooit *Overschrijven* op containerniveau: dat wist wat er al staat.
-4. Open daarna de variabele **GA4 Meet-ID** en vul je `G-`-nummer in. Dat is
-   de enige plek waar het staat; alle tags verwijzen ernaar.
+3. Kies **Overschrijven**, niet Samenvoegen. Bij samenvoegen blijft een
+   eventueel bestaande `Google-tag` staan náást `Google-tag - GA4`, en dan
+   configureren twee tags dezelfde property — dubbele pageviews.
+
+   > Controleer wél eerst het verwijderlijstje in het voorbeeldscherm. Staat
+   > daar iets dat je wilt houden, exporteer de werkruimte dan eerst.
+4. Het meet-ID `G-KJH1QEH8HZ` staat al in de variabele **GA4 Meet-ID**;
+   alle tags verwijzen ernaar. Wijzig je ooit van property, dan is dat de
+   enige plek die je aanpast.
 5. **Voorbeeldmodus** aanzetten en het testscenario hierboven doorlopen
 6. Publiceren met een versienaam
 
