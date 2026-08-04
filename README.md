@@ -98,6 +98,7 @@ docs/                 workflow, retourbeleid, Astro 7-migratie
 |---|---|
 | [`docs/workflow.md`](docs/workflow.md) | **Deploy, repositories, DNS, env-variabelen, prijzen wijzigen, orderbeheer en openstaande punten.** Begin hier. |
 | [`docs/retourbeleid.md`](docs/retourbeleid.md) | Retourregeling en de rekenregel; leidend boven de code |
+| [`docs/meetplan.md`](docs/meetplan.md) | Wat we meten in GA4 en Google Ads, en waarop het vuurt |
 | [`docs/astro-7-migratie.md`](docs/astro-7-migratie.md) | Waarom Astro 7 is teruggedraaid |
 
 ## Licentie

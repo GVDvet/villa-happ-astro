@@ -614,6 +614,7 @@ const pdpData = {
 
 <script>
   import { addToCart, openCart } from '../../lib/cart';
+  import { trackViewItem, trackAddToCart } from '../../lib/analytics';
   import { toggleWishlist, inWishlist } from '../../lib/wishlist';
   import { recordRecent, getRecent } from '../../lib/recent';
   import { flyToCart } from '../../lib/fx';
@@ -626,6 +627,13 @@ const pdpData = {
   const ac = new AbortController();
 
   const data = JSON.parse(dataEl.textContent!);
+
+  trackViewItem({
+    item_id: data.slug,
+    item_name: data.name,
+    ...(data.color ? { item_variant: data.color } : {}),
+    price_cents: data.price_cents,
+  });
 
   /* 3D-viewer alleen laden op producten met een model (eigen bundle,
      code-split; geen Google CDN meer) */
@@ -757,6 +765,13 @@ const pdpData = {
       unit_price_cents: data.price_cents,
       image_url: data.image,
       slug: data.slug,
+    });
+    trackAddToCart({
+      item_id: data.slug,
+      item_name: data.name,
+      item_variant: `${data.color} / ${selected.size}`,
+      price_cents: data.price_cents,
+      quantity: 1,
     });
     // Vlieg-naar-mandje vanaf de geklikte knop, dan pas de drawer openen
     const btn = (e?.currentTarget as HTMLElement) || addBtn;

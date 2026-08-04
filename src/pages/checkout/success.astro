@@ -90,6 +90,7 @@ const levEU = levertijdIndicatie('BE');
 
 <script>
   import { clearCart } from '../../lib/cart';
+  import { trackPurchase, type AnalyticsItem } from '../../lib/analytics';
   import { onPageReady } from '../../lib/page';
 
   onPageReady(() => {
@@ -142,6 +143,12 @@ const levEU = levertijdIndicatie('BE');
     titleEl.innerHTML = copy.title; // vaste opmaak, geen invoer van buiten
     leadEl.textContent = leadOverride || copy.lead;
   };
+
+  // Meetgegevens uit het API-antwoord; gevuld zodra de status 'paid' is.
+  let gemetenOrderNummer = '';
+  let gemetenTotaal = 0;
+  let gemetenVerzending = 0;
+  let gemetenItems: AnalyticsItem[] = [];
 
   const params = new URLSearchParams(window.location.search);
   // Alleen het token: het bestelnummer komt uit het antwoord van de API, zodat
@@ -201,13 +208,35 @@ const levEU = levertijdIndicatie('BE');
       if (res.ok) {
         const json = await res.json();
         state = json.state || 'unknown';
-        if (json.order_number) zetNummer(json.order_number);
+        if (json.order_number) { zetNummer(json.order_number); gemetenOrderNummer = json.order_number; }
         if (json.land) zetBezorging(json.land);
+        if (json.meting) {
+          gemetenTotaal = json.meting.total_cents || 0;
+          gemetenVerzending = json.meting.shipping_cents || 0;
+          gemetenItems = (json.meting.items || []).map((i: any) => ({
+            item_id: i.name,
+            item_name: i.name,
+            item_variant: i.variant,
+            // De API geeft het regeltotaal; GA4 wil de stuksprijs.
+            price_cents: i.quantity > 0 ? Math.round(i.total_cents / i.quantity) : i.total_cents,
+            quantity: i.quantity,
+          }));
+        }
       }
     } catch { /* netwerkfout: hieronder afgehandeld als 'unknown' */ }
 
     if (state === 'paid') {
       clearCart(); // pas nu: de bestelling staat vast
+      // Conversie pas hier, op de bevestigde betaling. Zou dit op paginaladen
+      // vuren, dan telde elke afgebroken betaling als omzet — Mollie stuurt
+      // de klant immers bij élke afloop hierheen. trackPurchase negeert een
+      // leeg bestelnummer, dus een reload levert nooit een tweede aankoop.
+      trackPurchase({
+        orderNumber: gemetenOrderNummer,
+        totalCents: gemetenTotaal,
+        shippingCents: gemetenVerzending,
+        items: gemetenItems,
+      });
       show('paid');
       return;
     }

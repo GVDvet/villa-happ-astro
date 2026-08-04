@@ -1,0 +1,195 @@
+---
+/**
+ * Cookiebanner — tevens de CMP van deze site.
+ *
+ * Verschijnt alleen als er nog geen geldige keuze is. Twee knoppen die
+ * gelijkwaardig zijn opgemaakt: weigeren mag niet moeilijker of minder
+ * zichtbaar zijn dan accepteren, dat is een harde eis van de AP.
+ *
+ * De banner rendert altijd in de HTML maar staat op `hidden`; het script
+ * beslist of hij zichtbaar wordt. Zo is er geen sprong bij het laden en
+ * werkt hij ook na een SPA-swap.
+ */
+---
+<div class="vh-consent" id="vh-consent" hidden role="dialog" aria-modal="false"
+     aria-labelledby="vh-consent-title" aria-describedby="vh-consent-text">
+  <div class="vh-consent-inner">
+    <div class="vh-consent-copy">
+      <p class="vh-consent-title" id="vh-consent-title">Cookies</p>
+      <p class="vh-consent-text" id="vh-consent-text">
+        We meten hoe de site gebruikt wordt en willen onze advertenties kunnen
+        aansluiten op wat je hier zag. Dat mag alleen met je toestemming.
+        Weiger je, dan werkt de winkel gewoon door.
+        <a href="/cookies">Lees het cookiebeleid</a>.
+      </p>
+
+      <div class="vh-consent-detail" id="vh-consent-detail" hidden>
+        <label class="vh-consent-row">
+          <input type="checkbox" checked disabled />
+          <span><b>Noodzakelijk</b> — je mandje, je verlanglijst en je
+          toestemmingskeuze. Staat altijd aan, want zonder werkt de winkel niet.</span>
+        </label>
+        <label class="vh-consent-row">
+          <input type="checkbox" id="vh-consent-analytics" />
+          <span><b>Statistieken</b> — welke pagina's worden bekeken en waar
+          mensen afhaken (Google Analytics).</span>
+        </label>
+        <label class="vh-consent-row">
+          <input type="checkbox" id="vh-consent-ads" />
+          <span><b>Advertenties</b> — meten welke advertentie tot een
+          bestelling leidde, en advertenties afstemmen op je bezoek (Google Ads).</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="vh-consent-actions">
+      <button type="button" class="vh-btn vh-btn--accent" id="vh-consent-all"><span>Alles accepteren</span></button>
+      <button type="button" class="vh-btn vh-btn--ghost" id="vh-consent-none"><span>Alleen noodzakelijk</span></button>
+      <button type="button" class="vh-consent-more" id="vh-consent-toggle" aria-expanded="false">Zelf kiezen</button>
+      <button type="button" class="vh-btn vh-btn--ghost" id="vh-consent-save" hidden><span>Keuze opslaan</span></button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .vh-consent {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 9000;
+    background: var(--vh-ink);
+    color: var(--vh-paper);
+    border-top: 1px solid rgba(247, 243, 236, 0.12);
+    padding: clamp(18px, 3vw, 26px) var(--vh-gutter);
+  }
+  .vh-consent[hidden] { display: none; }
+
+  .vh-consent-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    gap: clamp(20px, 4vw, 48px);
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .vh-consent-copy { flex: 1 1 420px; min-width: 0; }
+
+  .vh-consent-title {
+    font-family: var(--vh-font-mono);
+    font-size: 10px;
+    letter-spacing: var(--vh-tracking-widest);
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.55);
+    margin: 0 0 8px;
+  }
+  .vh-consent-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(247, 243, 236, 0.85);
+    margin: 0;
+    max-width: 62ch;
+  }
+  .vh-consent-text a { color: var(--vh-paper); text-decoration: underline; text-underline-offset: 3px; }
+
+  .vh-consent-detail { margin-top: 16px; display: grid; gap: 10px; }
+  .vh-consent-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(247, 243, 236, 0.75);
+    cursor: pointer;
+  }
+  .vh-consent-row input {
+    margin-top: 3px;
+    width: 16px; height: 16px;
+    accent-color: var(--vh-accent);
+    flex: none;
+  }
+  .vh-consent-row input:disabled { opacity: 0.5; cursor: default; }
+  .vh-consent-row b { color: var(--vh-paper); font-weight: 500; }
+
+  .vh-consent-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    flex: none;
+  }
+
+  /* Tekstknop, maar met een tap-target van 24px zoals de rest van de site. */
+  .vh-consent-more {
+    background: none;
+    border: 0;
+    color: rgba(247, 243, 236, 0.7);
+    font-family: inherit;
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 8px 4px;
+    min-height: 24px;
+  }
+  .vh-consent-more:hover { color: var(--vh-paper); }
+
+  @media (max-width: 720px) {
+    .vh-consent-inner { flex-direction: column; gap: 18px; }
+    .vh-consent-actions { width: 100%; }
+    .vh-consent-actions .vh-btn { flex: 1 1 auto; justify-content: center; }
+  }
+</style>
+
+<script>
+  import { hasChosen, setConsent, applyStoredConsent, onConsentChange } from '../../lib/consent';
+  import { onPageReady } from '../../lib/page';
+
+  // Buiten onPageReady: een bestaande keuze moet zo vroeg mogelijk naar
+  // Google, anders meet een terugkerende bezoeker één weergave lang op de
+  // denied-defaults uit de <head>.
+  applyStoredConsent();
+
+  onPageReady(() => {
+    const box = document.getElementById('vh-consent');
+    if (!box) return;
+
+    const detail = document.getElementById('vh-consent-detail')!;
+    const toggle = document.getElementById('vh-consent-toggle') as HTMLButtonElement;
+    const save = document.getElementById('vh-consent-save') as HTMLButtonElement;
+    const analytics = document.getElementById('vh-consent-analytics') as HTMLInputElement;
+    const ads = document.getElementById('vh-consent-ads') as HTMLInputElement;
+
+    const toon = () => box.removeAttribute('hidden');
+    const verberg = () => box.setAttribute('hidden', '');
+
+    if (!hasChosen()) toon();
+
+    // Vanaf het cookiebeleid kun je je keuze heropenen.
+    const heropen = () => { toon(); box.scrollIntoView({ behavior: 'smooth', block: 'end' }); };
+    window.addEventListener('vh:consent-open', heropen);
+
+    toggle.addEventListener('click', () => {
+      const open = detail.hasAttribute('hidden');
+      detail.toggleAttribute('hidden', !open);
+      save.toggleAttribute('hidden', !open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.textContent = open ? 'Verberg keuzes' : 'Zelf kiezen';
+    });
+
+    document.getElementById('vh-consent-all')!.addEventListener('click', () => {
+      setConsent(true, true); verberg();
+    });
+    document.getElementById('vh-consent-none')!.addEventListener('click', () => {
+      setConsent(false, false); verberg();
+    });
+    save.addEventListener('click', () => {
+      setConsent(analytics.checked, ads.checked); verberg();
+    });
+
+    const off = onConsentChange((c) => { if (c === null) toon(); });
+
+    return () => {
+      window.removeEventListener('vh:consent-open', heropen);
+      off();
+    };
+  });
+</script>

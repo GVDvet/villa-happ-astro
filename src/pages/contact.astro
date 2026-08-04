@@ -103,6 +103,7 @@ const visit = BUSINESS.visitingAddress;
 </Base>
 
 <script>
+  import { trackGenerateLead } from '../lib/analytics';
   import { onPageReady } from '../lib/page';
 
   onPageReady(() => {
@@ -169,6 +170,9 @@ const visit = BUSINESS.visitingAddress;
     sendLabel.textContent = 'Verstuur bericht';
 
     if (data?.success) {
+      // Pas hier: de server bevestigde dat het bericht verstuurd is.
+      // Op de submit meten telt ook de berichten die nooit aankwamen.
+      trackGenerateLead('contact');
       form.hidden = true;
       done.removeAttribute('hidden');
       done.scrollIntoView({ behavior: 'smooth', block: 'center' });

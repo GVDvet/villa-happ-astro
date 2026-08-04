@@ -102,6 +102,7 @@ een checklist:
 | `CRON_SECRET` | back-in-stock-verzender staat open |
 | `RESEND_API_KEY` | geen transactiemail |
 | `MAIL_FROM` | valt terug op de default in `src/lib/mail.ts` |
+| `PUBLIC_GTM_ID` | geen GTM, geen GA4, geen Ads, geen cookiebanner |
 
 `DEV`, `PROD` en `VERCEL_GIT_COMMIT_SHA` hoef je niet te zetten.
 
@@ -377,3 +378,65 @@ Scenario 2 is de belangrijkste: die ging eerder mis doordat de bedanktpagina
 
 - Search Console is al geverifieerd via het TXT-record; sitemap indienen op `https://villa-happ.nl/sitemap.xml`
 - Rich Results Test draaien op een productpagina (ProductGroup + FAQ + Breadcrumb)
+
+---
+
+## 11. Meting (GA4 en Google Ads)
+
+Het meetplan staat in [`meetplan.md`](meetplan.md). Dat gaat vóór de
+implementatie: wijkt de code ervan af, dan is de code fout.
+
+De site-kant is gebouwd en getest, maar staat **uit** tot `PUBLIC_GTM_ID`
+gezet is. Zonder die variabele laadt er geen GTM, verschijnt er geen
+cookiebanner, en zegt `/cookies` dat er niets te kiezen valt. Dat is bewust:
+een banner tonen voor cookies die niemand zet is zelf een overtreding.
+
+### Wat jij nog in Google moet doen
+
+1. **GTM-container** aanmaken op naam van Villa Happ, type Web, met minimaal
+   twee beheerders. Het id (`GTM-…`) gaat als `PUBLIC_GTM_ID` in Vercel,
+   alleen op Production.
+2. **GA4-property** met een webstream, tijdzone Europe/Amsterdam, valuta EUR.
+   Het meet-ID hoort in GTM, **niet** in de code — een tweede meetlijn naast
+   de container levert dubbele `page_view` en `purchase` op.
+3. In GTM: **Google-tag** op *Initialization – All Pages*, en per event uit
+   het meetplan een GA4-eventtag met een Custom Event-trigger.
+4. **Key events** markeren in GA4: alleen `purchase` en `generate_lead`.
+   Nooit `page_view`.
+5. **GA4 aan Google Ads koppelen**, auto-tagging aan, en die twee key events
+   importeren als conversie. Meet dezelfde actie nooit tegelijk als
+   geïmporteerde én native conversie.
+
+### Wat al klaarstaat
+
+- Consent Mode v2, alle vier de signalen standaard op `denied`, gezet in de
+  `<head>` vóór GTM laadt
+- Eigen cookiebanner met gelijkwaardige knoppen, keuze per categorie, en een
+  heropenlink in het cookiebeleid
+- `page_view` op elke SPA-navigatie — zonder dit meet je alleen de eerste
+  pagina van een bezoek
+- `view_item`, `add_to_cart`, `begin_checkout`, `purchase`, `generate_lead`
+- `purchase` op de bevestigde betaling, met het ordertotaal vanaf de server
+
+### Waarom het bedrag van de server komt
+
+`/api/checkout/status` geeft bij een betaalde bestelling het ordertotaal en
+de regels mee. De bedanktpagina zou dat ook uit het mandje kunnen halen, maar
+dat is precies de waarde die een bezoeker kan manipuleren — en het mandje is
+op dat moment al geleegd.
+
+### De CSP hoort erbij
+
+`googletagmanager.com` staat in `script-src`, de Google-meetdomeinen in
+`connect-src` en `img-src`, en `frame-src` staat niet meer op `'none'` omdat
+Ads-conversies een iframe gebruiken. Voeg je een tag toe die een ander domein
+aanspreekt, dan blokkeert de browser hem — zonder duidelijke melding, met een
+lege property als gevolg.
+
+### Testen kan niet op localhost
+
+`isPreviewHost()` telt localhost als preview, dus GTM laadt daar bewust niet.
+De logica is in plaats daarvan afgedekt met unit tests
+(`tests/consent.test.ts`, `tests/analytics.test.ts`). Voor een echte
+end-to-end test gebruik je Tag Assistant en GA4 DebugView op productie; het
+scenario staat onderaan het meetplan.

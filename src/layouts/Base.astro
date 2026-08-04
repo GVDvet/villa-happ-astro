@@ -3,6 +3,7 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import { ClientRouter } from 'astro:transitions';
 import CartDrawer from '../components/commerce/CartDrawer.astro';
+import ConsentBanner from '../components/layout/ConsentBanner.astro';
 import { isPreviewHost } from '../lib/site';
 import { srcsetFor, optimizedSrc } from '../lib/img';
 import { organizationLd, websiteLd } from '../lib/entity';
@@ -46,6 +47,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 const ogImageAbs = new URL(ogImage, canonicalURL).toString();
 // Preview-omgeving (*.vercel.app) mag nooit de index in
 const preview = isPreviewHost(canonicalURL.origin);
+
+/**
+ * GTM-container. Zonder PUBLIC_GTM_ID laadt er niets: geen script, geen
+ * noscript-iframe, geen consentbanner. Zo kan de meetopstelling in de code
+ * staan voordat de container bestaat, zonder dat er een banner verschijnt
+ * voor cookies die niemand zet.
+ *
+ * Op previews bewust uit: die zouden anders meetellen in de rapportage.
+ */
+const gtmId = !preview ? (import.meta.env.PUBLIC_GTM_ID || '') : '';
 ---
 
 <!doctype html>
@@ -66,6 +77,36 @@ const preview = isPreviewHost(canonicalURL.origin);
     />
   )}
   <script is:inline>document.documentElement.classList.remove('no-js');</script>
+
+  {gtmId && (
+    <>
+      {/* Consent Mode v2 — MOET vóór het GTM-script staan. Laadt GTM eerder,
+          dan meet Google één weergave lang met volledige opslag terwijl de
+          bezoeker nog niets heeft gekozen. Alle vier de signalen beginnen op
+          denied; src/lib/consent.ts doet daarna de update. */}
+      <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { window.dataLayer.push(arguments); }
+        gtag('consent', 'default', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          wait_for_update: 500,
+        });
+      </script>
+      <script is:inline define:vars={{ gtmId }}>
+        (function (w, d, s, i) {
+          w[ 'dataLayer' ] = w[ 'dataLayer' ] || [];
+          w[ 'dataLayer' ].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+          j.async = true;
+          j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i;
+          f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', gtmId);
+      </script>
+    </>
+  )}
   <script is:inline>
   // Diagnose: vangt de eerste JS-fout; met ?vh-debug in de URL verschijnt
   // een statusoverlay (build, reduce-motion, pins, scrollY, fouten).
@@ -125,6 +166,9 @@ const preview = isPreviewHost(canonicalURL.origin);
 </head>
 
 <body class={`vh-body ${bodyClass}`}>
+  {gtmId && (
+    <noscript set:html={`<iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`} />
+  )}
   <a class="vh-skip-link" href="#main-content">Ga naar inhoud</a>
 
   {showHeader && (
@@ -144,6 +188,19 @@ const preview = isPreviewHost(canonicalURL.origin);
   </div>
 
   <Analytics />
+
+  {gtmId && <ConsentBanner />}
+
+  {gtmId && (
+    <script>
+      {/* De ClientRouter vervangt de DOM zonder pageload, dus GTM ziet geen
+          nieuwe paginaweergave. Zonder dit meet je alleen de eerste pagina
+          van een bezoek. */}
+      import { trackPageView } from '../lib/analytics';
+      import { onPageReady } from '../lib/page';
+      onPageReady(() => { trackPageView(location.pathname, document.title); });
+    </script>
+  )}
 
   <script>
     // Homepage buiten de SPA-router houden: de GSAP/Lenis-motion daar

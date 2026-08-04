@@ -3,18 +3,27 @@ export const prerender = true;
 
 import LegalLayout from '../components/legal/LegalLayout.astro';
 import { LEGAL_UPDATED } from '../lib/legal';
+import { isPreviewHost } from '../lib/site';
 
 /**
- * Cookiebeleid — en de reden dat er geen cookiebanner staat.
+ * Cookiebeleid.
  *
- * De site zet geen trackingcookies. Wat er lokaal wordt opgeslagen zijn
- * functionele items in localStorage (mandje, verlanglijst) die je zelf
- * aanzet door iets toe te voegen. Voor die categorie is geen toestemming
- * vereist (art. 11.7a lid 3 Telecommunicatiewet).
+ * De tekst volgt de werkelijke opstelling. Staat er geen `PUBLIC_GTM_ID`,
+ * dan laadt Base.astro geen GTM en verschijnt er geen banner — en dan hoort
+ * deze pagina dat ook te zeggen. Zodra de container er is, klapt de tekst om
+ * naar de versie met toestemming.
  *
- * Elke regel hieronder is terug te vinden in de code: zie src/lib/cart.ts,
- * wishlist.ts, recent.ts en de sleutels in de PDP en Het Atelier.
+ * Zo kan het cookiebeleid niet uit de pas lopen met wat de site doet. Dat is
+ * geen luxe: een cookiebeleid dat meer of minder claimt dan er gebeurt, is
+ * precies waar een AVG-klacht op landt.
+ *
+ * Elke regel over localStorage is terug te vinden in de code: zie
+ * src/lib/cart.ts, wishlist.ts, recent.ts, consent.ts en de sleutels in de
+ * PDP en Het Atelier.
  */
+
+const canonical = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const meting = !isPreviewHost(canonical.origin) && !!import.meta.env.PUBLIC_GTM_ID;
 
 const stored = [
   { key: 'vh_cart_v1', what: 'Wat er in je winkelmandje ligt', why: 'Anders is je mandje weg zodra je een andere pagina opent', how: 'Tot je het mandje leegt' },
@@ -23,31 +32,96 @@ const stored = [
   { key: 'vh_checkout_form_v1', what: 'Je ingevulde bezorggegevens', why: 'Zodat een refresh of een afgebroken betaling je formulier niet wist', how: 'Tot je de browsertab sluit' },
   { key: 'vh_atelier_claim', what: 'Je geclaimde nummer in Het Atelier', why: 'Om je certificaat terug te kunnen tonen', how: 'Tot je het wist' },
   { key: 'vh_backinstock', what: 'Aangevraagde voorraadmeldingen', why: 'Alleen als de aanvraag niet bij ons aankwam, als vangnet', how: 'Tot je het wist' },
+  ...(meting ? [{ key: 'vh_consent_v1', what: 'Je cookiekeuze', why: 'Zodat we het niet elk bezoek opnieuw vragen', how: '12 maanden, daarna vragen we opnieuw' }] : []),
 ];
 ---
 <LegalLayout
   title="Cookiebeleid"
   heading="Cookies"
   headingAccent="en opslag"
-  intro="Waarom je hier geen cookiebanner ziet, en wat we wél lokaal in je browser bewaren."
-  description="Cookiebeleid van Villa Happ. Geen trackingcookies, geen advertentienetwerken, alleen functionele opslag in je eigen browser."
+  intro={meting
+    ? 'Wat we plaatsen, waarvoor we toestemming vragen, en hoe je je keuze wijzigt.'
+    : 'Waarom je hier geen cookiebanner ziet, en wat we wél lokaal in je browser bewaren.'}
+  description="Cookiebeleid van Villa Happ: welke cookies we plaatsen, waarvoor we toestemming vragen en wat we lokaal in je browser bewaren."
   updated={LEGAL_UPDATED}
 >
-  <section>
-    <h2>Waarom er geen banner staat</h2>
-    <p>
-      Omdat er niets te vragen valt. We plaatsen geen trackingcookies, gebruiken
-      geen advertentienetwerken en volgen je niet over websites heen. Voor
-      opslag die strikt nodig is om de site te laten werken, is geen
-      toestemming vereist. Een banner zou je dus alleen maar om iets vragen wat
-      we niet doen.
-    </p>
-  </section>
+  {meting ? (
+    <>
+      <section>
+        <h2>Waar we toestemming voor vragen</h2>
+        <p>
+          Bij je eerste bezoek verschijnt een keuzescherm. Tot je daar een keuze
+          maakt, plaatsen we geen statistiek- of advertentiecookies en staan alle
+          toestemmingssignalen richting Google op geweigerd. Weiger je, dan werkt
+          de winkel volledig door: je kunt bestellen, betalen en retourneren zonder
+          ergens toestemming voor te geven.
+        </p>
+        <div class="vh-legal-tablewrap">
+          <table class="vh-legal-table">
+            <thead><tr><th>Categorie</th><th>Waarvoor</th><th>Toestemming</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Noodzakelijk</b></td>
+                <td>Je mandje, je verlanglijst en je cookiekeuze. Zonder deze werkt de winkel niet.</td>
+                <td>Niet nodig (art. 11.7a lid 3 Telecommunicatiewet)</td>
+              </tr>
+              <tr>
+                <td><b>Statistieken</b></td>
+                <td>Google Analytics 4: welke pagina's worden bekeken en waar mensen afhaken.</td>
+                <td>Vooraf, per categorie</td>
+              </tr>
+              <tr>
+                <td><b>Advertenties</b></td>
+                <td>Google Ads: meten welke advertentie tot een bestelling leidde, en advertenties afstemmen op je bezoek.</td>
+                <td>Vooraf, per categorie</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          De statistiek- en advertentietags worden geladen via Google Tag Manager.
+          Wij sturen daarbij nooit je naam, e-mailadres, telefoonnummer of adres
+          mee — ook niet bij een bestelling. Wat Google meekrijgt is welke pagina's
+          je bekeek, wat er in je mandje lag en, bij een afgeronde bestelling, het
+          bestelnummer en het bedrag.
+        </p>
+      </section>
+
+      <section>
+        <h2>Je keuze wijzigen</h2>
+        <p>
+          Dat kan op elk moment, en het intrekken van toestemming is net zo
+          makkelijk als het geven ervan.
+        </p>
+        <p>
+          <button type="button" class="vh-btn vh-btn--ghost" id="vh-cookies-heropen">
+            <span>Cookievoorkeuren openen</span>
+          </button>
+        </p>
+        <p style="margin-top:14px;">
+          We vragen je keuze sowieso elke twaalf maanden opnieuw. Wis je je
+          websitegegevens via je browser, dan verdwijnt de keuze ook en verschijnt
+          het scherm bij je volgende bezoek.
+        </p>
+      </section>
+    </>
+  ) : (
+    <section>
+      <h2>Waarom er geen banner staat</h2>
+      <p>
+        Omdat er niets te vragen valt. We plaatsen geen trackingcookies, gebruiken
+        geen advertentienetwerken en volgen je niet over websites heen. Voor
+        opslag die strikt nodig is om de site te laten werken, is geen
+        toestemming vereist. Een banner zou je dus alleen maar om iets vragen wat
+        we niet doen.
+      </p>
+    </section>
+  )}
 
   <section>
-    <h2>Wat we wél bewaren</h2>
+    <h2>Wat we lokaal bewaren</h2>
     <p>
-      Een paar dingen slaan we lokaal op in je eigen browser, in de zogeheten
+      Een paar dingen slaan we op in je eigen browser, in de zogeheten
       localStorage. Die gegevens blijven op jouw apparaat en worden niet naar
       ons of naar derden gestuurd, behalve wanneer je zelf een bestelling
       plaatst.
@@ -75,13 +149,14 @@ const stored = [
   </section>
 
   <section>
-    <h2>Bezoekstatistiek</h2>
+    <h2>Bezoekstatistiek zonder cookies</h2>
     <p>
-      We meten hoeveel mensen welke pagina bekijken met Vercel Web Analytics.
-      Die dienst werkt zonder cookies en zonder een herkenbare bezoekers-ID: er
-      wordt geen profiel opgebouwd en je bent tussen twee bezoeken niet als
-      dezelfde persoon te herkennen. We zien dus wel dát een pagina bezocht is,
-      maar niet door wie.
+      Los van het bovenstaande meten we bezoekersaantallen met Vercel Web
+      Analytics. Die dienst werkt zonder cookies en zonder een herkenbare
+      bezoekers-ID: er wordt geen profiel opgebouwd en je bent tussen twee
+      bezoeken niet als dezelfde persoon te herkennen. We zien dus wel dát een
+      pagina bezocht is, maar niet door wie. Daarvoor is geen toestemming nodig
+      en die vragen we dus ook niet.
     </p>
   </section>
 
@@ -100,9 +175,22 @@ const stored = [
   <section>
     <h2>Wijzigingen</h2>
     <p>
-      Gaan we ooit wél iets gebruiken waarvoor toestemming nodig is, dan komt er
-      een keuzescherm en passen we deze pagina aan. Tot die tijd blijft het bij
-      wat hierboven staat.
+      Verandert er iets aan wat we plaatsen, dan passen we deze pagina aan en
+      vragen we je keuze opnieuw. De datum onderaan geeft aan wanneer dit beleid
+      voor het laatst is bijgewerkt.
     </p>
   </section>
 </LegalLayout>
+
+{meting && (
+  <script>
+    import { onPageReady } from '../lib/page';
+    onPageReady(() => {
+      const btn = document.getElementById('vh-cookies-heropen');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('vh:consent-open'));
+      });
+    });
+  </script>
+)}

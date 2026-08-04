@@ -127,10 +127,20 @@ import '../../styles/shop.css';
 
 <script>
   import { getCart, cartSubtotal, shippingCostCents, cartHasDemo } from '../../lib/cart';
+  import { trackBeginCheckout } from '../../lib/analytics';
   import { onPageReady } from '../../lib/page';
 
   onPageReady(() => {
   if (!document.getElementById('vh-co-form')) return;
+
+  // Alleen bij een gevuld mandje: een lege checkout is geen begonnen aankoop.
+  trackBeginCheckout(getCart().map((i) => ({
+    item_id: i.slug,
+    item_name: i.name,
+    ...(i.variant_label ? { item_variant: i.variant_label } : {}),
+    price_cents: i.unit_price_cents,
+    quantity: i.quantity,
+  })));
 
   const grid = document.getElementById('vh-co-grid')!;
   const empty = document.getElementById('vh-co-empty')!;
