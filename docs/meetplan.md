@@ -14,9 +14,9 @@ duiden. Wijkt de implementatie hiervan af, dan is de implementatie fout.
 | Valuta | EUR |
 | Tijdzone | Europe/Amsterdam |
 | CMP | Eigen banner (`src/components/layout/ConsentBanner.astro`) |
-| GTM-container | **nog aan te maken** → `PUBLIC_GTM_ID` |
-| GA4-property | **nog aan te maken** → meet-ID in GTM, niet in de code |
-| Google Ads | **nog aan te maken** → conversie-ID in GTM |
+| GTM-container | `GTM-PBFNLZ2M`, staat live |
+| GA4-property | aangemaakt, gekoppeld aan Search Console, Google-signalen aan |
+| Google Ads | nog aan te maken; conversie via import van de GA4-key events |
 | Bestaande tags | Geen. Alleen Vercel Web Analytics (cookieloos, blijft staan) |
 
 Er staat bewust **geen** hardcoded `gtag.js` of GA4-plugin in de site. Alles
@@ -115,3 +115,44 @@ Met Tag Assistant en GA4 DebugView:
 10. Bedanktpagina herladen → geen tweede `purchase`
 
 Punt 6 en 9 zijn waar dit soort opstellingen in de praktijk stukgaat.
+
+---
+
+## Importbestand voor GTM
+
+`docs/gtm-container-villa-happ.json` bevat alle tags, triggers en variabelen
+uit dit meetplan. Importeren gaat zo:
+
+1. GTM → **Beheer → Container importeren**
+2. Kies het bestand, selecteer **Bestaande werkruimte** (of maak een nieuwe)
+3. Kies **Samenvoegen** en daarbinnen **Conflicten overschrijven**. Neem
+   nooit *Overschrijven* op containerniveau: dat wist wat er al staat.
+4. Open daarna de variabele **GA4 Meet-ID** en vul je `G-`-nummer in. Dat is
+   de enige plek waar het staat; alle tags verwijzen ernaar.
+5. **Voorbeeldmodus** aanzetten en het testscenario hierboven doorlopen
+6. Publiceren met een versienaam
+
+### Wat er in zit
+
+| Tag | Trigger |
+|---|---|
+| Google-tag - GA4 | Initialization – All Pages |
+| GA4 - page_view | Custom Event `vh_page_view` |
+| GA4 - view_item | Custom Event `view_item` |
+| GA4 - add_to_cart | Custom Event `add_to_cart` |
+| GA4 - begin_checkout | Custom Event `begin_checkout` |
+| GA4 - purchase | Custom Event `purchase` |
+| GA4 - generate_lead | Custom Event `generate_lead` |
+
+Op de Google-tag staat `send_page_view` op **false**. De site is een SPA en
+stuurt zelf een `vh_page_view` bij elke weergave, ook de eerste. Zou de tag
+ook zijn eigen page_view sturen, dan telt de eerste pagina van elk bezoek
+dubbel.
+
+Geen van de tags heeft een extra toestemmingscontrole. Dat hoort ook niet:
+Consent Mode v2 regelt dat op Google-niveau, en een tweede blokkade erbovenop
+zorgt dat je ook de cookieloze pings kwijtraakt.
+
+> **Google wijzigt zijn exportschema regelmatig.** Weigert de import of ziet
+> een tag er leeg uit, meld het dan — dan pas ik het bestand aan. Importeer
+> bij twijfel in een nieuwe werkruimte, dan raak je niets kwijt.
