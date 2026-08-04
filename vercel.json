@@ -9,17 +9,25 @@
     { "source": "/p/villa-happ-back-cap", "destination": "/shop/villa-happ-back-cap", "permanent": true },
     { "source": "/p/organic-cotton-hoodie-navy:rest*", "destination": "/shop/organic-cotton-hoodie-navy", "permanent": true },
     { "source": "/p/organic-cotton-hoodie-olijfgroen:rest*", "destination": "/shop/organic-cotton-hoodie-olijfgroen", "permanent": true },
+    { "source": "/p/5-pack-villa-happ-sokken:rest*", "destination": "/shop/stap-voor-stap-sokken-5-pack", "permanent": true },
     { "source": "/p/villa-happ-sokken:rest*", "destination": "/shop/stap-voor-stap-sokken", "permanent": true },
+    { "source": "/p/hoodie-navy:rest*", "destination": "/shop/organic-cotton-hoodie-navy", "permanent": true },
+    { "source": "/p/hoodie-olijfgroen:rest*", "destination": "/shop/organic-cotton-hoodie-olijfgroen", "permanent": true },
     { "source": "/p/:slug*", "destination": "/shop", "permanent": true },
+    { "source": "/c/home", "destination": "/", "permanent": true },
     { "source": "/c/:slug*", "destination": "/shop", "permanent": true },
     { "source": "/i/65-jaar-historie", "destination": "/story", "permanent": true },
+    { "source": "/i/ons-verhaal", "destination": "/story", "permanent": true },
     { "source": "/i/contact", "destination": "/contact", "permanent": true },
     { "source": "/i/inschrijven", "destination": "/", "permanent": true },
     { "source": "/i/:slug*", "destination": "/", "permanent": true },
     { "source": "/l/tac", "destination": "/algemene-voorwaarden", "permanent": true },
     { "source": "/l/privacy", "destination": "/privacy", "permanent": true },
     { "source": "/l/:slug*", "destination": "/algemene-voorwaarden", "permanent": true },
-    { "source": "/epages/:path*", "destination": "/", "permanent": true }
+    { "source": "/epages/:path*", "destination": "/", "permanent": true },
+    { "source": "/rs/:path*", "destination": "/", "permanent": true },
+    { "source": "/storage/:path*", "destination": "/", "permanent": true },
+    { "source": "/WebRoot/:path*", "destination": "/", "permanent": true }
   ],
   "headers": [
     {
