@@ -51,21 +51,40 @@ function teken(payload: string): string {
  *
  * Genereer een hash met: `npm run beheer:hash -- '<wachtwoord>'`
  */
+/** Vaste maten. Zie de lengtecontrole in `controleerWachtwoord` hieronder. */
+export const SALT_BYTES = 16;
+export const HASH_BYTES = 32;
+
 export function hashWachtwoord(wachtwoord: string, salt?: Buffer): string {
-  const s = salt ?? randomBytes(16);
-  const h = scryptSync(wachtwoord, s, 32);
+  const s = salt ?? randomBytes(SALT_BYTES);
+  const h = scryptSync(wachtwoord, s, HASH_BYTES);
   return `scrypt:${s.toString('hex')}:${h.toString('hex')}`;
 }
 
-/** Timing-safe controle. False bij elke vorm van onzin, nooit een exception. */
+/**
+ * Timing-safe controle. False bij elke vorm van onzin, nooit een exception.
+ *
+ * De lengtes worden hard afgedwongen, en dat is geen formaliteit. Eerder
+ * werd de sleutel afgeleid op `verwacht.length`, dus op de lengte van wat er
+ * toevallig was opgeslagen. Werd die hash ergens afgekapt, bijvoorbeeld bij
+ * het plakken in een omgevingsvariabele, dan vergeleek deze functie nog maar
+ * een deel van de bytes en gaf hij alsnog `true`. Bij een hash die tot vier
+ * bytes was ingekort, hoefde een aanvaller nog maar 32 bits te raden.
+ *
+ * Een afgekapte waarde hoort te falen, niet stilletijds de deur open te
+ * zetten. Beter een winkelier die niet naar binnen kan en het meldt.
+ */
 export function controleerWachtwoord(wachtwoord: string, opgeslagen: string): boolean {
   try {
     const delen = opgeslagen.split(':');
     if (delen.length !== 3 || delen[0] !== 'scrypt') return false;
+    if (delen[1].length !== SALT_BYTES * 2 || delen[2].length !== HASH_BYTES * 2) return false;
     const salt = Buffer.from(delen[1], 'hex');
     const verwacht = Buffer.from(delen[2], 'hex');
-    if (salt.length === 0 || verwacht.length === 0) return false;
-    const gegeven = scryptSync(wachtwoord, salt, verwacht.length);
+    // Buffer.from kapt stilzwijgend af bij ongeldige hex; controleer dus wat
+    // er werkelijk uit kwam en niet alleen wat erin ging.
+    if (salt.length !== SALT_BYTES || verwacht.length !== HASH_BYTES) return false;
+    const gegeven = scryptSync(wachtwoord, salt, HASH_BYTES);
     return timingSafeEqual(gegeven, verwacht);
   } catch {
     return false;

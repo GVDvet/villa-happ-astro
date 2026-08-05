@@ -77,6 +77,36 @@ describe('beheerwachtwoord', () => {
       expect(controleerWachtwoord('wachtwoord', rommel)).toBe(false);
     }
   });
+
+  it('weigert een afgekapte hash, ook met het juiste wachtwoord', () => {
+    // Dit ging eerder mis. De sleutel werd afgeleid op de lengte van wat was
+    // opgeslagen, dus een afgekapte hash vergeleek alleen het stuk dat er nog
+    // was en gaf `true`. Een waarde die bij het plakken in een
+    // omgevingsvariabele halverwege afbrak, liet het juiste wachtwoord dus
+    // door op een fractie van de sterkte; bij vier bytes nog maar 32 bits.
+    const ww = 'een lang genoeg wachtwoord';
+    const hash = hashWachtwoord(ww);
+
+    for (const lengte of [8, 40, 80, hash.length - 2]) {
+      expect(controleerWachtwoord(ww, hash.slice(0, lengte))).toBe(false);
+    }
+    // En andersom: er mag ook niets achter geplakt zitten.
+    expect(controleerWachtwoord(ww, hash + 'ab')).toBe(false);
+    expect(controleerWachtwoord(ww, `"${hash}"`)).toBe(false);
+    expect(controleerWachtwoord(ww, ` ${hash} `)).toBe(false);
+
+    // De onbeschadigde waarde blijft gewoon werken.
+    expect(controleerWachtwoord(ww, hash)).toBe(true);
+  });
+
+  it('houdt de vaste lengte aan: scrypt: + 32 hex + : + 64 hex', () => {
+    const hash = hashWachtwoord('wachtwoord van voldoende lengte');
+    expect(hash).toHaveLength('scrypt:'.length + 32 + 1 + 64);
+    const [prefix, salt, digest] = hash.split(':');
+    expect(prefix).toBe('scrypt');
+    expect(salt).toMatch(/^[0-9a-f]{32}$/);
+    expect(digest).toMatch(/^[0-9a-f]{64}$/);
+  });
 });
 
 describe('beheersessie', () => {

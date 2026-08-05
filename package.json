@@ -13,7 +13,8 @@
     "astro": "astro",
     "test": "vitest run",
     "check": "astro check",
-    "beheer:hash": "node scripts/beheer-hash.mjs"
+    "beheer:hash": "node scripts/beheer-hash.mjs",
+    "beheer:check": "node scripts/beheer-check.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^10.0.8",

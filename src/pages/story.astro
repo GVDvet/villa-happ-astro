@@ -40,6 +40,7 @@ const breadcrumbLd = {
  */
 const chapters = [
   {
+    breed: false,
     num: 'Hoofdstuk 01',
     year: '10 mei 1945',
     title: 'Noordstraat 85',
@@ -51,6 +52,7 @@ const chapters = [
     ],
   },
   {
+    breed: false,
     num: 'Hoofdstuk 02',
     year: 'Midden jaren vijftig',
     title: 'Babyparadijs',
@@ -63,6 +65,7 @@ const chapters = [
     ],
   },
   {
+    breed: false,
     num: 'Hoofdstuk 03',
     year: 'Jaren zestig',
     title: 'De eerste die ging',
@@ -74,6 +77,7 @@ const chapters = [
     ],
   },
   {
+    breed: false,
     num: 'Hoofdstuk 04',
     year: "Jaren '70, '80, '90",
     title: 'De marktleider die je niet zag',
@@ -87,6 +91,7 @@ const chapters = [
     ],
   },
   {
+    breed: false,
     num: 'Hoofdstuk 05',
     year: '1999',
     title: 'Een eigen naam in de Koopgoot',
@@ -99,6 +104,7 @@ const chapters = [
     ],
   },
   {
+    breed: false,
     num: 'Hoofdstuk 06',
     year: '2004 tot 2010',
     title: 'The Comeback Kid',
@@ -111,11 +117,12 @@ const chapters = [
     ],
   },
   {
+    breed: true,
     num: 'Hoofdstuk 07',
     year: '2021 tot nu',
     title: 'De derde generatie',
-    img: '/img/heritage/2025-calle-artoni-rutger.webp',
-    alt: 'Rutger van Happen bij het straatnaambord Calle Artoni in Spanje, de straat die naar zijn grootouders Noud en Tony is vernoemd.',
+    img: '/img/heritage/calle-artoni-85-25.webp',
+    alt: 'Twee opnamen van dezelfde plek in Spanje, in elkaar overlopend: links Rogér van Happen bij het bord C. Artoni in februari 1985, rechts Rutger van Happen op dezelfde hoek in februari 2025.',
     paras: [
       'Tien jaar na de val worden de merkrechten niet verlengd. Ze vervallen, en Rutger van Happen, kleinzoon van Tony en Noud, haalt ze terug naar de familie. Jarenlang onderzoekt hij hoe de comeback eruit moet zien. De pandemie vertraagt de plannen.',
       'In Spanje ligt een straat die naar Noud & Tony is vernoemd. In februari 1985 stond Rogér daar op de foto. Veertig jaar later stond Rutger op dezelfde plek.',
@@ -147,7 +154,7 @@ const chapters = [
   <!-- Chapters -->
   <main class="st-main">
     {chapters.map((ch, i) => (
-      <article class={`st-chapter${i % 2 === 1 ? ' st-chapter--flip' : ''} st-reveal`}>
+      <article class={`st-chapter${i % 2 === 1 ? ' st-chapter--flip' : ''}${ch.breed ? ' st-chapter--breed' : ''} st-reveal`}>
         <div class="st-chapter-text">
           <p class="st-chapter-num vh-mono">{ch.num}</p>
           <p class="st-chapter-year">{ch.year}</p>
@@ -156,7 +163,14 @@ const chapters = [
         </div>
         <div class={`st-chapter-media${ch.img ? '' : ' is-placeholder'}`}>
           {ch.img
-            ? <img src={ch.img} alt={ch.alt} width="900" height="1125" loading="lazy" decoding="async" />
+            ? <img
+                src={ch.img}
+                alt={ch.alt}
+                width={ch.breed ? 1160 : 900}
+                height={ch.breed ? 800 : 1125}
+                loading="lazy"
+                decoding="async"
+              />
             : <span>{ch.year}</span>}
         </div>
       </article>
@@ -232,6 +246,18 @@ const chapters = [
   }
   .st-chapter--flip .st-chapter-text { order: 2; }
   .st-chapter--flip .st-chapter-media { order: 1; }
+
+  /**
+   * Liggend beeld dat de tekst niet naast zich verdraagt. De twee foto's van
+   * Calle Artoni lopen in elkaar over: Rogér links, Rutger rechts. In de
+   * smalle mediakolom van 5fr wordt dat een strook waarop je geen van beiden
+   * meer herkent, en dan is de hele vergelijking weg. Dus: tekst boven,
+   * beeld eronder over de volle breedte, in de verhouding van het bestand.
+   */
+  .st-chapter--breed { grid-template-columns: 1fr; gap: clamp(28px, 4vw, 48px); }
+  .st-chapter--breed .st-chapter-text,
+  .st-chapter--breed .st-chapter-media { order: 0; }
+  .st-chapter--breed .st-chapter-media { aspect-ratio: 1160 / 800; }
 
   .st-chapter-num { color: var(--vh-ink-muted); margin: 0 0 14px; }
   .st-chapter-year {
