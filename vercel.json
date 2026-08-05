@@ -1,56 +1,192 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "trailingSlash": false,
   "crons": [
-    { "path": "/api/notify/run", "schedule": "0 8 * * *" }
+    {
+      "path": "/api/notify/run",
+      "schedule": "0 8 * * *"
+    }
   ],
   "redirects": [
-    { "source": "/p/villa-happ-cap", "destination": "/shop/villa-happ-back-cap", "permanent": true },
-    { "source": "/p/villa-happ-back-cap", "destination": "/shop/villa-happ-back-cap", "permanent": true },
-    { "source": "/p/organic-cotton-hoodie-navy:rest*", "destination": "/shop/organic-cotton-hoodie-navy", "permanent": true },
-    { "source": "/p/organic-cotton-hoodie-olijfgroen:rest*", "destination": "/shop/organic-cotton-hoodie-olijfgroen", "permanent": true },
-    { "source": "/p/5-pack-villa-happ-sokken:rest*", "destination": "/shop/stap-voor-stap-sokken-5-pack", "permanent": true },
-    { "source": "/p/villa-happ-sokken:rest*", "destination": "/shop/stap-voor-stap-sokken", "permanent": true },
-    { "source": "/p/hoodie-navy:rest*", "destination": "/shop/organic-cotton-hoodie-navy", "permanent": true },
-    { "source": "/p/hoodie-olijfgroen:rest*", "destination": "/shop/organic-cotton-hoodie-olijfgroen", "permanent": true },
-    { "source": "/p/:slug*", "destination": "/shop", "permanent": true },
-    { "source": "/c/home", "destination": "/", "permanent": true },
-    { "source": "/c/:slug*", "destination": "/shop", "permanent": true },
-    { "source": "/i/65-jaar-historie", "destination": "/story", "permanent": true },
-    { "source": "/i/ons-verhaal", "destination": "/story", "permanent": true },
-    { "source": "/i/contact", "destination": "/contact", "permanent": true },
-    { "source": "/i/inschrijven", "destination": "/", "permanent": true },
-    { "source": "/i/:slug*", "destination": "/", "permanent": true },
-    { "source": "/l/tac", "destination": "/algemene-voorwaarden", "permanent": true },
-    { "source": "/l/privacy", "destination": "/privacy", "permanent": true },
-    { "source": "/l/:slug*", "destination": "/algemene-voorwaarden", "permanent": true },
-    { "source": "/epages/:path*", "destination": "/", "permanent": true },
-    { "source": "/rs/:path*", "destination": "/", "permanent": true },
-    { "source": "/storage/:path*", "destination": "/", "permanent": true },
-    { "source": "/WebRoot/:path*", "destination": "/", "permanent": true }
+    {
+      "source": "/p/villa-happ-cap",
+      "destination": "/shop/villa-happ-back-cap",
+      "permanent": true
+    },
+    {
+      "source": "/p/villa-happ-back-cap",
+      "destination": "/shop/villa-happ-back-cap",
+      "permanent": true
+    },
+    {
+      "source": "/p/organic-cotton-hoodie-navy:rest*",
+      "destination": "/shop/organic-cotton-hoodie-navy",
+      "permanent": true
+    },
+    {
+      "source": "/p/organic-cotton-hoodie-olijfgroen:rest*",
+      "destination": "/shop/organic-cotton-hoodie-olijfgroen",
+      "permanent": true
+    },
+    {
+      "source": "/p/5-pack-villa-happ-sokken:rest*",
+      "destination": "/shop/stap-voor-stap-sokken-5-pack",
+      "permanent": true
+    },
+    {
+      "source": "/p/villa-happ-sokken:rest*",
+      "destination": "/shop/stap-voor-stap-sokken",
+      "permanent": true
+    },
+    {
+      "source": "/p/hoodie-navy:rest*",
+      "destination": "/shop/organic-cotton-hoodie-navy",
+      "permanent": true
+    },
+    {
+      "source": "/p/hoodie-olijfgroen:rest*",
+      "destination": "/shop/organic-cotton-hoodie-olijfgroen",
+      "permanent": true
+    },
+    {
+      "source": "/p/:slug*",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/c/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/c/:slug*",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/i/65-jaar-historie",
+      "destination": "/story",
+      "permanent": true
+    },
+    {
+      "source": "/i/ons-verhaal",
+      "destination": "/story",
+      "permanent": true
+    },
+    {
+      "source": "/i/contact",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/i/inschrijven",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/i/:slug*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/l/tac",
+      "destination": "/algemene-voorwaarden",
+      "permanent": true
+    },
+    {
+      "source": "/l/privacy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/l/:slug*",
+      "destination": "/algemene-voorwaarden",
+      "permanent": true
+    },
+    {
+      "source": "/epages/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/rs/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/storage/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/WebRoot/:path*",
+      "destination": "/",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": ".*\\.vercel\\.app"
+        }
+      ],
       "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://www.google.com https://www.google.nl; font-src 'self'; connect-src 'self' https://api.pdok.nl https://va.vercel-scripts.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net; form-action 'self'; frame-src https://www.googletagmanager.com https://td.doubleclick.net; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://www.google.com https://www.google.nl; font-src 'self'; connect-src 'self' https://api.pdok.nl https://va.vercel-scripts.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net; form-action 'self'; frame-src https://www.googletagmanager.com https://td.doubleclick.net; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+        }
       ]
     },
     {
       "source": "/img/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/models/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     }
   ]

@@ -101,6 +101,12 @@ const gtmId = !preview ? (import.meta.env.PUBLIC_GTM_ID || '') : '';
       </script>
       <script is:inline define:vars={{ gtmId }}>
         (function (w, d, s, i) {
+          // Niet meten op een *.vercel.app-host. De pagina's zijn geprerenderd,
+          // dus de servercode kan dit niet beslissen: één build wordt op elke
+          // host hetzelfde geserveerd, en `isPreviewHost` kijkt naar het
+          // ingestelde domein en niet naar de host van het verzoek. Zonder
+          // deze controle telt elk bezoek aan de deploy-URL mee in GA4.
+          if (/\.vercel\.app$/i.test(location.hostname)) return;
           w[ 'dataLayer' ] = w[ 'dataLayer' ] || [];
           w[ 'dataLayer' ].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
           var f = d.getElementsByTagName(s)[0], j = d.createElement(s);

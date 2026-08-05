@@ -151,6 +151,10 @@
   onPageReady(() => {
     const box = document.getElementById('vh-consent');
     if (!box) return;
+    // Op een *.vercel.app-host laadt GTM bewust niet (zie Base.astro), dus
+    // er valt daar niets te kiezen. Een banner tonen voor cookies die
+    // niemand zet is zelf misleidend.
+    if (/\.vercel\.app$/i.test(location.hostname)) return;
 
     const detail = document.getElementById('vh-consent-detail')!;
     const toggle = document.getElementById('vh-consent-toggle') as HTMLButtonElement;
