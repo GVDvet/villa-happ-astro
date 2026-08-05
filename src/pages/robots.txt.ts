@@ -7,7 +7,7 @@ export const GET: APIRoute = () => {
   const origin = getSiteOrigin();
 
   // Preview (*.vercel.app): volledig buiten de index houden, anders
-  // concurreert deze omgeving met de echte site op villa-happ.nl.
+  // concurreert deze omgeving met de echte site op villahapp.nl.
   // Productie: iedereen (incl. AI-crawlers als GPTBot, ClaudeBot,
   // PerplexityBot en Google-Extended) mag alles behalve de transactie-
   // en API-paden. Voor GEO willen we die bots juist binnen; het `*`-blok

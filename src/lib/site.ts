@@ -2,7 +2,7 @@
  * Villa Happ — Site-identiteit (één bron voor domein en indexeerbaarheid)
  *
  * Go-live op het echte domein = alleen PUBLIC_SITE_URL zetten
- * (bijv. https://villa-happ.nl). Canonical, sitemap, robots en de
+ * (bijv. https://villahapp.nl). Canonical, sitemap, robots en de
  * noindex-guard volgen dan automatisch.
  */
 
@@ -40,7 +40,7 @@ export function getSiteOrigin(): string {
 
 /**
  * Preview-detectie: zolang de site op een *.vercel.app-domein draait
- * mag Google haar niet indexeren (zou concurreren met villa-happ.nl).
+ * mag Google haar niet indexeren (zou concurreren met villahapp.nl).
  */
 export function isPreviewHost(origin: string = getSiteOrigin()): boolean {
   try {

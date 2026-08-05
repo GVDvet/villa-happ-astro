@@ -1,7 +1,7 @@
 # Werkwijze — code, deploy en DNS
 
 Dit document beschrijft hoe je een wijziging van je laptop naar
-`villa-happ.nl` krijgt, en welke valkuilen daar onderweg liggen. Het is
+`villahapp.nl` krijgt, en welke valkuilen daar onderweg liggen. Het is
 geschreven na een livegang waarin een aantal daarvan is ingelopen: er is een
 uur besteed aan een deploy die nooit kon werken omdat er naar de verkeerde
 repository was gepusht.
@@ -129,11 +129,15 @@ Let op: de hash gebruikt dubbele punten als scheidingsteken, geen `$`. Een
 
 ## 4. DNS
 
-**Strato is autoritatief.** Er staat ook een zone in Vercel DNS, maar die is
-ongebruikt en doet niets zolang de nameservers bij Strato staan. Wijzig DNS
-dus bij Strato, niet in Vercel.
+**Strato is autoritatief, voor beide domeinen.** Er staat ook een ongebruikte
+zone in Vercel DNS voor `villa-happ.nl`; die doet niets zolang de nameservers
+bij Strato staan. Wijzig DNS dus bij Strato, niet in Vercel.
 
-### De records
+`villahapp.nl` serveert de site. `villa-happ.nl` verwijst permanent door en
+draagt voorlopig nog de mail — dat laatste verhuist mee zodra de postvakken
+op het nieuwe domein bestaan.
+
+### De records — beide domeinen dragen dit
 
 | Type | Naam | Waarde |
 |---|---|---|
@@ -176,7 +180,7 @@ Strato's statusvlaggen lopen achter op de werkelijkheid. Vertrouw de
 resolvers, niet het paneel:
 
 ```bash
-nslookup -type=A villa-happ.nl 8.8.8.8
+nslookup -type=A villahapp.nl 8.8.8.8
 ```
 
 ---
@@ -188,13 +192,13 @@ alleen in de nieuwe code bestaat opvragen. Werkt niet? Dan draait er nog een
 oude deployment.
 
 ```bash
-curl -sI https://villa-happ.nl/voor-merken
+curl -sI https://villahapp.nl/voor-merken
 ```
 
 Verder:
 
 ```bash
-curl -s https://villa-happ.nl/robots.txt
+curl -s https://villahapp.nl/robots.txt
 ```
 
 Hier hoort `Allow: /` te staan met een `Sitemap:`-regel op het echte domein.
@@ -358,8 +362,11 @@ Werk ze bij wanneer ze veranderen; dit is de enige plek waar ze staan.
 - **Bedrijfsgegevens** — btw-id, bezoekadres, postadres en retouradres staan in `business.ts`. Alleen het telefoonnummer is nog `PENDING`.
 - **Resend** — domein geverifieerd, DKIM op `resend._domainkey`, SPF op subdomein `send`. DMARC op `p=none` met rapportage naar `contact@villa-happ.nl`; verzwaren naar `p=quarantine` zodra de rapporten schoon zijn.
 - **Mailadres** — `contact@villa-happ.nl` bestaat en `MAIL_FROM` staat er in Vercel op.
-- **Mollie** — sleutel staat op `live_`. Zet in het Mollie-dashboard iDEAL, Bancontact, Mastercard en Visa aan; dat zijn precies de vier die de site toont. De webhook-URL is `https://villa-happ.nl/api/checkout/webhook`.
-- **Domein** — `villa-happ.nl` live op Vercel, `www` doet een 308 naar de apex, HSTS actief.
+  Bewust nog op het oude domein: de site draait al op `villahapp.nl`, maar de
+  postvakken op `@villahapp.nl` bestaan nog niet. Verhuist mee zodra Microsoft
+  365 het nieuwe domein heeft geverifieerd; zie `docs/domeinmigratie.md` stap 6.
+- **Mollie** — sleutel staat op `live_`. Zet in het Mollie-dashboard iDEAL, Bancontact, Mastercard en Visa aan; dat zijn precies de vier die de site toont. De webhook-URL is `https://villahapp.nl/api/checkout/webhook`.
+- **Domein** — `villahapp.nl` live op Vercel, `www` doet een 308 naar de apex, HSTS actief. `villa-happ.nl` verwijst permanent door; zie `docs/domeinmigratie.md`.
 
 ### Eerste echte bestelling
 
@@ -376,7 +383,7 @@ Scenario 2 is de belangrijkste: die ging eerder mis doordat de bedanktpagina
 
 ### Google
 
-- Search Console is al geverifieerd via het TXT-record; sitemap indienen op `https://villa-happ.nl/sitemap.xml`
+- Search Console is al geverifieerd via het TXT-record; sitemap indienen op `https://villahapp.nl/sitemap.xml`
 - Rich Results Test draaien op een productpagina (ProductGroup + FAQ + Breadcrumb)
 
 ---

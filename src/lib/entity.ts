@@ -16,7 +16,7 @@ import { BUSINESS, isPending } from './business';
 
 export const BRAND = {
   name: 'Villa Happ',
-  domain: 'villa-happ.nl',
+  domain: 'villahapp.nl',
   email: BUSINESS.orderEmail,
   /**
    * 10 mei 1945: de dag dat Tony Kuijsters met haar partner Gaillard de

@@ -4,7 +4,7 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  // Go-live: zet PUBLIC_SITE_URL=https://villa-happ.nl (canonical, sitemap,
+  // Go-live: zet PUBLIC_SITE_URL=https://villahapp.nl (canonical, sitemap,
   // robots en de noindex-guard volgen automatisch, zie src/lib/site.ts)
   site: process.env.PUBLIC_SITE_URL || 'https://villa-happ-astro.vercel.app',
   output: 'server',

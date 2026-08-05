@@ -8,7 +8,7 @@ duiden. Wijkt de implementatie hiervan af, dan is de implementatie fout.
 
 | | |
 |---|---|
-| Domein | `villa-happ.nl` (apex; `www` doet 308 naar apex) |
+| Domein | `villahapp.nl` (apex; `www` doet 308 naar apex). `villa-happ.nl` verwijst permanent door. |
 | Platform | Astro 6 op Vercel, met View Transitions (SPA-navigatie) |
 | Betaalprovider | Mollie — iDEAL, Bancontact, Mastercard, Visa |
 | Valuta | EUR |
