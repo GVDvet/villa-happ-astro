@@ -28,6 +28,17 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    # Astro-majors niet automatisch voorstellen. Astro 7 is eerder
+    # teruggedraaid wegens een whitespace-regressie op elke pagina (#27,
+    # zie docs/astro-7-migratie.md), en @astrojs/vercel@10 accepteert
+    # astro@^6 als peer -- die PR's falen dus sowieso op npm-resolutie.
+    # Wil je alsnog naar Astro 7, doe dat als bewuste klus samen met de
+    # adapter-upgrade, niet via een losse Dependabot-PR.
+    ignore:
+      - dependency-name: "astro"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@astrojs/vercel"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
