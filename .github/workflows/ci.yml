@@ -19,6 +19,9 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # Zonder expliciete timeout geldt GitHubs standaard van 360 minuten per job; een
+    # hangende run vreet dan het Actions-maandquotum leeg (gemeten 25 aug 2026, quotum vol).
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -88,6 +91,7 @@ jobs:
       github.actor == 'dependabot[bot]' &&
       github.repository_owner == 'GVDvet'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
       pull-requests: write
