@@ -23,7 +23,7 @@ jobs:
     # hangende run vreet dan het Actions-maandquotum leeg (gemeten 25 aug 2026, quotum vol).
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Secret-scan (blokkerend)
         run: |
